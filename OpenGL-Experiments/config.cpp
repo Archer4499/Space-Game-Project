@@ -17,7 +17,6 @@ int loadConfig(Config *conf, std::string fileName) {
     // Return 1 and conf contains default values on file read error
     // Return 2 if invalid file format, conf not guaranteed to contain default values
     // TODO(Derek): fix non default values on return 2
-    // TODO(Derek): console logging at each non-zero return
 
 
     // Set default values
@@ -25,13 +24,13 @@ int loadConfig(Config *conf, std::string fileName) {
     conf->data["height"] = "600";
 
 
-    std::ifstream fs (fileName);
+    std::ifstream fs(fileName);
 
     if (fs.is_open()) {
         std::string line;
 
         while (std::getline(fs, line)) {
-            int i = 0;
+            unsigned int i = 0;
 
             // Line:
             i = skipSpaces(line, i);
@@ -89,7 +88,7 @@ int saveConfig(Config *conf, std::string fileName) {
     // Returns 1 on file error
     // TODO(Derek): Keep format/comments from old file
 
-    std::ofstream fs (fileName);
+    std::ofstream fs(fileName);
 
     if (fs.is_open()) {
         for (std::map<std::string, std::string>::iterator it = (conf->data).begin(); it != (conf->data).end(); ++it) {

@@ -22,6 +22,6 @@ struct Config {
 };
 
 
-int loadConfig(Config *conf, std::string fileName="config.cfg");
+int loadConfig(Config *conf, std::string fileName);
 
-int saveConfig(Config *conf, std::string fileName="config.cfg");
+int saveConfig(Config *conf, std::string fileName);

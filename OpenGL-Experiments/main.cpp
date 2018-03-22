@@ -3,7 +3,13 @@
 
 #include <iostream>
 
+#define LOG_FILE "err.log"
+#define LOG_LEVEL 1
+#include "logging.h"
+
 #include "config.h"
+
+#define CONFIG_FILE "config.cfg"
 
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -20,20 +26,28 @@ void render() {
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
+void cleanup() {
+    glfwTerminate();
+    logClose();
+}
+
 
 int main(int argc, char const *argv[]) {
+    // Load config file
     Config conf;
 
-    if (int err = loadConfig(&conf)) {
+    if (int err = loadConfig(&conf, CONFIG_FILE)) {
         if (err == 1) {
-            std::cout << "Failed to load config file, using and saving defaults" << std::endl;
+            log("Failed to load config file, using and saving defaults", ERR);
         } else if (err == 2) {
-            std::cout << "Config file invalid" << std::endl;
+            log("Config file invalid");
             return -1;
         }
     }
-    saveConfig(&conf);
+    saveConfig(&conf, CONFIG_FILE);
 
+
+    // Init GLFW
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -47,8 +61,7 @@ int main(int argc, char const *argv[]) {
 
     GLFWwindow* window = glfwCreateWindow(width, height, "OpenGL Experiments", NULL, NULL);
     if (window == NULL) {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
+        log("Failed to create GLFW window");
         return -1;
     }
 
@@ -56,12 +69,13 @@ int main(int argc, char const *argv[]) {
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "Failed to initialise GLAD" << std::endl;
-        glfwTerminate();
+        log("Failed to initialise GLAD");
+        cleanup();
         return -1;
     }
 
 
+    // Window loop
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
@@ -72,6 +86,6 @@ int main(int argc, char const *argv[]) {
     }
 
 
-    glfwTerminate();
+    cleanup();
     return 0;
 }
