@@ -1,13 +1,12 @@
 #pragma once
-#include <iostream>
 #include <string>
 #include <map>
 
 
 /*
 Config format:
-Comment lines start with # (no comments after data lines)
-Spaces allowed anywhere
+Comments start with #, either on their own line or after data
+Spaces allowed anywhere except in values
 Data format:
     tag:value
 */

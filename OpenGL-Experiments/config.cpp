@@ -5,10 +5,8 @@
 #include "config.h"
 
 
-int skipSpaces(char* buf, int i) {
-    while (buf[i] == ' ') {
-        i++;
-    }
+int skipSpaces(std::string str, int i) {
+    while (str[i] == ' ') ++i;
 
     return i;
 }
@@ -27,61 +25,60 @@ int loadConfig(Config *conf, std::string fileName) {
     conf->data["height"] = "600";
 
 
-    if (FILE *fp = fopen(fileName.c_str(), "r")) {
-        char buf[1024];
-        while (fgets(buf, sizeof(buf), fp) != NULL) {
+    std::ifstream fs (fileName);
+
+    if (fs.is_open()) {
+        std::string line;
+
+        while (std::getline(fs, line)) {
             int i = 0;
 
             // Line:
-            i = skipSpaces(buf, i);
+            i = skipSpaces(line, i);
 
             // Skip Comment Lines
-            if (buf[i] == '#') continue;
+            if (line[i] == '#') continue;
 
             // Tag
-            char tag[1024];
-            int j = 0;
-            while (buf[i] != ':') {
-                tag[j++] = buf[i++];
-            }
-            int tagLength = j;
+            std::string tag;
 
-            i = skipSpaces(buf, i);
+            while (line[i] != ':') {
+                tag += line[i++];
+            }
+
+            i = skipSpaces(line, i);
 
             // Value
-            if (buf[i++] == ':') {
-                i = skipSpaces(buf, i);
+            if (line[i++] == ':') {
+                i = skipSpaces(line, i);
 
-                char value[1024];
-                j = 0;
-                while (buf[i] != '\n') {
-                    value[j++] = buf[i++];
+                std::string value;
 
-                    // Buf not big enough to contain line
-                    if (i == sizeof(buf)) {
-                        fgets(buf, sizeof(buf), fp);
-                        i = 0;
+                while (i < line.length()) {
+                    // Ignore comments at end of line (no spaces in values)
+                    if (line[i] == '#' || line[i] == ' ') {
+                        if (value.length() == 0) {
+                            // Invalid value
+                            return 2;
+                        }
+                        break;
                     }
+                    value += line[i++];
                 }
-                int valueLength = j;
 
                 // Assign value
-                conf->data[std::string(tag, tagLength)] = std::string(value, valueLength);
+                conf->data[tag] = value;
             } else {
                 // Invalid line
                 return 2;
             }
-
         }
-        if (!feof(fp)) {
-            // Error reading file
-            return 1;
-        }
-        fclose(fp);
     } else {
-        // Error opening file
+        // File could not be opened
         return 1;
     }
+
+    fs.close();
 
     return 0;
 }

@@ -24,7 +24,14 @@ void render() {
 int main(int argc, char const *argv[]) {
     Config conf;
 
-    loadConfig(&conf);
+    if (int err = loadConfig(&conf)) {
+        if (err == 1) {
+            std::cout << "Failed to load config file, using and saving defaults" << std::endl;
+        } else if (err == 2) {
+            std::cout << "Config file invalid" << std::endl;
+            return -1;
+        }
+    }
     saveConfig(&conf);
 
     glfwInit();
