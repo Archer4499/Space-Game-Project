@@ -18,12 +18,6 @@ int loadConfig(Config *conf, std::string fileName) {
     // Return 2 if invalid file format, conf not guaranteed to contain default values
     // TODO(Derek): fix non default values on return 2
 
-
-    // Set default values
-    conf->data["width"] = "800";
-    conf->data["height"] = "600";
-
-
     std::ifstream fs(fileName);
 
     if (fs.is_open()) {

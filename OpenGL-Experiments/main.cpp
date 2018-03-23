@@ -34,7 +34,7 @@ void cleanup() {
 
 int main(int argc, char const *argv[]) {
     // Load config file
-    Config conf;
+    Config conf();
 
     if (int err = loadConfig(&conf, CONFIG_FILE)) {
         if (err == 1) {
