@@ -4,7 +4,7 @@
 #include <iostream>
 
 #define LOG_FILE "err.log"
-#define LOG_LEVEL 1
+#define LOG_LEVEL 2
 #include "logging.h"
 
 #include "config.h"
@@ -34,7 +34,7 @@ void cleanup() {
 
 int main(int argc, char const *argv[]) {
     // Load config file
-    Config conf();
+    Config conf;
 
     if (int err = loadConfig(&conf, CONFIG_FILE)) {
         if (err == 1) {

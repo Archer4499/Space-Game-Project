@@ -64,26 +64,26 @@ std::string curTime() {
 void log(std::string err, int errLevel=2) {
 #if LOG_LEVEL
     if (log_file.is_open()) {
-    #if errLevel <= LOG_LEVEL
-        log_file << curTime();
+        if (errLevel <= LOG_LEVEL) {
+            log_file << curTime();
 
-        switch(errLevel) {
-            case ERR:
-                log_file << " - ERROR - ";
-                break;
-            case WARN:
-                log_file << " - WARNING - ";
-                break;
-            case INFO:
-                log_file << " - INFO - ";
-                break;
-            case DEBUG:
-                log_file << " - DEBUG - ";
-                break;
+            switch(errLevel) {
+                case ERR:
+                    log_file << " - ERROR - ";
+                    break;
+                case WARN:
+                    log_file << " - WARNING - ";
+                    break;
+                case INFO:
+                    log_file << " - INFO - ";
+                    break;
+                case DEBUG:
+                    log_file << " - DEBUG - ";
+                    break;
+            }
+
+            log_file << err << std::endl;
         }
-
-        log_file << err << std::endl;
-    #endif
     } else {
         std::cout << "Log file is not open!" << std::endl;
     }
