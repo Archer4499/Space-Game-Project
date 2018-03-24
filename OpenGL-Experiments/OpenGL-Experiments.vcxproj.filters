@@ -33,6 +33,9 @@
     <ClCompile Include="loadShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="logging.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h">

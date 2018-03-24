@@ -71,6 +71,7 @@
     <ClCompile Include="config.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="loadShader.cpp" />
+    <ClCompile Include="logging.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
