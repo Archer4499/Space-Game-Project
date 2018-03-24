@@ -20,55 +20,55 @@ int loadConfig(Config *conf, std::string fileName) {
 
     std::ifstream fs(fileName);
 
-    if (fs.is_open()) {
-        std::string line;
-
-        while (std::getline(fs, line)) {
-            unsigned int i = 0;
-
-            // Line:
-            i = skipSpaces(line, i);
-
-            // Skip Comment Lines
-            if (line[i] == '#') continue;
-
-            // Tag
-            std::string tag;
-
-            while (line[i] != ':') {
-                tag += line[i++];
-            }
-
-            i = skipSpaces(line, i);
-
-            // Value
-            if (line[i++] == ':') {
-                i = skipSpaces(line, i);
-
-                std::string value;
-
-                while (i < line.length()) {
-                    // Ignore comments at end of line (no spaces in values)
-                    if (line[i] == '#' || line[i] == ' ') {
-                        if (value.length() == 0) {
-                            // Invalid value
-                            return 2;
-                        }
-                        break;
-                    }
-                    value += line[i++];
-                }
-
-                // Assign value
-                conf->data[tag] = value;
-            } else {
-                // Invalid line
-                return 2;
-            }
-        }
-    } else {
+    if (!fs.is_open()) {
         // File could not be opened
         return 1;
+    }
+
+    std::string line;
+
+    while (std::getline(fs, line)) {
+        unsigned int i = 0;
+
+        // Line:
+        i = skipSpaces(line, i);
+
+        // Skip Comment Lines
+        if (line[i] == '#') continue;
+
+        // Tag
+        std::string tag;
+
+        while (line[i] != ':') {
+            tag += line[i++];
+        }
+
+        i = skipSpaces(line, i);
+
+        // Value
+        if (line[i++] != ':') {
+            // Invalid line
+            return 2;
+        }
+
+        i = skipSpaces(line, i);
+
+        std::string value;
+
+        while (i < line.length()) {
+            // Ignore comments at end of line (no spaces in values)
+            if (line[i] == '#' || line[i] == ' ') {
+                if (value.length() == 0) {
+                    // Invalid value
+                    return 2;
+                }
+                break;
+            }
+            value += line[i++];
+        }
+
+        // Assign value
+        conf->data[tag] = value;
     }
 
     fs.close();
@@ -84,13 +84,13 @@ int saveConfig(Config *conf, std::string fileName) {
 
     std::ofstream fs(fileName);
 
-    if (fs.is_open()) {
-        for (std::map<std::string, std::string>::iterator it = (conf->data).begin(); it != (conf->data).end(); ++it) {
-            fs << it->first << ": " << it->second << std::endl;
-        }
-    } else {
+    if (!fs.is_open()) {
         // File could not be opened
         return 1;
+    }
+
+    for (std::map<std::string, std::string>::iterator it = (conf->data).begin(); it != (conf->data).end(); ++it) {
+        fs << it->first << ": " << it->second << std::endl;
     }
 
     fs.close();

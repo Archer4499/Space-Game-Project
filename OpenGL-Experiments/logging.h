@@ -26,24 +26,6 @@
 std::ofstream log_file(LOG_FILE);
 #endif
 
-// std::ostringstream curTime() {
-//     timeval t;
-//     gettimeofday(&t, NULL);
-
-//     std::tm* now = std::localtime(&t.tv_sec);
-
-//     std::ostringstream ss;
-//     ss << std::put_time(now, "%F %T.")
-//     // ss << (now->tm_year + 1900) << '-'
-//     //   << (now->tm_mon + 1) << '-'
-//     //   <<  now->tm_mday << ' '
-//     //   <<  now->tm_hour << ':'
-//     //   <<  now->tm_min << ':'
-//     //   <<  now->tm_sec << '.'
-//       <<  t.tv_usec / 1000;
-
-//     return ss;
-// }
 
 std::string curTime() {
     auto now = std::chrono::system_clock::now();
@@ -63,29 +45,29 @@ std::string curTime() {
 
 void log(std::string err, int errLevel=2) {
 #if LOG_LEVEL
-    if (log_file.is_open()) {
-        if (errLevel <= LOG_LEVEL) {
-            log_file << curTime();
-
-            switch(errLevel) {
-                case ERR:
-                    log_file << " - ERROR - ";
-                    break;
-                case WARN:
-                    log_file << " - WARNING - ";
-                    break;
-                case INFO:
-                    log_file << " - INFO - ";
-                    break;
-                case DEBUG:
-                    log_file << " - DEBUG - ";
-                    break;
-            }
-
-            log_file << err << std::endl;
-        }
-    } else {
+    if (!log_file.is_open()) {
         std::cout << "Log file is not open!" << std::endl;
+    }
+
+    if (errLevel <= LOG_LEVEL) {
+        log_file << curTime();
+
+        switch(errLevel) {
+            case ERR:
+                log_file << " - ERROR - ";
+                break;
+            case WARN:
+                log_file << " - WARNING - ";
+                break;
+            case INFO:
+                log_file << " - INFO - ";
+                break;
+            case DEBUG:
+                log_file << " - DEBUG - ";
+                break;
+        }
+
+        log_file << err << std::endl;
     }
 #else
     std::cout << err << std::endl;

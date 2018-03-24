@@ -44,7 +44,7 @@ int main(int argc, char const *argv[]) {
             return -1;
         }
     }
-    saveConfig(&conf, CONFIG_FILE);
+    // saveConfig(&conf, CONFIG_FILE);
 
 
     // Init GLFW
