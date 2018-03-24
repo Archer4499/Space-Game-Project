@@ -10,9 +10,13 @@
 #include "logging.h"
 
 
-// Log file
-#if LOG_LEVEL
-std::ofstream log_file(LOG_FILE);
+int _logLevel = 0;
+bool _hasBeenOpened = false;
+
+#if LOG_TYPE == LOG_TYPE_FILE
+std::ofstream _logOutput;
+#elif LOG_TYPE == LOG_TYPE_COUT
+auto _logOutput = std::cout;
 #endif
 
 
@@ -32,39 +36,61 @@ std::string curTime() {
     return ss.str();
 }
 
-void log(std::string err, int errLevel) {
-#if LOG_LEVEL
-    if (!log_file.is_open()) {
-        std::cout << "Log file is not open!" << std::endl;
-    }
 
-    if (errLevel <= LOG_LEVEL) {
-        log_file << curTime();
+int logOpen(std::string logPath, int logLevel ) {
+#if LOG_TYPE == LOG_TYPE_FILE
+    _logLevel = logLevel;
+    _logOutput.open(logPath);
+
+    _hasBeenOpened = _logOutput.is_open();
+
+    return !_hasBeenOpened;
+#else
+    _logLevel = logLevel;
+    return 0;
+#endif
+}
+
+void log(std::string err, int errLevel) {
+#if LOG_TYPE != LOG_TYPE_NO
+    #if LOG_TYPE == LOG_TYPE_FILE
+        if (!_hasBeenOpened) {
+            std::cerr << "Log file has not yet been opened with logOpen(..)" << std::endl;
+            return;
+        }
+
+        if (!_logOutput.is_open()) {
+            std::cerr << "Log file has either already been closed or there is a problem with the file. Error that attempted to log:" << std::endl;
+            std::cerr << err << std::endl;
+            return;
+        }
+    #endif
+
+    if (errLevel <= _logLevel) {
+        _logOutput << curTime();
 
         switch(errLevel) {
             case ERR:
-                log_file << " - ERROR - ";
+                _logOutput << " - ERROR - ";
                 break;
             case WARN:
-                log_file << " - WARNING - ";
+                _logOutput << " - WARNING - ";
                 break;
             case INFO:
-                log_file << " - INFO - ";
+                _logOutput << " - INFO - ";
                 break;
             case DEBUG:
-                log_file << " - DEBUG - ";
+                _logOutput << " - DEBUG - ";
                 break;
         }
 
-        log_file << err << std::endl;
+        _logOutput << err << std::endl;
     }
-#else
-    std::cout << err << std::endl;
 #endif
 }
 
 void logClose() {
-#if LOG_LEVEL
-    log_file.close();
+#if LOG_TYPE == LOG_TYPE_FILE
+    _logOutput.close();
 #endif
 }

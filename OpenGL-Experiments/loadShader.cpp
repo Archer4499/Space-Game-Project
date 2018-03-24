@@ -25,13 +25,13 @@ std::string readFile(const char *filePath) {
 }
 
 
-int loadShader(const char *vertex_path, const char *fragment_path) {
+int loadShader(const char *vertexPath, const char *fragmentPath) {
     int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
     // Read shaders
-    std::string vertexShaderStr = readFile(vertex_path);
-    std::string fragmentShaderStr = readFile(fragment_path);
+    std::string vertexShaderStr = readFile(vertexPath);
+    std::string fragmentShaderStr = readFile(fragmentPath);
     const char *vertexShaderSrc = vertexShaderStr.c_str();
     const char *fragmentShaderSrc = fragmentShaderStr.c_str();
 

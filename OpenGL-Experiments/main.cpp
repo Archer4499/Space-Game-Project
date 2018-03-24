@@ -3,14 +3,21 @@
 
 #include <iostream>
 
-#define LOG_FILE "debug.log"
-#define LOG_LEVEL 2
-#include "logging.h"
+#define LOG_TYPE_NO 0
+#define LOG_TYPE_COUT 1
+#define LOG_TYPE_FILE 2
 
+#define LOG_TYPE LOG_TYPE_FILE
+
+#include "logging.h"
 #include "config.h"
 #include "loadShader.h"
 
+#define LOG_LEVEL INFO
+#define LOG_FILE "debug.log"
 #define CONFIG_FILE "config.cfg"
+#define VERTEX_FILE "Assets/Shaders/shader.vert"
+#define FRAGMENT_FILE "Assets/Shaders/shader.frag"
 
 
 // TODO(Derek): Log more info and errs
@@ -37,6 +44,12 @@ void cleanup() {
 
 
 int main(int argc, char const *argv[]) {
+    // Start logging
+    if (logOpen(LOG_FILE, LOG_LEVEL)) {
+        std::cerr << "Log file: \"" << LOG_FILE << "\" could not be opened for writing." << std::endl;
+        return -1;
+    }
+
     // Load config file
     Config conf;
 
@@ -80,7 +93,7 @@ int main(int argc, char const *argv[]) {
 
     // Load shaders
     log("Loading Shaders", INFO);
-    int shaderProgram = loadShader("shader.vert", "shader.frag");
+    int shaderProgram = loadShader(VERTEX_FILE, FRAGMENT_FILE);
 
     // Window loop
     while (!glfwWindowShouldClose(window)) {
