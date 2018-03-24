@@ -3,13 +3,17 @@
 
 #include <iostream>
 
-#define LOG_FILE "err.log"
+#define LOG_FILE "debug.log"
 #define LOG_LEVEL 2
 #include "logging.h"
 
 #include "config.h"
+#include "loadShader.h"
 
 #define CONFIG_FILE "config.cfg"
+
+
+// TODO(Derek): Log more info and errs
 
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -40,7 +44,7 @@ int main(int argc, char const *argv[]) {
         if (err == 1) {
             log("Failed to load config file, using and saving defaults", ERR);
         } else if (err == 2) {
-            log("Config file invalid");
+            log("Config file invalid", ERR);
             return -1;
         }
     }
@@ -61,7 +65,7 @@ int main(int argc, char const *argv[]) {
 
     GLFWwindow* window = glfwCreateWindow(width, height, "OpenGL Experiments", NULL, NULL);
     if (window == NULL) {
-        log("Failed to create GLFW window");
+        log("Failed to create GLFW window", ERR);
         return -1;
     }
 
@@ -69,11 +73,14 @@ int main(int argc, char const *argv[]) {
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        log("Failed to initialise GLAD");
+        log("Failed to initialise GLAD", ERR);
         cleanup();
         return -1;
     }
 
+    // Load shaders
+    log("Loading Shaders", INFO);
+    int shaderProgram = loadShader("shader.vert", "shader.frag");
 
     // Window loop
     while (!glfwWindowShouldClose(window)) {
