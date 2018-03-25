@@ -2,13 +2,6 @@
 #include <string>
 
 
-#define NO_LOG 0
-#define ERR 1
-#define WARN 2
-#define INFO 3
-#define DEBUG 4
-
-
 #ifndef LOG_TYPE_NO
 #define LOG_TYPE_NO 0
 #define LOG_TYPE_COUT 1
@@ -18,6 +11,14 @@
 #ifndef LOG_TYPE
 #define LOG_TYPE LOG_TYPE_FILE
 #endif
+
+enum LogLevel {
+    NO_LOG,
+    ERR,
+    WARN,
+    INFO,
+    DEBUG
+};
 
 
 // std::string curTime();
