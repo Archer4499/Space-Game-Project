@@ -70,14 +70,23 @@
   <ItemGroup>
     <ClCompile Include="config.cpp" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="loadShader.cpp" />
+    <ClCompile Include="loadResources.cpp" />
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
-    <ClInclude Include="loadShader.h" />
+    <ClInclude Include="loadResources.h" />
     <ClInclude Include="logging.h" />
+    <ClInclude Include="stb_image.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\shader.frag" />
+    <None Include="Resources\Shaders\shader.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\Textures\awesomeface.png" />
+    <Image Include="Resources\Textures\container.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
