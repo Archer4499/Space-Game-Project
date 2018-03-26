@@ -23,7 +23,7 @@ enum LogLevel {
 
 // std::string curTime();
 
-int logOpen(std::string logPath="debug.log", int logLevel=2);
+int logOpen(const char *logPath="debug.log", int logLevel=2);
 
 void log(std::string err, int errLevel=2);
 

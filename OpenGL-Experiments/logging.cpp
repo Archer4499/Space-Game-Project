@@ -10,6 +10,10 @@
 #include "logging.h"
 
 
+// TODO(Derek): Allow either trunc or append file modes
+// TODO(Derek): Either switch to full printf or use << operator instead of log()
+
+
 int _logLevel = 0;
 bool _hasBeenOpened = false;
 
@@ -37,7 +41,7 @@ std::string curTime() {
 }
 
 
-int logOpen(std::string logPath, int logLevel ) {
+int logOpen(const char *logPath, int logLevel) {
 #if LOG_TYPE == LOG_TYPE_FILE
     _logLevel = logLevel;
     _logOutput.open(logPath);
