@@ -28,7 +28,7 @@ int loadConfig(Config *conf, std::string fileName) {
     std::string line;
 
     while (std::getline(fs, line)) {
-        unsigned int i = 0;
+        size_t i = 0;
 
         // Line:
         i = skipSpaces(line, i);
