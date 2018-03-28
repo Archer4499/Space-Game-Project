@@ -22,7 +22,6 @@
 #define FRAGMENT_FILE "Resources/Shaders/shader.frag"
 #define TEXTURE1_FILE "Resources/Textures/container.jpg"
 #define TEXTURE2_FILE "Resources/Textures/awesomeface.png"
-#define OBJECT1_FILE "Resources/Objects/rect.obj"
 
 
 // TODO(Derek): Log more info and errs
@@ -30,6 +29,11 @@
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+    // glMatrixMode(GL_PROJECTION);
+    // glLoadIdentity();
+    // gluPerspective(45.0, (float)w / (float)h, 0.01f, 100.0f);
+    // glMatrixMode(GL_MODELVIEW);
+    // glLoadIdentity();
 }
 
 void processInput(GLFWwindow *window) {
@@ -60,17 +64,28 @@ int main(int argc, char const *argv[]) {
 
     if (int err = loadConfig(&conf, CONFIG_FILE)) {
         if (err == 1) {
-            log("Failed to load config file, using and saving defaults", ERR);
+            log("Failed to load config file, using and saving defaults: " + std::string(CONFIG_FILE), ERR);
         } else if (err == 2) {
-            log("Config file invalid", ERR);
+            log("Config file invalid: " + std::string(CONFIG_FILE), ERR);
+            cleanup();
             return -1;
         }
     }
+
+    int width = std::stoi(conf.data["width"]);
+    int height = std::stoi(conf.data["height"]);
+    log("Config file loaded: " + std::string(CONFIG_FILE), INFO);
     // saveConfig(&conf, CONFIG_FILE);
+    // log("Config file saved: " + std::string(CONFIG_FILE), INFO);
+    // END Load config
 
 
     // Init GLFW
-    glfwInit();
+    if (!glfwInit()) {
+        log("Failed to initialize GLFW.", ERR);
+        cleanup();
+        return -1;
+    }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -78,16 +93,16 @@ int main(int argc, char const *argv[]) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    int width = std::stoi(conf.data["width"]);
-    int height = std::stoi(conf.data["height"]);
-
     GLFWwindow* window = glfwCreateWindow(width, height, "OpenGL Experiments", NULL, NULL);
     if (window == NULL) {
         log("Failed to create GLFW window", ERR);
+        cleanup();
         return -1;
     }
 
     glfwMakeContextCurrent(window);
+    // glfwSwapInterval(1); // Vsync
+
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -105,7 +120,7 @@ int main(int argc, char const *argv[]) {
     unsigned int texture2 = loadTexture(TEXTURE2_FILE);
 
 
-    log("Loading objects", INFO);
+    log("Loading models", INFO);
     unsigned int VBO, VAO, EBO;
     if (loadObject(OBJECT1_FILE, &VBO, &VAO, &EBO)) {
         cleanup();

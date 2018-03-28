@@ -48,7 +48,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
 
     // Check vertex shader
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    glGetProgramiv(vertexShader, GL_INFO_LOG_LENGTH, &logLength);
+    glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &logLength);
     if (logLength > 1) {
         glGetShaderInfoLog(vertexShader, sizeof(infoLog), NULL, infoLog);
         if (!success) {
@@ -65,7 +65,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
 
     // Check fragment shader
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    glGetProgramiv(fragmentShader, GL_INFO_LOG_LENGTH, &logLength);
+    glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &logLength);
     if (logLength > 1) {
         glGetShaderInfoLog(fragmentShader, sizeof(infoLog), NULL, infoLog);
         if (!success) {
@@ -122,13 +122,19 @@ unsigned int loadTexture(const char *texturePath) {
         log("Failed to load texture: " + std::string(texturePath), ERR);
         return NULL;
     }
+    log("Loaded texture: " + std::string(texturePath) + ", w = " + std::to_string(texWidth) +
+        ", h = " + std::to_string(texHeight) + ", channels = " + std::to_string(nrChannels), INFO);
 
     if (nrChannels == 3) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     } else if (nrChannels == 4) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    } else {
+        log("Texture: " + std::string(texturePath) + " not RGB or RGBA.", ERR);
     }
     glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     stbi_image_free(data);
 
@@ -137,6 +143,8 @@ unsigned int loadTexture(const char *texturePath) {
 
 
 int loadObject(const char *objectFile, unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
+    // Return 0 if success
+    // Return 1 if failed to load model file
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
