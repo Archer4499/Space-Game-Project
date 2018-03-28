@@ -7,9 +7,13 @@
 
 #include "loadResources.h"
 #include "logging.h"
+#include "utils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
 
 std::string readFile(const char *filePath) {
     std::ifstream fs(filePath);
@@ -142,7 +146,72 @@ unsigned int loadTexture(const char *texturePath) {
 }
 
 
-int loadObject(const char *objectFile, unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
+int loadModel(const char *modelPath, unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
+    // Return 0 if success
+    // Return 1 if failed to load model file
+
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string err;
+
+    bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath);
+
+    if (!err.empty()) {
+        log("LoadObj error: " + err, ERR);
+        return 1;
+    }
+
+    if (!ret) {
+        log("Loading object: \"" + std::string(modelPath) + "\" failed.", ERR);
+        return 1;
+    }
+
+
+    glGenVertexArrays(1, VAO);
+    glGenBuffers(1, VBO);
+    glGenBuffers(1, EBO);
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(*VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, *VBO);
+
+    // position attribute
+    glBufferData(GL_ARRAY_BUFFER, sizeof(attrib.vertices.data()), attrib.vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // texture coord attribute
+    glBufferData(GL_ARRAY_BUFFER, sizeof(attrib.texcoords.data()), attrib.texcoords.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+
+
+    std::vector<int> indices;
+
+    for (size_t i = 0; i < shapes.size(); i++) {
+        // indices.insert(shapes[i].mesh.indices.end(), shapes[i].mesh.indices.begin(), shapes[i].mesh.indices.end());
+        std::vector<tinyobj::index_t> shapeIndicies = shapes[i].mesh.indices;
+
+        for (size_t j = 0; j < shapeIndicies.size(); ++j) {
+            indices.push_back(shapeIndicies[j].vertex_index);
+        }
+    }
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices.data()), indices.data(), GL_STATIC_DRAW);
+
+    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    log("Loaded model: " + std::string(modelPath) + ", Vertices = " + std::to_string(attrib.vertices.size()/3) +
+        ", TexCoords = " + std::to_string(attrib.texcoords.size()/2) + ", Indices = " + std::to_string(indices.size()), INFO);
+
+    return 0;
+}
+
+
+int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
     // Return 0 if success
     // Return 1 if failed to load model file
     // set up vertex data (and buffer(s)) and configure vertex attributes
