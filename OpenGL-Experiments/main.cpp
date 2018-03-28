@@ -159,7 +159,6 @@ int main(int argc, char const *argv[]) {
         // render container
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         // TODO(Derek): should use var (length of indices vector) instead of 36
         // glDrawArrays(GL_TRIANGLES, 0, 36);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);

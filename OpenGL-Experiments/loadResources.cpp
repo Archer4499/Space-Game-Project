@@ -177,12 +177,13 @@ int loadModel(const char *modelPath, unsigned int *VBO, unsigned int *VAO, unsig
     glBindBuffer(GL_ARRAY_BUFFER, *VBO);
 
     // position attribute
-    glBufferData(GL_ARRAY_BUFFER, sizeof(attrib.vertices.data()), attrib.vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, attrib.vertices.size() * sizeof(attrib.vertices[0]), &attrib.vertices[0], GL_STATIC_DRAW);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(attrib.vertices.data()), attrib.vertices.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // texture coord attribute
-    glBufferData(GL_ARRAY_BUFFER, sizeof(attrib.texcoords.data()), attrib.texcoords.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, attrib.texcoords.size() * sizeof(attrib.texcoords[0]), &attrib.texcoords[0], GL_STATIC_DRAW);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
 
