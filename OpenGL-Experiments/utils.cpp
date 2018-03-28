@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 
 #include "utils.h"
 
@@ -20,7 +20,7 @@ struct vec3 {
 
 void normalizeVector(vec3 *v) {
   float len2 = v->v[0] * v->v[0] + v->v[1] * v->v[1] + v->v[2] * v->v[2];
-  if (len2 > 0->0f) {
+  if (len2 > 0.0f) {
     float len = sqrtf(len2);
 
     v->v[0] /= len;
