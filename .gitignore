@@ -301,3 +301,4 @@ __pycache__/
 
 ## Custom excludes ##
 *.cfg
+!*/Resources/Models/*.obj

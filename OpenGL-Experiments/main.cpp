@@ -20,8 +20,12 @@
 #define CONFIG_FILE "config.cfg"
 #define VERTEX_FILE "Resources/Shaders/shader.vert"
 #define FRAGMENT_FILE "Resources/Shaders/shader.frag"
-#define TEXTURE1_FILE "Resources/Textures/container.jpg"
-#define TEXTURE2_FILE "Resources/Textures/awesomeface.png"
+// #define TEXTURE1_FILE "Resources/Textures/container.jpg"
+// #define TEXTURE2_FILE "Resources/Textures/awesomeface.png"
+// #define TEXTURE_CH_FILE "Resources/Textures/chalet.jpg"
+// #define MODEL_CH_FILE "Resources/Models/chalet.obj"
+#define TEXTURE_CH_FILE "Resources/Textures/item_box.png"
+#define MODEL_CH_FILE "Resources/Models/item_box.obj"
 
 
 // TODO(Derek): Log more info and errs
@@ -116,13 +120,15 @@ int main(int argc, char const *argv[]) {
 
 
     log("Loading textures", INFO);
-    unsigned int texture1 = loadTexture(TEXTURE1_FILE);
-    unsigned int texture2 = loadTexture(TEXTURE2_FILE);
+    // unsigned int texture1 = loadTexture(TEXTURE1_FILE);
+    // unsigned int texture2 = loadTexture(TEXTURE2_FILE);
+    unsigned int textureCH = loadTexture(TEXTURE_CH_FILE);
 
 
     log("Loading models", INFO);
     unsigned int VBO, VAO, EBO;
-    if (loadObject(OBJECT1_FILE, &VBO, &VAO, &EBO)) {
+    // if (loadModelOld(&VBO, &VAO, &EBO)) {
+    if (loadModel(MODEL_CH_FILE, &VBO, &VAO, &EBO)) {
         cleanup();
         return -1;
     }
@@ -131,8 +137,9 @@ int main(int argc, char const *argv[]) {
     // -------------------------------------------------------------------------------------------
     glUseProgram(shaderProgram);
 
-    glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
-    glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
+    glUniform1i(glGetUniformLocation(shaderProgram, "textureCH"), 0);
+    // glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
+    // glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 
 
     log("Main loop", INFO);
@@ -144,14 +151,18 @@ int main(int argc, char const *argv[]) {
         // TODO(Derek): move into render function
         // bind textures on corresponding texture units
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
+        glBindTexture(GL_TEXTURE_2D, textureCH);
+        // glBindTexture(GL_TEXTURE_2D, texture1);
+        // glActiveTexture(GL_TEXTURE1);
+        // glBindTexture(GL_TEXTURE_2D, texture2);
 
         // render container
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        // TODO(Derek): should use var (length of indices vector) instead of 36
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         // END Section //
 
 

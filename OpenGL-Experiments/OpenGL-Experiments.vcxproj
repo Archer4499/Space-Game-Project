@@ -42,6 +42,10 @@
     <IncludePath>C:\Users\Derek\Downloads\Apps\Projects\C++\Libraries\Includes;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\Derek\Downloads\Apps\Projects\C++\Libraries\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>C:\Users\Derek\Downloads\Apps\Projects\C++\Libraries\Includes;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Derek\Downloads\Apps\Projects\C++\Libraries\Libs;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -65,6 +69,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
