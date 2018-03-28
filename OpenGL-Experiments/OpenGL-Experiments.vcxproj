@@ -73,12 +73,15 @@
     <ClCompile Include="loadResources.cpp" />
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="loadResources.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="tiny_obj_loader.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\shader.frag" />
