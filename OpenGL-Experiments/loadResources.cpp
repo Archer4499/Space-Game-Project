@@ -56,7 +56,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
     if (logLength > 1) {
         glGetShaderInfoLog(vertexShader, sizeof(infoLog), NULL, infoLog);
         if (!success) {
-            log("Vertex Shader Compilation Failed" + std::string(infoLog), ERR);
+            log("Vertex Shader Compilation Failed: " + std::string(infoLog), ERR);
         } else {
             log(infoLog, INFO);
         }
@@ -73,7 +73,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
     if (logLength > 1) {
         glGetShaderInfoLog(fragmentShader, sizeof(infoLog), NULL, infoLog);
         if (!success) {
-            log("Fragment Shader Compilation Failed" + std::string(infoLog), ERR);
+            log("Fragment Shader Compilation Failed: " + std::string(infoLog), ERR);
         } else {
             log(infoLog, INFO);
         }
