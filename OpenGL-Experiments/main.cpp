@@ -127,9 +127,10 @@ int main(int argc, char const *argv[]) {
 
 
     log("Loading models", INFO);
-    unsigned int VBO, VAO, EBO;
+    // unsigned int VBO, VAO, EBO;
+    unsigned int VAO, VBO, numVertices;
     // if (loadModelOld(&VBO, &VAO, &EBO)) {
-    if (loadModel(MODEL_CH_FILE, &VBO, &VAO, &EBO)) {
+    if (loadModel(MODEL_FILE, &VAO, &VBO, &numVertices)) {
         cleanup();
         return -1;
     }
@@ -160,9 +161,9 @@ int main(int argc, char const *argv[]) {
         // render container
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        // TODO(Derek): should use var (length of indices vector) instead of 36
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, numVertices);
+        // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         // END Section //
 
 
@@ -174,7 +175,7 @@ int main(int argc, char const *argv[]) {
     // TODO(Derek): move into cleanup function
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    // glDeleteBuffers(1, &EBO);
 
 
     cleanup();

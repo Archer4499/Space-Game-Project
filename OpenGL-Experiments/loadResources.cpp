@@ -146,14 +146,21 @@ unsigned int loadTexture(const char *texturePath) {
 }
 
 
-int loadModel(const char *modelPath, unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
+int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsigned int *numVertices) {
     // Return 0 if success
     // Return 1 if failed to load model file
+    // NOTE(optimisation): use map or set for a unique collection of vertices(with texCoords/normals) and re-index that
+    // NOTE: possibly use different VBOs for different shapes
 
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
     std::string err;
+
+    std::vector<float> buffer;  // pos(3 float), texCoord(2 float)
+
+    *VBO = 0;
+    *numVertices = 0;
 
     bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath);
 
@@ -167,47 +174,56 @@ int loadModel(const char *modelPath, unsigned int *VBO, unsigned int *VAO, unsig
         return 1;
     }
 
+    buffer.reserve(5*shapes[0].mesh.indices.size()*shapes.size());
 
-    glGenVertexArrays(1, VAO);
-    glGenBuffers(1, VBO);
-    glGenBuffers(1, EBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(*VAO);
+    for (size_t i = 0; i < shapes.size(); ++i) {
+        for (size_t k = 0; k < shapes[i].mesh.indices.size(); ++k) {
+            tinyobj::index_t idx = shapes[i].mesh.indices[k];
 
-    glBindBuffer(GL_ARRAY_BUFFER, *VBO);
+            float tc[2];
+            if (attrib.texcoords.size() > 0) {
+                // Flip Y coord.
+                tc[0] = attrib.texcoords[2 * idx.texcoord_index];
+                tc[1] = 1.0f - attrib.texcoords[2 * idx.texcoord_index + 1];
+            } else {
+                tc[0] = 0.0f;
+                tc[1] = 0.0f;
+            }
 
-    // position attribute
-    glBufferData(GL_ARRAY_BUFFER, attrib.vertices.size() * sizeof(attrib.vertices[0]), &attrib.vertices[0], GL_STATIC_DRAW);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(attrib.vertices.data()), attrib.vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+            buffer.push_back(attrib.vertices[3 * idx.vertex_index + 0]);
+            buffer.push_back(attrib.vertices[3 * idx.vertex_index + 1]);
+            buffer.push_back(attrib.vertices[3 * idx.vertex_index + 2]);
 
-    // texture coord attribute
-    glBufferData(GL_ARRAY_BUFFER, attrib.texcoords.size() * sizeof(attrib.texcoords[0]), &attrib.texcoords[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
+            buffer.push_back(tc[0]);
+            buffer.push_back(tc[1]);
 
-
-    std::vector<int> indices;
-
-    for (size_t i = 0; i < shapes.size(); i++) {
-        // indices.insert(shapes[i].mesh.indices.end(), shapes[i].mesh.indices.begin(), shapes[i].mesh.indices.end());
-        std::vector<tinyobj::index_t> shapeIndicies = shapes[i].mesh.indices;
-
-        for (size_t j = 0; j < shapeIndicies.size(); ++j) {
-            indices.push_back(shapeIndicies[j].vertex_index);
+            ++*numVertices;
         }
     }
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], GL_STATIC_DRAW);
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices.data()), indices.data(), GL_STATIC_DRAW);
+    if (buffer.size() > 0) {
+        glGenVertexArrays(1, VAO);
+        glGenBuffers(1, VBO);
 
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(*VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, *VBO);
+        glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW);
+
+        // position attribute
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        // texture coord attribute
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
 
     log("Loaded model: " + std::string(modelPath) + ", Vertices = " + std::to_string(attrib.vertices.size()/3) +
-        ", TexCoords = " + std::to_string(attrib.texcoords.size()/2) + ", Indices = " + std::to_string(indices.size()), INFO);
+        ", TexCoords = " + std::to_string(attrib.texcoords.size()/2) + ", Indices = " + std::to_string(*numVertices), INFO);
+    log("Transformed into: " + std::to_string(*numVertices) + " vertices", INFO);
 
     return 0;
 }
