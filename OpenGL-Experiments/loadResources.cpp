@@ -7,7 +7,6 @@
 
 #include "loadResources.h"
 #include "logging.h"
-#include "utils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"

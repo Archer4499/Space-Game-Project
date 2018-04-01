@@ -300,5 +300,6 @@ __pycache__/
 
 
 ## Custom excludes ##
+/*/Research/*
 *.cfg
 !*/Resources/Models/*.obj
