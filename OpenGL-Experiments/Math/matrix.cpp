@@ -16,6 +16,12 @@ mat2::mat2(float aa, float ab,
            mat {aa, ab,
                 ba, bb}
 {}
+float mat2::operator [](int i) const {
+    return mat[i];
+}
+float &mat2::operator [](int i) {
+    return mat[i];
+}
 
 
 mat3::mat3() {}
@@ -34,6 +40,13 @@ mat3::mat3(float aa, float ab, float ac,
                 ba, bb, bc,
                 ca, cb, cc}
 {}
+float mat3::operator [](int i) const {
+    return mat[i];
+}
+float &mat3::operator [](int i) {
+    return mat[i];
+}
+
 
 mat4::mat4() {}
 mat4::mat4(float diag):
@@ -54,3 +67,16 @@ mat4::mat4(float aa, float ab, float ac, float ad,
                 ca, cb, cc, cd,
                 da, db, dc, dd}
 {}
+float mat4::operator [](int i) const {
+    return mat[i];
+}
+float &mat4::operator [](int i) {
+    return mat[i];
+}
+
+mat4 translate(mat4 trans, vec3 in) {
+    mat4 out = mat4(trans);
+    out[12] += in.x;
+    out[13] += in.y;
+    out[14] += in.z;
+}
