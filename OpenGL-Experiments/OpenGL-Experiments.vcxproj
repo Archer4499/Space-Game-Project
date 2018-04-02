@@ -78,15 +78,17 @@
     <ClCompile Include="loadResources.cpp" />
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="Math\matrix.cpp" />
+    <ClCompile Include="Math\vector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="loadResources.h" />
     <ClInclude Include="logging.h" />
+    <ClInclude Include="Math\matrix.h" />
+    <ClInclude Include="Math\vector.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="tiny_obj_loader.h" />
-    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\shader.frag" />
