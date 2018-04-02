@@ -78,6 +78,7 @@
     <ClCompile Include="loadResources.cpp" />
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Math\func.cpp" />
     <ClCompile Include="Math\matrix.cpp" />
     <ClCompile Include="Math\vector.cpp" />
   </ItemGroup>
@@ -85,6 +86,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="loadResources.h" />
     <ClInclude Include="logging.h" />
+    <ClInclude Include="Math\func.h" />
     <ClInclude Include="Math\matrix.h" />
     <ClInclude Include="Math\vector.h" />
     <ClInclude Include="stb_image.h" />
