@@ -1,5 +1,4 @@
 #include <cmath>
-#include <vector>
 
 #include "vector.h"
 
@@ -12,7 +11,7 @@ vec2::vec2(float a) {
     x = a;
     y = a;
 }
-vec2::vec2(float vert[]) {
+vec2::vec2(float vert[2]) {
     x = vert[0];
     y = vert[1];
 }
@@ -32,7 +31,7 @@ vec3::vec3(float a) {
     y = a;
     z = a;
 }
-vec3::vec3(float vert[]) {
+vec3::vec3(float vert[3]) {
     x = vert[0];
     y = vert[1];
     z = vert[2];
@@ -55,7 +54,7 @@ vec4::vec4(float a) {
     z = a;
     w = a;
 }
-vec4::vec4(float vert[]) {
+vec4::vec4(float vert[4]) {
     x = vert[0];
     y = vert[1];
     z = vert[2];
