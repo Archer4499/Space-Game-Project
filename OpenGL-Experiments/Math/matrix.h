@@ -2,6 +2,7 @@
 
 #include "vector.h"
 
+// Data stored in column-major order
 
 struct mat2 {
     float mat[4];
@@ -44,3 +45,11 @@ struct mat4 {
     float operator [](int i) const;
     float &operator [](int i);
 };
+
+
+std::ostream& operator<<(std::ostream& os, const mat2& mat);
+std::ostream& operator<<(std::ostream& os, const mat3& mat);
+std::ostream& operator<<(std::ostream& os, const mat4& mat);
+
+
+mat4 translate(mat4 trans, vec3 in);

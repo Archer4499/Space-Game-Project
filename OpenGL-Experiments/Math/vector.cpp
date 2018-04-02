@@ -68,6 +68,22 @@ vec4::vec4(float ax, float ay, float az, float aw) {
 }
 
 
+std::ostream& operator<< (std::ostream& os, const vec2& vec) {
+    os << "[" << vec.x << ", " << vec.y << "]";
+    return os;
+}
+
+std::ostream& operator<< (std::ostream& os, const vec3& vec) {
+    os << "[" << vec.x << ", " << vec.y << ", " << vec.z << "]";
+    return os;
+}
+
+std::ostream& operator<< (std::ostream& os, const vec4& vec) {
+    os << "[" << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << "]";
+    return os;
+}
+
+
 void normalizeVector(vec3 *v) {
   float len2 = v->x * v->x + v->y * v->y + v->z * v->z;
   if (len2 > 0.0f) {

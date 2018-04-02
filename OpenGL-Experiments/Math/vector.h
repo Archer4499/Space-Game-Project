@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 struct vec2 {
   float x;
   float y;
@@ -33,5 +35,9 @@ struct vec4 {
   vec4(float ax, float ay, float az, float w);
 };
 
+
+std::ostream& operator<<(std::ostream&, const vec2&);
+std::ostream& operator<<(std::ostream&, const vec3&);
+std::ostream& operator<<(std::ostream&, const vec4&);
 
 // void normalizeVector(const vec3 *v); TODO: not sure about syntax

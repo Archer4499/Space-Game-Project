@@ -74,6 +74,29 @@ float &mat4::operator [](int i) {
     return mat[i];
 }
 
+
+std::ostream& operator<< (std::ostream& os, const mat2& mat) {
+    os << "[[" << mat[0] << ", " << mat[1] << "], ["
+               << mat[2] << ", " << mat[3] << "]]";
+    return os;
+}
+
+std::ostream& operator<< (std::ostream& os, const mat3& mat) {
+    os << "[[" << mat[0] << ", " << mat[1] << ", " << mat[2] << "], ["
+               << mat[3] << ", " << mat[4] << ", " << mat[5] << "], ["
+               << mat[6] << ", " << mat[7] << ", " << mat[8] << "]]";
+    return os;
+}
+
+std::ostream& operator<< (std::ostream& os, const mat4& mat) {
+    os << "[[" << mat[0]  << ", " << mat[1]  << ", " << mat[2]  << ", " << mat[3]  << "], ["
+               << mat[4]  << ", " << mat[5]  << ", " << mat[6]  << ", " << mat[7]  << "], ["
+               << mat[8]  << ", " << mat[9]  << ", " << mat[10] << ", " << mat[11] << "], ["
+               << mat[12] << ", " << mat[13] << ", " << mat[14] << ", " << mat[15] << "]]";
+    return os;
+}
+
+
 mat4 translate(mat4 trans, vec3 in) {
     mat4 out = mat4(trans);
     out[12] += in.x;
