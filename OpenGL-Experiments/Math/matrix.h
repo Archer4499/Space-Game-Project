@@ -3,6 +3,7 @@
 #include "vector.h"
 
 // Data stored in column-major order
+// TODO(Derek): implement overloads: https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
 
 struct mat2 {
     float mat[4];
@@ -14,7 +15,7 @@ struct mat2 {
          float ba, float bb);
 
     float operator [](int i) const;
-    float &operator [](int i);
+    float& operator [](int i);
 };
 
 struct mat3 {
@@ -28,7 +29,7 @@ struct mat3 {
          float ca, float cb, float cc);
 
     float operator [](int i) const;
-    float &operator [](int i);
+    float& operator [](int i);
 };
 
 struct mat4 {
@@ -42,8 +43,8 @@ struct mat4 {
          float ca, float cb, float cc, float cd,
          float da, float db, float dc, float dd);
 
-    float operator [](int i) const;
-    float &operator [](int i);
+    float operator[](int i) const;
+    float& operator[](int i);
 };
 
 
