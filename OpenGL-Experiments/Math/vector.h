@@ -2,42 +2,108 @@
 
 #include <ostream>
 
-struct vec2 {
-  float x;
-  float y;
 
-  vec2();
-  explicit vec2(float a);
-  explicit vec2(float vert[2]);
-  vec2(float ax, float ay);
+// TODO(Derek): implement comparison and arithmetic overloads: https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
+
+struct vec2 {
+    float x, y;
+
+    vec2();
+    explicit vec2(float a);
+    explicit vec2(float vert[2]);
+    vec2(float ax, float ay);
+
+    float  operator [](int i) const;
+    float& operator [](int i);
 };
+
+std::ostream& operator<<(std::ostream& os, const vec2& vec);
+
+// TODO(Derek): consider float comparison https://stackoverflow.com/questions/17333/what-is-the-most-effective-way-for-float-and-double-comparison
+//              glm uses return std::memcmp(&a, &b, sizeof(T)) == 0;
+inline bool  operator==(const vec2& A, const vec2& B) {return (A.x == B.x) && (A.y == B.y);}
+inline bool  operator!=(const vec2& A, const vec2& B) {return !operator==(A,B);}
+// TODO(Derek): Not sure what (if anything) these would mean:
+// inline bool  operator< (const vec2& A, const vec2& B) {return ;}
+// inline bool  operator> (const vec2& A, const vec2& B) {return  operator< (B,A);}
+// inline bool  operator<=(const vec2& A, const vec2& B) {return !operator> (A,B);}
+// inline bool  operator>=(const vec2& A, const vec2& B) {return !operator< (A,B);}
+
+inline vec2& operator- (vec2& A) {A.x = -A.x; A.y = -A.y; return A;}
+
+inline vec2& operator+=(vec2& A, const vec2& B) {A.x += B.x; A.y += B.y; return A;}
+inline vec2  operator+ (vec2  A, const vec2& B) {A += B; return A;}
+inline vec2& operator-=(vec2& A, const vec2& B) {A.x -= B.x; A.y -= B.y; return A;}
+inline vec2  operator- (vec2  A, const vec2& B) {A -= B; return A;}
+
+inline vec2& operator*=(vec2& A, const float B) {A.x *= B; A.y *= B; return A;}
+inline vec2  operator* (vec2  A, const float B) {A *= B; return A;}
+inline vec2  operator* (const float B, vec2  A) {A *= B; return A;}
+inline vec2& operator/=(vec2& A, const float B) {A.x /= B; A.y /= B; return A;}
+inline vec2  operator/ (vec2  A, const float B) {A /= B; return A;}
+// inline vec2  operator/ (const float B, vec2  A) {A /= B; return A;}
+
 
 struct vec3 {
-  float x;
-  float y;
-  float z;
+    float x, y, z;
 
-  vec3();
-  explicit vec3(float a);
-  explicit vec3(float vert[3]);
-  vec3(float ax, float ay, float az);
+    vec3();
+    explicit vec3(float a);
+    explicit vec3(float vert[3]);
+    vec3(float ax, float ay, float az);
+
+    float  operator [](int i) const;
+    float& operator [](int i);
 };
+
+std::ostream& operator<<(std::ostream& os, const vec3& vec);
+
+inline bool  operator==(const vec3& A, const vec3& B) {return (A.x == B.x) && (A.y == B.y) && (A.z == B.z);}
+inline bool  operator!=(const vec3& A, const vec3& B) {return !operator==(A,B);}
+
+inline vec3& operator- (vec3& A) {A.x = -A.x; A.y = -A.y; A.z = -A.z; return A;}
+
+inline vec3& operator+=(vec3& A, const vec3& B) {A.x += B.x; A.y += B.y; A.z += B.z; return A;}
+inline vec3  operator+ (vec3  A, const vec3& B) {A += B; return A;}
+inline vec3& operator-=(vec3& A, const vec3& B) {A.x -= B.x; A.y -= B.y; A.z -= B.z; return A;}
+inline vec3  operator- (vec3  A, const vec3& B) {A -= B; return A;}
+
+inline vec3& operator*=(vec3& A, const float B) {A.x *= B; A.y *= B; A.z *= B; return A;}
+inline vec3  operator* (vec3  A, const float B) {A *= B; return A;}
+inline vec3  operator* (const float B, vec3  A) {A *= B; return A;}
+inline vec3& operator/=(vec3& A, const float B) {A.x /= B; A.y /= B; A.z /= B; return A;}
+inline vec3  operator/ (vec3  A, const float B) {A /= B; return A;}
+
 
 struct vec4 {
-  float x;
-  float y;
-  float z;
-  float w;
+    float x, y, z, w;
 
-  vec4();
-  explicit vec4(float a);
-  explicit vec4(float vert[4]);
-  vec4(float ax, float ay, float az, float w);
+    vec4();
+    explicit vec4(float a);
+    explicit vec4(float vert[4]);
+    vec4(float ax, float ay, float az, float w);
+
+    float  operator [](int i) const;
+    float& operator [](int i);
 };
 
-
-std::ostream& operator<<(std::ostream&, const vec2&);
-std::ostream& operator<<(std::ostream&, const vec3&);
 std::ostream& operator<<(std::ostream&, const vec4&);
+
+inline bool  operator==(const vec4& A, const vec4& B) {return (A.x == B.x) && (A.y == B.y) && (A.z == B.z) && (A.w == B.w);}
+inline bool  operator!=(const vec4& A, const vec4& B) {return !operator==(A,B);}
+
+inline vec4& operator- (vec4& A) {A.x = -A.x; A.y = -A.y; A.z = -A.z; A.w = -A.w; return A;}
+
+inline vec4& operator+=(vec4& A, const vec4& B) {A.x += B.x; A.y += B.y; A.z += B.z; A.w += B.w; return A;}
+inline vec4  operator+ (vec4  A, const vec4& B) {A += B; return A;}
+inline vec4& operator-=(vec4& A, const vec4& B) {A.x -= B.x; A.y -= B.y; A.z -= B.z; A.w -= B.w; return A;}
+inline vec4  operator- (vec4  A, const vec4& B) {A -= B; return A;}
+
+inline vec4& operator*=(vec4& A, const float B) {A.x *= B; A.y *= B; A.z *= B; A.w *= B; return A;}
+inline vec4  operator* (vec4  A, const float B) {A *= B; return A;}
+inline vec4  operator* (const float B, vec4  A) {A *= B; return A;}
+inline vec4& operator/=(vec4& A, const float B) {A.x /= B; A.y /= B; A.z /= B; A.w /= B; return A;}
+inline vec4  operator/ (vec4  A, const float B) {A /= B; return A;}
+
 
 // void normalizeVector(const vec3 *v); TODO: not sure about syntax
