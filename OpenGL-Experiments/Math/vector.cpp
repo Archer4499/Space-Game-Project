@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <cmath>
 
 #include "vector.h"
@@ -18,6 +19,32 @@ vec2::vec2(float vert[2]) {
 vec2::vec2(float ax, float ay) {
     x = ax;
     y = ay;
+}
+
+float vec2::operator [](int i) const {
+    assert(i >= 0 && i < 2);
+    switch(i) {
+        case 0:
+            return x;
+        case 1:
+            return y;
+    }
+    return x; // Should never be here
+}
+float& vec2::operator [](int i) {
+    assert(i >= 0 && i < 2);
+    switch(i) {
+        case 0:
+            return x;
+        case 1:
+            return y;
+    }
+    return x; // Should never be here
+}
+
+std::ostream& operator<< (std::ostream& os, const vec2& vec) {
+    os << "[" << vec.x << ", " << vec.y << "]";
+    return os;
 }
 
 
@@ -41,6 +68,37 @@ vec3::vec3(float ax, float ay, float az) {
     y = ay;
     z = az;
 }
+
+float vec3::operator [](int i) const {
+    assert(i >= 0 && i < 3);
+    switch(i) {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+    }
+    return x; // Should never be here
+}
+float& vec3::operator [](int i) {
+    assert(i >= 0 && i < 3);
+    switch(i) {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+    }
+    return x; // Should never be here
+}
+
+std::ostream& operator<< (std::ostream& os, const vec3& vec) {
+    os << "[" << vec.x << ", " << vec.y << ", " << vec.z << "]";
+    return os;
+}
+
 
 vec4::vec4() {
     x = 0.0f;
@@ -67,21 +125,40 @@ vec4::vec4(float ax, float ay, float az, float aw) {
     w = aw;
 }
 
-
-std::ostream& operator<< (std::ostream& os, const vec2& vec) {
-    os << "[" << vec.x << ", " << vec.y << "]";
-    return os;
+float vec4::operator [](int i) const {
+    assert(i >= 0 && i < 4);
+    switch(i) {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return w;
+    }
+    return x; // Should never be here
 }
-
-std::ostream& operator<< (std::ostream& os, const vec3& vec) {
-    os << "[" << vec.x << ", " << vec.y << ", " << vec.z << "]";
-    return os;
+float& vec4::operator [](int i) {
+    assert(i >= 0 && i < 4);
+    switch(i) {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return w;
+    }
+    return x; // Should never be here
 }
 
 std::ostream& operator<< (std::ostream& os, const vec4& vec) {
     os << "[" << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << "]";
     return os;
 }
+
 
 
 void normalizeVector(vec3 *v) {
