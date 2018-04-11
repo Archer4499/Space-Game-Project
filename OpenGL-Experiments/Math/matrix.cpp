@@ -24,10 +24,10 @@ mat2::mat2(float aa, float ab,
     mat[0] = aa; mat[1] = ab;
     mat[2] = ba; mat[3] = bb;
 }
-float mat2::operator [](int i) const {
+float mat2::operator[](int i) const {
     return mat[i];
 }
-float& mat2::operator [](int i) {
+float& mat2::operator[](int i) {
     return mat[i];
 }
 
@@ -48,10 +48,10 @@ mat3::mat3(float aa, float ab, float ac,
     mat[3] = ba; mat[4] = bb; mat[5] = bc;
     mat[6] = ca; mat[7] = cb; mat[8] = cc;
 }
-float mat3::operator [](int i) const {
+float mat3::operator[](int i) const {
     return mat[i];
 }
-float& mat3::operator [](int i) {
+float& mat3::operator[](int i) {
     return mat[i];
 }
 
@@ -75,10 +75,10 @@ mat4::mat4(float aa, float ab, float ac, float ad,
     mat[8]  = ca; mat[9]  = cb; mat[10] = cc; mat[11] = cd;
     mat[12] = da; mat[13] = db; mat[14] = dc; mat[15] = dd;
 }
-float mat4::operator [](int i) const {
+float mat4::operator[](int i) const {
     return mat[i];
 }
-float& mat4::operator [](int i) {
+float& mat4::operator[](int i) {
     return mat[i];
 }
 
