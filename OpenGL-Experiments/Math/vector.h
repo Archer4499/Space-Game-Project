@@ -3,7 +3,14 @@
 #include <ostream>
 
 
-// TODO(Derek): implement comparison and arithmetic overloads: https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
+// NOTE: Possibly have raw and pretty print
+
+// TODO(Derek): implement utility functions
+// mag
+// magSquared
+// cross
+// dot
+
 
 struct vec2 {
     float x, y;
@@ -13,14 +20,13 @@ struct vec2 {
     explicit vec2(float vert[2]);
     vec2(float ax, float ay);
 
-    float  operator [](int i) const;
-    float& operator [](int i);
+    float  operator[](int i) const;
+    float& operator[](int i);
 };
 
 std::ostream& operator<<(std::ostream& os, const vec2& vec);
 
-// TODO(Derek): consider float comparison https://stackoverflow.com/questions/17333/what-is-the-most-effective-way-for-float-and-double-comparison
-//              glm uses return std::memcmp(&a, &b, sizeof(T)) == 0;
+// Exact float comparison
 inline bool  operator==(const vec2& A, const vec2& B) {return (A.x == B.x) && (A.y == B.y);}
 inline bool  operator!=(const vec2& A, const vec2& B) {return !operator==(A,B);}
 // TODO(Derek): Not sure what (if anything) these would mean:
@@ -52,8 +58,8 @@ struct vec3 {
     explicit vec3(float vert[3]);
     vec3(float ax, float ay, float az);
 
-    float  operator [](int i) const;
-    float& operator [](int i);
+    float  operator[](int i) const;
+    float& operator[](int i);
 };
 
 std::ostream& operator<<(std::ostream& os, const vec3& vec);
@@ -83,8 +89,8 @@ struct vec4 {
     explicit vec4(float vert[4]);
     vec4(float ax, float ay, float az, float w);
 
-    float  operator [](int i) const;
-    float& operator [](int i);
+    float  operator[](int i) const;
+    float& operator[](int i);
 };
 
 std::ostream& operator<<(std::ostream&, const vec4&);

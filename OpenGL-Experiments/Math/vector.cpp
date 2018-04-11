@@ -21,7 +21,7 @@ vec2::vec2(float ax, float ay) {
     y = ay;
 }
 
-float vec2::operator [](int i) const {
+float vec2::operator[](int i) const {
     assert(i >= 0 && i < 2);
     switch(i) {
         case 0:
@@ -31,7 +31,7 @@ float vec2::operator [](int i) const {
     }
     return x; // Should never be here
 }
-float& vec2::operator [](int i) {
+float& vec2::operator[](int i) {
     assert(i >= 0 && i < 2);
     switch(i) {
         case 0:
@@ -69,7 +69,7 @@ vec3::vec3(float ax, float ay, float az) {
     z = az;
 }
 
-float vec3::operator [](int i) const {
+float vec3::operator[](int i) const {
     assert(i >= 0 && i < 3);
     switch(i) {
         case 0:
@@ -81,7 +81,7 @@ float vec3::operator [](int i) const {
     }
     return x; // Should never be here
 }
-float& vec3::operator [](int i) {
+float& vec3::operator[](int i) {
     assert(i >= 0 && i < 3);
     switch(i) {
         case 0:
@@ -125,7 +125,7 @@ vec4::vec4(float ax, float ay, float az, float aw) {
     w = aw;
 }
 
-float vec4::operator [](int i) const {
+float vec4::operator[](int i) const {
     assert(i >= 0 && i < 4);
     switch(i) {
         case 0:
@@ -139,7 +139,7 @@ float vec4::operator [](int i) const {
     }
     return x; // Should never be here
 }
-float& vec4::operator [](int i) {
+float& vec4::operator[](int i) {
     assert(i >= 0 && i < 4);
     switch(i) {
         case 0:
