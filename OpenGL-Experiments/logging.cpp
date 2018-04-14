@@ -1,4 +1,4 @@
-#pragma warning (disable : 4996)
+#pragma warning (disable : 4996) // Visuall C++ declares localtime 'unsafe'
 
 #include <iostream>
 #include <fstream>
@@ -14,13 +14,13 @@
 // TODO(Derek): Either switch to full printf or use << operator instead of log()
 
 
-int _logLevel = 0;
-bool _hasBeenOpened = false;
+LogLevel setLogLevel = NO_LOG;
+bool hasBeenOpened = false;
 
 #if LOG_TYPE == LOG_TYPE_FILE
-std::ofstream _logOutput;
+std::ofstream logOS;
 #elif LOG_TYPE == LOG_TYPE_COUT
-auto _logOutput = std::cout;
+auto logOS = std::cout;
 #endif
 
 
@@ -41,60 +41,61 @@ std::string curTime() {
 }
 
 
-int logOpen(const char *logPath, int logLevel) {
+int logOpen(const char *alogPath, LogLevel alogLevel) {
 #if LOG_TYPE == LOG_TYPE_FILE
-    _logLevel = logLevel;
-    _logOutput.open(logPath);
+    setLogLevel = alogLevel;
 
-    _hasBeenOpened = _logOutput.is_open();
+    logOS.open(alogPath);
 
-    return !_hasBeenOpened;
+    hasBeenOpened = logOS.is_open();
+
+    return !hasBeenOpened;
 #else
-    _logLevel = logLevel;
+    setLogLevel = alogLevel;
     return 0;
 #endif
 }
 
-void log(std::string err, int errLevel) {
+void log(std::string err, LogLevel errLevel) {
 #if LOG_TYPE != LOG_TYPE_NO
     #if LOG_TYPE == LOG_TYPE_FILE
-        if (!_hasBeenOpened) {
+        if (!hasBeenOpened) {
             std::cerr << "Log file has not yet been opened with logOpen(..)" << std::endl;
             return;
         }
 
-        if (!_logOutput.is_open()) {
+        if (!logOS.is_open()) {
             std::cerr << "Log file has either already been closed or there is a problem with the file. Error that attempted to log:" << std::endl;
             std::cerr << err << std::endl;
             return;
         }
     #endif
 
-    if (errLevel <= _logLevel) {
-        _logOutput << curTime();
+    if (errLevel <= setLogLevel) {
+        logOS << curTime();
 
         switch(errLevel) {
             case ERR:
-                _logOutput << " - ERROR - ";
+                logOS << " - ERROR - ";
                 break;
             case WARN:
-                _logOutput << " - WARNING - ";
+                logOS << " - WARNING - ";
                 break;
             case INFO:
-                _logOutput << " - INFO - ";
+                logOS << " - INFO - ";
                 break;
             case DEBUG:
-                _logOutput << " - DEBUG - ";
+                logOS << " - DEBUG - ";
                 break;
         }
 
-        _logOutput << err << std::endl;
+        logOS << err << std::endl;
     }
 #endif
 }
 
 void logClose() {
 #if LOG_TYPE == LOG_TYPE_FILE
-    _logOutput.close();
+    logOS.close();
 #endif
 }
