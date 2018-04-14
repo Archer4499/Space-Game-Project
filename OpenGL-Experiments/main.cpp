@@ -14,6 +14,7 @@
 
 #include "config.h"
 #include "loadResources.h"
+#include "math/math.h"
 
 #define LOG_LEVEL INFO
 #define LOG_FILE "debug.log"
@@ -30,15 +31,11 @@
 
 
 // TODO(Derek): Log more info and errs
+// TODO(Derek): hot loading of resource files
 
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
-    // glMatrixMode(GL_PROJECTION);
-    // glLoadIdentity();
-    // gluPerspective(45.0, (float)w / (float)h, 0.01f, 100.0f);
-    // glMatrixMode(GL_MODELVIEW);
-    // glLoadIdentity();
 }
 
 void processInput(GLFWwindow *window) {
