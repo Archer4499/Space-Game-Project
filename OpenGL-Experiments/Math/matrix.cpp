@@ -1,4 +1,4 @@
-#pragma warning(disable: 4996)
+#pragma warning(disable: 4996) // Visual C++ doesn't like std::copy with unknown array size e.g. &data[0][0]
 
 #include <assert.h>
 #include <algorithm>
@@ -11,7 +11,7 @@
 //            mat {diag, 0.0f,
 //                 0.0f, diag}
 // {}
-
+// But since my default initialiser doesn't do anything it doesn't really matter
 
 
 mat2::mat2() {}
