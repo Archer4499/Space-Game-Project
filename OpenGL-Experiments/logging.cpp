@@ -58,44 +58,45 @@ int logOpen(const char *alogPath, LogLevel alogLevel) {
 
 void log(std::string err, LogLevel errLevel) {
 #if LOG_TYPE != LOG_TYPE_NO
+    if (errLevel > setLogLevel) return;
+
     #if LOG_TYPE == LOG_TYPE_FILE
         if (!hasBeenOpened) {
-            std::cerr << "Log file has not yet been opened with logOpen(..)" << std::endl;
+            std::cerr << "Log file has either been closed or not yet been opened with logOpen(..)" << std::endl;
             return;
         }
 
         if (!logOS.is_open()) {
-            std::cerr << "Log file has either already been closed or there is a problem with the file. Error that attempted to log:" << std::endl;
+            std::cerr << "There is a problem with the log file. Error that attempted to log:" << std::endl;
             std::cerr << err << std::endl;
             return;
         }
     #endif
 
-    if (errLevel <= setLogLevel) {
-        logOS << curTime();
+    logOS << curTime();
 
-        switch(errLevel) {
-            case ERR:
-                logOS << " - ERROR - ";
-                break;
-            case WARN:
-                logOS << " - WARNING - ";
-                break;
-            case INFO:
-                logOS << " - INFO - ";
-                break;
-            case DEBUG:
-                logOS << " - DEBUG - ";
-                break;
-        }
-
-        logOS << err << std::endl;
+    switch(errLevel) {
+        case ERR:
+            logOS << " - ERROR - ";
+            break;
+        case WARN:
+            logOS << " - WARNING - ";
+            break;
+        case INFO:
+            logOS << " - INFO - ";
+            break;
+        case DEBUG:
+            logOS << " - DEBUG - ";
+            break;
     }
+
+    logOS << err << std::endl;
 #endif
 }
 
 void logClose() {
 #if LOG_TYPE == LOG_TYPE_FILE
     logOS.close();
+    hasBeenOpened = false;
 #endif
 }
