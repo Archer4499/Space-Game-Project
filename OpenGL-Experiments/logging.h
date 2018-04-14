@@ -12,6 +12,7 @@
 #define LOG_TYPE LOG_TYPE_FILE
 #endif
 
+// TODO(Derek): Possibly add FATAL
 enum LogLevel {
     NO_LOG,
     ERR,
@@ -23,8 +24,8 @@ enum LogLevel {
 
 // std::string curTime();
 
-int logOpen(const char *logPath="debug.log", int logLevel=2);
+int logOpen(const char *alogPath="debug.log", LogLevel alogLevel=WARN);
 
-void log(std::string err, int errLevel=2);
+void log(std::string err, LogLevel errLevel=WARN);
 
 void logClose();
