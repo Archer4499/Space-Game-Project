@@ -22,19 +22,70 @@ enum LogLevel {
 
 #if LOG_TYPE == LOG_TYPE_NO
 
+#define LOG_F(errLevel, ...)
+#define LOG_S(errLevel)
 int logOpen(const char *alogPath="debug.log", LogLevel alogLevel=WARN) {}
 void logClose() {}
 
 #else // LOG_TYPE != LOG_TYPE_NO
 
+
+#include <sstream>
 #include <string>
+
+#include "fmt/format.h"
+#include "fmt/ostream.h"
+
+#define LOG_F(errLevel, format, ...) log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__)
+#define LOG_S(errLevel) StreamLogger(errLevel, __FILE__, __LINE__)
+
+// TODO(Derek): replace sstream with fmt
 
 // std::string curTime();
 
 int logOpen(const char *alogPath="debug.log", LogLevel alogLevel=WARN);
 
+__declspec(deprecated)
 void log(std::string err, LogLevel errLevel=WARN);
 
 void logClose();
+
+
+void logb(LogLevel errLevel,  const char *file, unsigned int line, std::string message);
+
+template <typename... Args>
+void log(LogLevel errLevel, const char *file, unsigned int line, const char* format, const Args & ... args) {
+    std::string message = fmt::format(format, args...);
+
+    logb(errLevel, file, line, message);
+}
+
+
+class StreamLogger {
+public:
+    StreamLogger(LogLevel errLevel, const char *file, unsigned line) : _errLevel(errLevel), _file(file), _line(line) {}
+    StreamLogger::~StreamLogger() {
+        std::string message = _ss.str();
+        log(_errLevel, _file, _line, message.c_str());
+    }
+
+    template<typename T>
+    StreamLogger& operator<<(const T& t) {
+        _ss << t;
+        return *this;
+    }
+
+    // std::endl and other iomanip:s.
+    StreamLogger& operator<<(std::ostream&(*f)(std::ostream&)) {
+        f(_ss);
+        return *this;
+    }
+
+private:
+    LogLevel    _errLevel;
+    const char* _file;
+    unsigned    _line;
+    std::ostringstream _ss;
+};
 
 #endif // LOG_TYPE != LOG_TYPE_NO

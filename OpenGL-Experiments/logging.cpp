@@ -35,7 +35,7 @@ std::string curDateTime() {
     auto milli = now.time_since_epoch();
     auto secs = std::chrono::duration_cast<std::chrono::milliseconds>(milli).count() % 1000;
 
-
+    // TODO(Derek): use fmt
     std::ostringstream ss;
     ss << std::put_time(now_tm, "%Y-%m-%d %H:%M:%S.")
        << std::setfill('0') << std::setw(3) << secs;
@@ -59,21 +59,69 @@ int logOpen(const char *alogPath, LogLevel alogLevel) {
 #endif
 }
 
+
+void logb(LogLevel errLevel, const char *file, unsigned int line, std::string message) {
+    if (errLevel > setLogLevel) return;
+
+#if LOG_TYPE == LOG_TYPE_FILE
+    if (!hasBeenOpened) {
+        std::cerr << "Log file has either been closed or not yet been opened with logOpen(..) at: " << file << ":" << line << std::endl;
+        return;
+    }
+
+    if (!logOS.is_open()) {
+        std::cerr << "There is a problem with the log file at: " << file << ":" << line << std::endl;
+        return;
+    }
+#endif
+
+    std::string errText;
+    switch(errLevel) {
+        case ERR:
+            errText = "  ERROR";
+            break;
+        case WARN:
+            errText = "WARNING";
+            break;
+        case INFO:
+            errText = "   INFO";
+            break;
+        case DEBUG:
+            errText = "  DEBUG";
+            break;
+    }
+
+    // Only file name not full path
+    for (const char *ptr = file; *ptr; ++ptr) {
+        if (*ptr == '/' || *ptr == '\\') {
+            file = ptr + 1;
+        }
+    }
+
+    std::string prefix = fmt::format("{} [{:>20}:{:<5}] {}| ", curDateTime(), file, line, errText);
+
+    std::string fullMessage = prefix + message;
+
+    // TODO(Derek): Use fmt::print(file, )
+    logOS << fullMessage << std::endl; // endl flushes
+}
+
+
 void log(std::string err, LogLevel errLevel) {
     if (errLevel > setLogLevel) return;
 
-    #if LOG_TYPE == LOG_TYPE_FILE
-        if (!hasBeenOpened) {
-            std::cerr << "Log file has either been closed or not yet been opened with logOpen(..)" << std::endl;
-            return;
-        }
+#if LOG_TYPE == LOG_TYPE_FILE
+    if (!hasBeenOpened) {
+        std::cerr << "Log file has either been closed or not yet been opened with logOpen(..)" << std::endl;
+        return;
+    }
 
-        if (!logOS.is_open()) {
-            std::cerr << "There is a problem with the log file. Error that attempted to log:" << std::endl;
-            std::cerr << err << std::endl;
-            return;
-        }
-    #endif
+    if (!logOS.is_open()) {
+        std::cerr << "There is a problem with the log file. Error that attempted to log:" << std::endl;
+        std::cerr << err << std::endl;
+        return;
+    }
+#endif
 
     logOS << curDateTime();
 
