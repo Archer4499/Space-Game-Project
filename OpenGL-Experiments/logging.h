@@ -41,13 +41,9 @@ void logClose() {}
 
 // TODO(Derek): replace sstream with fmt
 
-// std::string curTime();
+// std::string curDateTime();
 
 int logOpen(const char *alogPath="debug.log", LogLevel alogLevel=WARN);
-
-__declspec(deprecated)
-void log(std::string err, LogLevel errLevel=WARN);
-
 void logClose();
 
 

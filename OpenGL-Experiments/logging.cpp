@@ -1,4 +1,4 @@
-#pragma warning (disable : 4996) // Visuall C++ declares localtime 'unsafe'
+#pragma warning (disable : 4996) // Visual C++ declares localtime 'unsafe'
 
 #include "logging.h"
 
@@ -6,7 +6,6 @@
 
 #include <iostream>
 #include <fstream>
-// #include <string>
 #include <chrono>
 #include <iomanip>
 #include <sstream>
@@ -104,43 +103,6 @@ void logb(LogLevel errLevel, const char *file, unsigned int line, std::string me
 
     // TODO(Derek): Use fmt::print(file, )
     logOS << fullMessage << std::endl; // endl flushes
-}
-
-
-void log(std::string err, LogLevel errLevel) {
-    if (errLevel > setLogLevel) return;
-
-#if LOG_TYPE == LOG_TYPE_FILE
-    if (!hasBeenOpened) {
-        std::cerr << "Log file has either been closed or not yet been opened with logOpen(..)" << std::endl;
-        return;
-    }
-
-    if (!logOS.is_open()) {
-        std::cerr << "There is a problem with the log file. Error that attempted to log:" << std::endl;
-        std::cerr << err << std::endl;
-        return;
-    }
-#endif
-
-    logOS << curDateTime();
-
-    switch(errLevel) {
-        case ERR:
-            logOS << " - ERROR - ";
-            break;
-        case WARN:
-            logOS << " - WARNING - ";
-            break;
-        case INFO:
-            logOS << " - INFO - ";
-            break;
-        case DEBUG:
-            logOS << " - DEBUG - ";
-            break;
-    }
-
-    logOS << err << std::endl; // endl flushes
 }
 
 
