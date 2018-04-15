@@ -26,7 +26,7 @@ auto logOS = std::cout;
 #endif
 
 
-std::string curTime() {
+std::string curDateTime() {
     auto now = std::chrono::system_clock::now();
 
     time_t now_t = std::chrono::system_clock::to_time_t(now);
@@ -75,7 +75,7 @@ void log(std::string err, LogLevel errLevel) {
         }
     #endif
 
-    logOS << curTime();
+    logOS << curDateTime();
 
     switch(errLevel) {
         case ERR:
