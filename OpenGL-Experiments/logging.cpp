@@ -1,13 +1,15 @@
 #pragma warning (disable : 4996) // Visuall C++ declares localtime 'unsafe'
 
+#include "logging.h"
+
+#if LOG_TYPE != LOG_TYPE_NO
+
 #include <iostream>
 #include <fstream>
-#include <string>
+// #include <string>
 #include <chrono>
 #include <iomanip>
 #include <sstream>
-
-#include "logging.h"
 
 
 // TODO(Derek): Allow either trunc or append file modes
@@ -58,7 +60,6 @@ int logOpen(const char *alogPath, LogLevel alogLevel) {
 }
 
 void log(std::string err, LogLevel errLevel) {
-#if LOG_TYPE != LOG_TYPE_NO
     if (errLevel > setLogLevel) return;
 
     #if LOG_TYPE == LOG_TYPE_FILE
@@ -91,9 +92,9 @@ void log(std::string err, LogLevel errLevel) {
             break;
     }
 
-    logOS << err << std::endl;
-#endif
+    logOS << err << std::endl; // endl flushes
 }
+
 
 void logClose() {
 #if LOG_TYPE == LOG_TYPE_FILE
@@ -101,3 +102,5 @@ void logClose() {
     hasBeenOpened = false;
 #endif
 }
+
+#endif // LOG_TYPE != LOG_TYPE_NO

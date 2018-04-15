@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 
 
 #ifndef LOG_TYPE_NO
@@ -21,6 +20,14 @@ enum LogLevel {
     DEBUG
 };
 
+#if LOG_TYPE == LOG_TYPE_NO
+
+int logOpen(const char *alogPath="debug.log", LogLevel alogLevel=WARN) {}
+void logClose() {}
+
+#else // LOG_TYPE != LOG_TYPE_NO
+
+#include <string>
 
 // std::string curTime();
 
@@ -29,3 +36,5 @@ int logOpen(const char *alogPath="debug.log", LogLevel alogLevel=WARN);
 void log(std::string err, LogLevel errLevel=WARN);
 
 void logClose();
+
+#endif // LOG_TYPE != LOG_TYPE_NO
