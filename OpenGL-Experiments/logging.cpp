@@ -26,16 +26,17 @@ auto logOS = std::cout;
 
 std::string curTime() {
     auto now = std::chrono::system_clock::now();
+
     time_t now_t = std::chrono::system_clock::to_time_t(now);
     std::tm* now_tm = std::localtime(&now_t);
 
-    auto now_milli = std::chrono::system_clock::now().time_since_epoch();
-    auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(now_milli).count() % 1000;
+    auto milli = now.time_since_epoch();
+    auto secs = std::chrono::duration_cast<std::chrono::milliseconds>(milli).count() % 1000;
 
 
     std::ostringstream ss;
     ss << std::put_time(now_tm, "%Y-%m-%d %H:%M:%S.")
-       << std::setfill('0') << std::setw(3) << milli;
+       << std::setfill('0') << std::setw(3) << secs;
 
     return ss.str();
 }
