@@ -30,8 +30,11 @@
 // #define MODEL_FILE "Resources/Models/item_box.obj"
 
 
+// todo/note area //
 // TODO(Derek): Log more info and errs
 // TODO(Derek): hot loading of resource files
+// NOTE: __declspec(deprecated) for deprecating functions
+////////////////////
 
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -66,9 +69,9 @@ int main(int argc, char const *argv[]) {
 
     if (int err = loadConfig(&conf, CONFIG_FILE)) {
         if (err == 1) {
-            log("Failed to load config file, using and saving defaults: " + std::string(CONFIG_FILE), ERR);
+            LOG_F(ERR, "Failed to load config file, using and saving defaults: {}", CONFIG_FILE);
         } else if (err == 2) {
-            log("Config file invalid: " + std::string(CONFIG_FILE), ERR);
+            LOG_F(ERR, "Config file invalid: {}", CONFIG_FILE);
             cleanup();
             return -1;
         }
@@ -76,15 +79,15 @@ int main(int argc, char const *argv[]) {
 
     int width = std::stoi(conf.data["width"]);
     int height = std::stoi(conf.data["height"]);
-    log("Config file loaded: " + std::string(CONFIG_FILE), INFO);
+    LOG_F(INFO, "Config file loaded: {}", CONFIG_FILE);
     // saveConfig(&conf, CONFIG_FILE);
-    // log("Config file saved: " + std::string(CONFIG_FILE), INFO);
+    // LOG_F(INFO, "Config file saved: {}", CONFIG_FILE);
     // END Load config
 
 
     // Init GLFW
     if (!glfwInit()) {
-        log("Failed to initialize GLFW.", ERR);
+        LOG_F(ERR, "Failed to initialize GLFW.");
         cleanup();
         return -1;
     }
@@ -97,7 +100,7 @@ int main(int argc, char const *argv[]) {
 
     GLFWwindow* window = glfwCreateWindow(width, height, "OpenGL Experiments", NULL, NULL);
     if (window == NULL) {
-        log("Failed to create GLFW window", ERR);
+        LOG_F(ERR, "Failed to create GLFW window");
         cleanup();
         return -1;
     }
@@ -108,22 +111,22 @@ int main(int argc, char const *argv[]) {
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        log("Failed to initialise GLAD", ERR);
+        LOG_F(ERR, "Failed to initialise GLAD");
         cleanup();
         return -1;
     }
 
-    log("Loading Shaders", INFO);
+    LOG_F(INFO, "Loading Shaders");
     int shaderProgram = loadShader(VERTEX_FILE, FRAGMENT_FILE);
 
 
-    log("Loading textures", INFO);
+    LOG_F(INFO, "Loading textures");
     // unsigned int texture1 = loadTexture(TEXTURE1_FILE);
     // unsigned int texture2 = loadTexture(TEXTURE2_FILE);
     unsigned int atexture = loadTexture(TEXTURE_FILE);
 
 
-    log("Loading models", INFO);
+    LOG_F(INFO, "Loading models");
     // unsigned int VBO, VAO, EBO;
     unsigned int VAO, VBO, numVertices;
     // if (loadModelOld(&VBO, &VAO, &EBO)) {
@@ -141,7 +144,7 @@ int main(int argc, char const *argv[]) {
     // glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 
 
-    log("Main loop", INFO);
+    LOG_F(INFO, "Main loop");
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 

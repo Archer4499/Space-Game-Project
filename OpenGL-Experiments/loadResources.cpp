@@ -18,7 +18,7 @@ std::string readFile(const char *filePath) {
     std::ifstream fs(filePath);
 
     if(!fs.is_open()) {
-        log("Could not read file " + std::string(filePath), ERR);
+        LOG_F(ERR, "Could not read file: {}", filePath);
         return "";
     }
 
@@ -45,7 +45,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
     char infoLog[512];
 
     // Compile vertex shader
-    log("Compiling vertex shader.", INFO);
+    LOG_F(INFO, "Compiling vertex shader.");
     glShaderSource(vertexShader, 1, &vertexShaderSrc, NULL);
     glCompileShader(vertexShader);
 
@@ -55,14 +55,14 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
     if (logLength > 1) {
         glGetShaderInfoLog(vertexShader, sizeof(infoLog), NULL, infoLog);
         if (!success) {
-            log("Vertex Shader Compilation Failed: " + std::string(infoLog), ERR);
+            LOG_F(ERR, "Vertex Shader Compilation Failed: {}", infoLog);
         } else {
-            log(infoLog, INFO);
+            LOG_F(INFO, "{}", infoLog);
         }
     }
 
     // Compile fragment shader
-    log("Compiling fragment shader.", INFO);
+    LOG_F(INFO, "Compiling fragment shader.");
     glShaderSource(fragmentShader, 1, &fragmentShaderSrc, NULL);
     glCompileShader(fragmentShader);
 
@@ -72,15 +72,15 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
     if (logLength > 1) {
         glGetShaderInfoLog(fragmentShader, sizeof(infoLog), NULL, infoLog);
         if (!success) {
-            log("Fragment Shader Compilation Failed: " + std::string(infoLog), ERR);
+            LOG_F(ERR, "Fragment Shader Compilation Failed: {}", infoLog);
         } else {
-            log(infoLog, INFO);
+            LOG_F(INFO, "{}", infoLog);
         }
     }
 
 
     // Link shaders
-    log("Linking program", INFO);
+    LOG_F(INFO, "Linking program");
     int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
@@ -92,9 +92,9 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
     if (logLength > 1) {
         glGetShaderInfoLog(shaderProgram, sizeof(infoLog), NULL, infoLog);
         if (!success) {
-            log("Shader Program Linking Failed: " + std::string(infoLog), ERR);
+            LOG_F(ERR, "Shader Program Linking Failed: {}", infoLog);
         } else {
-            log(infoLog, INFO);
+            LOG_F(INFO, "{}", infoLog);
         }
     }
 
@@ -122,18 +122,17 @@ unsigned int loadTexture(const char *texturePath) {
 
     unsigned char *data = stbi_load(texturePath, &texWidth, &texHeight, &nrChannels, 0);
     if (!data) {
-        log("Failed to load texture: " + std::string(texturePath), ERR);
+        LOG_F(ERR, "Failed to load texture: {}", texturePath);
         return NULL;
     }
-    log("Loaded texture: " + std::string(texturePath) + ", w = " + std::to_string(texWidth) +
-        ", h = " + std::to_string(texHeight) + ", channels = " + std::to_string(nrChannels), INFO);
+    LOG_F(INFO, "Loaded texture: {}, w = {}, h = {}, channels = {}", texturePath, texWidth, texHeight, nrChannels);
 
     if (nrChannels == 3) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     } else if (nrChannels == 4) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     } else {
-        log("Texture: " + std::string(texturePath) + " not RGB or RGBA.", ERR);
+        LOG_F(ERR, "Texture: {} not RGB or RGBA.", texturePath);
     }
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -164,12 +163,12 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
     bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath);
 
     if (!err.empty()) {
-        log("LoadObj error: " + err, ERR);
+        LOG_F(ERR, "LoadObj error: {}", err);
         return 1;
     }
 
     if (!ret) {
-        log("Loading object: \"" + std::string(modelPath) + "\" failed.", ERR);
+        LOG_F(ERR, "Loading object: {} failed.", modelPath);
         return 1;
     }
 
@@ -220,9 +219,8 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
     }
 
 
-    log("Loaded model: " + std::string(modelPath) + ", Vertices = " + std::to_string(attrib.vertices.size()/3) +
-        ", TexCoords = " + std::to_string(attrib.texcoords.size()/2) + ", Indices = " + std::to_string(*numVertices), INFO);
-    log("Transformed into: " + std::to_string(*numVertices) + " vertices", INFO);
+    LOG_F(INFO, "Loaded model: {}, Vertices = {}, TexCoords = {}, Indices = {}", modelPath, attrib.vertices.size()/3, attrib.texcoords.size()/2, *numVertices);
+    LOG_F(INFO, "Transformed into: {} vertices", *numVertices);
 
     return 0;
 }
