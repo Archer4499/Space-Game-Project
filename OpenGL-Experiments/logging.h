@@ -24,7 +24,7 @@ enum LogLevel {
 
 #define LOG_F(errLevel, ...)
 #define LOG_S(errLevel)
-int logOpen(const char *alogPath="debug.log", LogLevel alogLevel=WARN) {}
+int logOpen(const char *alogPath="debug.log", const char *amode="w", LogLevel alogLevel=WARN) {}
 void logClose() {}
 
 #else // LOG_TYPE != LOG_TYPE_NO
@@ -43,7 +43,7 @@ void logClose() {}
 
 // std::string curDateTime();
 
-int logOpen(const char *alogPath="debug.log", LogLevel alogLevel=WARN);
+int logOpen(const char *alogPath="debug.log", const char *amode="w", LogLevel alogLevel=WARN);
 void logClose();
 
 

@@ -4,25 +4,15 @@
 
 #if LOG_TYPE != LOG_TYPE_NO
 
-#include <iostream>
-#include <fstream>
+#include <cstdio>
+#include <ostream>
 #include <chrono>
 #include <iomanip>
 #include <sstream>
 
 
-// TODO(Derek): Allow either trunc or append file modes
-// TODO(Derek): Either switch to full printf or use << operator instead of log()
-
-
 LogLevel setLogLevel = NO_LOG;
-bool hasBeenOpened = false;
-
-#if LOG_TYPE == LOG_TYPE_FILE
-std::ofstream logOS;
-#elif LOG_TYPE == LOG_TYPE_COUT
-auto logOS = std::cout;
-#endif
+FILE *logFILE = NULL;
 
 
 std::string curDateTime() {
@@ -43,17 +33,21 @@ std::string curDateTime() {
 }
 
 
-int logOpen(const char *alogPath, LogLevel alogLevel) {
+int logOpen(const char *alogPath, const char *amode, LogLevel alogLevel) {
 #if LOG_TYPE == LOG_TYPE_FILE
     setLogLevel = alogLevel;
 
-    logOS.open(alogPath);
+    logFILE = fopen(alogPath, amode);
 
-    hasBeenOpened = logOS.is_open();
+    if (logFILE == NULL) {
+        perror ("Error opening file");
+        return 1;
+    }
 
-    return !hasBeenOpened;
+    return 0;
 #else
     setLogLevel = alogLevel;
+    logFILE = stdout;
     return 0;
 #endif
 }
@@ -62,17 +56,10 @@ int logOpen(const char *alogPath, LogLevel alogLevel) {
 void logb(LogLevel errLevel, const char *file, unsigned int line, std::string message) {
     if (errLevel > setLogLevel) return;
 
-#if LOG_TYPE == LOG_TYPE_FILE
-    if (!hasBeenOpened) {
-        std::cerr << "Log file has either been closed or not yet been opened with logOpen(..) at: " << file << ":" << line << std::endl;
+    if (logFILE == NULL) {
+        fmt::print(stderr, "Log file/stream has either been closed or not yet been opened with logOpen(..) at: {}:{}\n", file, line);
         return;
     }
-
-    if (!logOS.is_open()) {
-        std::cerr << "There is a problem with the log file at: " << file << ":" << line << std::endl;
-        return;
-    }
-#endif
 
     std::string errText;
     switch(errLevel) {
@@ -101,15 +88,21 @@ void logb(LogLevel errLevel, const char *file, unsigned int line, std::string me
 
     std::string fullMessage = prefix + message;
 
-    // TODO(Derek): Use fmt::print(file, )
-    logOS << fullMessage << std::endl; // endl flushes
+    fmt::print(logFILE, "{}\n", fullMessage);
+    fflush(logFILE); // Ensures log is up to date if we crash
+
+    if (ferror(logFILE)) {
+        fmt::print(stderr, "There is a problem with the log file at: {}:{}\n", file, line);
+        return;
+    }
 }
 
 
 void logClose() {
 #if LOG_TYPE == LOG_TYPE_FILE
-    logOS.close();
-    hasBeenOpened = false;
+    fclose(logFILE);
+#else
+    logFILE = NULL;
 #endif
 }
 

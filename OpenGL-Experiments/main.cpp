@@ -3,9 +3,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <iostream>
-// #include <cmath>
-
 // TODO(Derek): Remove requirement for these defines
 #define LOG_TYPE_NO 0
 #define LOG_TYPE_COUT 1
@@ -19,6 +16,8 @@
 #include "math/math.h"
 
 #define LOG_LEVEL INFO
+#define LOG_MODE "w"
+// #define LOG_MODE "a"
 #define LOG_FILE "debug.log"
 #define CONFIG_FILE "config.cfg"
 #define VERTEX_FILE "Resources/Shaders/shader.vert"
@@ -61,8 +60,7 @@ void cleanup() {
 
 int main(int argc, char const *argv[]) {
     // Start logging
-    if (logOpen(LOG_FILE, LOG_LEVEL)) {
-        std::cerr << "Log file: \"" << LOG_FILE << "\" could not be opened for writing." << std::endl;
+    if (logOpen(LOG_FILE, LOG_MODE, LOG_LEVEL)) {
         return -1;
     }
 
