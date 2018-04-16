@@ -11,6 +11,7 @@
 #define LOG_TYPE LOG_TYPE_FILE
 #endif
 
+// #define LOG_STREAM_OVERLOAD
 // #define LOG_STREAM
 
 // TODO(Derek): Possibly add FATAL
@@ -57,9 +58,12 @@ void log(LogLevel errLevel, const char *file, unsigned int line, const char* for
     logb(errLevel, file, line, message);
 }
 
+#ifdef LOG_STREAM_OVERLOAD
+#include "fmt/ostream.h"
+#endif
+
 #ifdef LOG_STREAM
 #include <sstream>
-#include "fmt/ostream.h"
 
 class StreamLogger {
 public:

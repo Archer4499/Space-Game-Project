@@ -9,6 +9,7 @@
 #define LOG_TYPE_FILE 2
 
 #define LOG_TYPE LOG_TYPE_FILE
+#define LOG_STREAM_OVERLOAD
 #include "logging.h"
 
 #include "config.h"
@@ -34,6 +35,7 @@
 // todo/note area //
 // TODO(Derek): Log more info and errs
 // TODO(Derek): hot loading of resource files
+// TODO(Derek): Replace operator>> overloads with format_arg then remove define
 // NOTE: __declspec(deprecated) for deprecating functions
 ////////////////////
 
