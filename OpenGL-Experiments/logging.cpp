@@ -36,7 +36,7 @@ int logOpen(const char *alogPath, const char *amode, LogLevel alogLevel) {
 #if LOG_TYPE == LOG_TYPE_FILE
     setLogLevel = alogLevel;
 
-    fopen_s(&logFILE, alogPath, amode);
+    logFILE = _fsopen(alogPath, amode, _SH_DENYWR);
 
     if (logFILE == NULL) {
         perror ("Error opening file");
