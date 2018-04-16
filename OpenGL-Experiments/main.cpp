@@ -1,4 +1,7 @@
-#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup") // Removes pointless cmd window
+#ifdef NDEBUG
+// Removes cmd window in non debug builds
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#endif
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
