@@ -27,7 +27,6 @@ enum LogLevel {
 #if LOG_TYPE == LOG_TYPE_NO
 
 #define LOG_F(errLevel, ...)
-#define LOG_S(errLevel)
 int logOpen(const char *alogPath="debug.log", const char *amode="w", LogLevel alogLevel=WARN) {}
 void logClose() {}
 
@@ -38,10 +37,9 @@ void logClose() {}
 
 #include "fmt/format.h"
 
+// TODO(Derek): possibly change to LOG
 #define LOG_F(errLevel, format, ...) log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__)
-#define LOG_S(errLevel) StreamLogger(errLevel, __FILE__, __LINE__)
 
-// TODO(Derek): replace sstream with fmt
 
 // std::string curDateTime();
 
@@ -65,6 +63,9 @@ void log(LogLevel errLevel, const char *file, unsigned int line, const char* for
 #ifdef LOG_STREAM
 #include <sstream>
 
+#define LOG_S(errLevel) StreamLogger(errLevel, __FILE__, __LINE__)
+
+// TODO(Derek): replace sstream with fmt
 class StreamLogger {
 public:
     StreamLogger(LogLevel errLevel, const char *file, unsigned line) : _errLevel(errLevel), _file(file), _line(line) {}
