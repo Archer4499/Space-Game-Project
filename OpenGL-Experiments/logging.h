@@ -11,6 +11,8 @@
 #define LOG_TYPE LOG_TYPE_FILE
 #endif
 
+// #define LOG_STREAM
+
 // TODO(Derek): Possibly add FATAL
 enum LogLevel {
     NO_LOG,
@@ -30,11 +32,9 @@ void logClose() {}
 #else // LOG_TYPE != LOG_TYPE_NO
 
 
-#include <sstream>
 #include <string>
 
 #include "fmt/format.h"
-#include "fmt/ostream.h"
 
 #define LOG_F(errLevel, format, ...) log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_S(errLevel) StreamLogger(errLevel, __FILE__, __LINE__)
@@ -56,6 +56,9 @@ void log(LogLevel errLevel, const char *file, unsigned int line, const char* for
     logb(errLevel, file, line, message);
 }
 
+#ifdef LOG_STREAM
+#include <sstream>
+#include "fmt/ostream.h"
 
 class StreamLogger {
 public:
@@ -83,5 +86,7 @@ private:
     unsigned    _line;
     std::ostringstream _ss;
 };
+
+#endif // ifdef LOG_STREAM
 
 #endif // LOG_TYPE != LOG_TYPE_NO
