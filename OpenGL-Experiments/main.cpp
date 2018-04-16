@@ -72,6 +72,8 @@ int main(int argc, char const *argv[]) {
     if (int err = loadConfig(&conf, CONFIG_FILE)) {
         if (err == 1) {
             LOG_F(ERR, "Failed to load config file, using and saving defaults: {}", CONFIG_FILE);
+            saveConfig(&conf, CONFIG_FILE);
+            LOG_F(INFO, "Config file saved: {}", CONFIG_FILE);
         } else if (err == 2) {
             LOG_F(ERR, "Config file invalid: {}", CONFIG_FILE);
             cleanup();
@@ -81,9 +83,7 @@ int main(int argc, char const *argv[]) {
 
     int width = std::stoi(conf.data["width"]);
     int height = std::stoi(conf.data["height"]);
-    LOG_F(INFO, "Config file loaded: {}", CONFIG_FILE);
-    // saveConfig(&conf, CONFIG_FILE);
-    // LOG_F(INFO, "Config file saved: {}", CONFIG_FILE);
+    LOG_F(INFO, "Config loaded: {}", CONFIG_FILE);
     // END Load config
 
 
