@@ -160,14 +160,17 @@ std::ostream& operator<< (std::ostream& os, const vec4& vec) {
 }
 
 
+vec3 normalize(const vec3& in) {
+    vec3 out(in);
+    float len2 = in.x * in.x + in.y * in.y + in.z * in.z;
 
-void normalizeVector(vec3 *v) {
-  float len2 = v->x * v->x + v->y * v->y + v->z * v->z;
-  if (len2 > 0.0f) {
-    float len = sqrtf(len2);
+    if (len2 > 0.0f) {
+        float len = sqrtf(len2);
 
-    v->x /= len;
-    v->y /= len;
-    v->z /= len;
-  }
+        out.x /= len;
+        out.y /= len;
+        out.z /= len;
+    }
+
+    return out;
 }

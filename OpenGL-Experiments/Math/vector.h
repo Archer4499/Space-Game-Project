@@ -4,7 +4,7 @@
 
 
 // NOTE: Possibly have raw and pretty print
-
+// NOTE: Printing floats is tricky...
 // TODO(Derek): implement utility functions
 // mag
 // magSquared
@@ -37,10 +37,15 @@ inline bool  operator!=(const vec2& A, const vec2& B) {return !operator==(A,B);}
 
 inline vec2& operator- (vec2& A) {A.x = -A.x; A.y = -A.y; return A;}
 
+// Component-wise operations
 inline vec2& operator+=(vec2& A, const vec2& B) {A.x += B.x; A.y += B.y; return A;}
 inline vec2  operator+ (vec2  A, const vec2& B) {A += B; return A;}
 inline vec2& operator-=(vec2& A, const vec2& B) {A.x -= B.x; A.y -= B.y; return A;}
 inline vec2  operator- (vec2  A, const vec2& B) {A -= B; return A;}
+inline vec2& operator*=(vec2& A, const vec2& B) {A.x *= B.x; A.y *= B.y; return A;}
+inline vec2  operator* (vec2  A, const vec2& B) {A *= B; return A;}
+inline vec2& operator/=(vec2& A, const vec2& B) {A.x /= B.x; A.y /= B.y; return A;}
+inline vec2  operator/ (vec2  A, const vec2& B) {A /= B; return A;}
 
 inline vec2& operator*=(vec2& A, const float B) {A.x *= B; A.y *= B; return A;}
 inline vec2  operator* (vec2  A, const float B) {A *= B; return A;}
@@ -69,10 +74,15 @@ inline bool  operator!=(const vec3& A, const vec3& B) {return !operator==(A,B);}
 
 inline vec3& operator- (vec3& A) {A.x = -A.x; A.y = -A.y; A.z = -A.z; return A;}
 
+// Component-wise operations
 inline vec3& operator+=(vec3& A, const vec3& B) {A.x += B.x; A.y += B.y; A.z += B.z; return A;}
 inline vec3  operator+ (vec3  A, const vec3& B) {A += B; return A;}
 inline vec3& operator-=(vec3& A, const vec3& B) {A.x -= B.x; A.y -= B.y; A.z -= B.z; return A;}
 inline vec3  operator- (vec3  A, const vec3& B) {A -= B; return A;}
+inline vec3& operator*=(vec3& A, const vec3& B) {A.x *= B.x; A.y *= B.y; A.z *= B.z; return A;}
+inline vec3  operator* (vec3  A, const vec3& B) {A *= B; return A;}
+inline vec3& operator/=(vec3& A, const vec3& B) {A.x /= B.x; A.y /= B.y; A.z /= B.z; return A;}
+inline vec3  operator/ (vec3  A, const vec3& B) {A /= B; return A;}
 
 inline vec3& operator*=(vec3& A, const float B) {A.x *= B; A.y *= B; A.z *= B; return A;}
 inline vec3  operator* (vec3  A, const float B) {A *= B; return A;}
@@ -100,10 +110,15 @@ inline bool  operator!=(const vec4& A, const vec4& B) {return !operator==(A,B);}
 
 inline vec4& operator- (vec4& A) {A.x = -A.x; A.y = -A.y; A.z = -A.z; A.w = -A.w; return A;}
 
+// Component-wise operations
 inline vec4& operator+=(vec4& A, const vec4& B) {A.x += B.x; A.y += B.y; A.z += B.z; A.w += B.w; return A;}
 inline vec4  operator+ (vec4  A, const vec4& B) {A += B; return A;}
 inline vec4& operator-=(vec4& A, const vec4& B) {A.x -= B.x; A.y -= B.y; A.z -= B.z; A.w -= B.w; return A;}
 inline vec4  operator- (vec4  A, const vec4& B) {A -= B; return A;}
+inline vec4& operator*=(vec4& A, const vec4& B) {A.x *= B.x; A.y *= B.y; A.z *= B.z; A.w *= B.w; return A;}
+inline vec4  operator* (vec4  A, const vec4& B) {A *= B; return A;}
+inline vec4& operator/=(vec4& A, const vec4& B) {A.x /= B.x; A.y /= B.y; A.z /= B.z; A.w /= B.w; return A;}
+inline vec4  operator/ (vec4  A, const vec4& B) {A /= B; return A;}
 
 inline vec4& operator*=(vec4& A, const float B) {A.x *= B; A.y *= B; A.z *= B; A.w *= B; return A;}
 inline vec4  operator* (vec4  A, const float B) {A *= B; return A;}
@@ -112,4 +127,4 @@ inline vec4& operator/=(vec4& A, const float B) {A.x /= B; A.y /= B; A.z /= B; A
 inline vec4  operator/ (vec4  A, const float B) {A /= B; return A;}
 
 
-// void normalizeVector(const vec3 *v); TODO: not sure about syntax
+vec3 normalize(const vec3& in);
