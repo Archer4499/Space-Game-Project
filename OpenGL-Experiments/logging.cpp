@@ -1,5 +1,3 @@
-#pragma warning (disable : 4996) // Visual C++ declares localtime 'unsafe'
-
 #include "logging.h"
 
 #if LOG_TYPE != LOG_TYPE_NO
@@ -19,14 +17,15 @@ std::string curDateTime() {
     auto now = std::chrono::system_clock::now();
 
     time_t now_t = std::chrono::system_clock::to_time_t(now);
-    std::tm* now_tm = std::localtime(&now_t);
+    std::tm now_tm;
+    localtime_s(&now_tm, &now_t);
 
     auto milli = now.time_since_epoch();
     auto secs = std::chrono::duration_cast<std::chrono::milliseconds>(milli).count() % 1000;
 
     // TODO(Derek): use fmt
     std::ostringstream ss;
-    ss << std::put_time(now_tm, "%Y-%m-%d %H:%M:%S.")
+    ss << std::put_time(&now_tm, "%Y-%m-%d %H:%M:%S.")
        << std::setfill('0') << std::setw(3) << secs;
 
     return ss.str();
@@ -37,7 +36,7 @@ int logOpen(const char *alogPath, const char *amode, LogLevel alogLevel) {
 #if LOG_TYPE == LOG_TYPE_FILE
     setLogLevel = alogLevel;
 
-    logFILE = fopen(alogPath, amode);
+    fopen_s(&logFILE, alogPath, amode);
 
     if (logFILE == NULL) {
         perror ("Error opening file");
