@@ -63,6 +63,9 @@ void logb(LogLevel errLevel, const char *file, unsigned int line, std::string me
 
     std::string errText;
     switch(errLevel) {
+        case FATAL:
+            errText = "  FATAL";
+            break;
         case ERR:
             errText = "  ERROR";
             break;

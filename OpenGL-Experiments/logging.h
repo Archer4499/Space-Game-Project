@@ -16,6 +16,7 @@
 // TODO(Derek): Possibly add FATAL
 enum LogLevel {
     NO_LOG,
+    FATAL,
     ERR,
     WARN,
     INFO,

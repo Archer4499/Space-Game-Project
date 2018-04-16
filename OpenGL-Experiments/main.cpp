@@ -73,7 +73,7 @@ int main(int argc, char const *argv[]) {
             saveConfig(&conf, CONFIG_FILE);
             LOG_F(INFO, "Config file saved: {}", CONFIG_FILE);
         } else if (err == 2) {
-            LOG_F(ERR, "Config file invalid: {}", CONFIG_FILE);
+            LOG_F(FATAL, "Config file invalid: {}", CONFIG_FILE);
             cleanup();
             return -1;
         }
@@ -87,7 +87,7 @@ int main(int argc, char const *argv[]) {
 
     // Init GLFW
     if (!glfwInit()) {
-        LOG_F(ERR, "Failed to initialize GLFW.");
+        LOG_F(FATAL, "Failed to initialize GLFW.");
         cleanup();
         return -1;
     }
@@ -100,7 +100,7 @@ int main(int argc, char const *argv[]) {
 
     GLFWwindow* window = glfwCreateWindow(width, height, "OpenGL Experiments", NULL, NULL);
     if (window == NULL) {
-        LOG_F(ERR, "Failed to create GLFW window");
+        LOG_F(FATAL, "Failed to create GLFW window");
         cleanup();
         return -1;
     }
@@ -111,7 +111,7 @@ int main(int argc, char const *argv[]) {
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        LOG_F(ERR, "Failed to initialise GLAD");
+        LOG_F(FATAL, "Failed to initialise GLAD");
         cleanup();
         return -1;
     }
