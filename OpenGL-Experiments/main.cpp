@@ -39,6 +39,7 @@
 // TODO(Derek): Log more info and errs
 // TODO(Derek): hot loading of resource files
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
+// TODO(Derek): Give math and logging their own repositories
 // NOTE: __declspec(deprecated) for deprecating functions
 ////////////////////
 
@@ -165,6 +166,17 @@ int main(int argc, char const *argv[]) {
 
         // render container
         glUseProgram(shaderProgram);
+
+
+        mat4 transform(1.0f);
+        transform = translate(transform, vec3(0.5f, -0.5f, 0.0f));
+        transform = rotate(transform, glfwGetTime(), vec3(0.0f, 0.0f, 1.0f));
+
+        // get matrix's uniform location and set matrix
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &(transform[0].x));
+
+
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, numVertices);
         // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
