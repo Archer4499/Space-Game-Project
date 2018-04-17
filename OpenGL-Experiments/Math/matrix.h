@@ -25,45 +25,40 @@ struct mat2 {
 
 std::ostream& operator<<(std::ostream& os, const mat2& mat);
 
-inline bool  operator==(const mat2& A, const mat2& B) {bool ret = true; for (int i = 0; i < 4; ++i) ret &= (A[i]==B[i]); return ret;}
+// TODO(Derek): can use 2 vec2 comparisons now
+inline bool  operator==(const mat2& A, const mat2& B) {return (A[0]==B[0] && A[1]==B[1]);}
 inline bool  operator!=(const mat2& A, const mat2& B) {return !operator==(A,B);}
 
-inline mat2& operator- (mat2& A) {for (int i = 0; i < 4; ++i) A[i] = -A[i]; return A;}
+inline mat2  operator- (const mat2& A) {return mat2(-A[0], -A[1]);}
 
 // Matrix/Matrix
-inline mat2& operator+=(mat2& A, const mat2& B) {for (int i = 0; i < 4; ++i) A[i] += B[i]; return A;}
+inline mat2& operator+=(mat2& A, const mat2& B) {A[0] += B[0]; A[1] += B[1]; return A;}
 inline mat2  operator+ (mat2  A, const mat2& B) {A += B; return A;}
-inline mat2& operator-=(mat2& A, const mat2& B) {for (int i = 0; i < 4; ++i) A[i] -= B[i]; return A;}
+inline mat2& operator-=(mat2& A, const mat2& B) {A[0] -= B[0]; A[1] -= B[1]; return A;}
 inline mat2  operator- (mat2  A, const mat2& B) {A -= B; return A;}
 
 // TODO(Derek): Check order of all matrix multiplies
 // Matrix multiplication
 inline mat2  operator* (const mat2& A, const mat2& B) {
-    mat2 res(A.data[0][0] * B.data[0][0] + A.data[1][0] * B.data[0][1],
-             A.data[0][1] * B.data[0][0] + A.data[1][1] * B.data[0][1],
+    return mat2(A[0][0] * B[0][0] + A[1][0] * B[0][1],
+                A[0][1] * B[0][0] + A[1][1] * B[0][1],
 
-             A.data[0][0] * B.data[1][0] + A.data[1][0] * B.data[1][1],
-             A.data[0][1] * B.data[1][0] + A.data[1][1] * B.data[1][1]);
-    return res;
+                A[0][0] * B[1][0] + A[1][0] * B[1][1],
+                A[0][1] * B[1][0] + A[1][1] * B[1][1]);
 }
 // Horizontal/Row vector
 inline vec2  operator* (vec2 A, const mat2& B) {
-    vec2 res(A.x * B.data[0][0] + A.y * B.data[0][1],
-             A.x * B.data[1][0] + A.y * B.data[1][1]);
-    return res;
+    return vec2(A.x * B[0][0] + A.y * B[0][1],
+                A.x * B[1][0] + A.y * B[1][1]);
 }
 // Vertical/Column vector
-inline vec2  operator* (const mat2& A, vec2 B) {
-    vec2 res(A.data[0][0] * B.x + A.data[1][0] * B.y,
-             A.data[0][1] * B.x + A.data[1][1] * B.y);
-    return res;
-}
+inline vec2  operator* (const mat2& A, vec2 B) {return A[0] * B.x + A[1] * B.y;}
 
 // Scalar
-inline mat2& operator*=(mat2& A, const float B) {for (int i = 0; i < 4; ++i) A[i] *= B; return A;}
+inline mat2& operator*=(mat2& A, const float B) {A[0] *= B; A[1] *= B; return A;}
 inline mat2  operator* (mat2  A, const float B) {A *= B; return A;}
 inline mat2  operator* (const float B, mat2  A) {A *= B; return A;}
-inline mat2& operator/=(mat2& A, const float B) {for (int i = 0; i < 4; ++i) A[i] /= B; return A;}
+inline mat2& operator/=(mat2& A, const float B) {A[0] /= B; A[1] /= B; return A;}
 inline mat2  operator/ (mat2  A, const float B) {A /= B; return A;}
 
 
@@ -87,52 +82,45 @@ struct mat3 {
 
 std::ostream& operator<<(std::ostream& os, const mat3& mat);
 
-inline bool  operator==(const mat3& A, const mat3& B) {bool ret = true; for (int i = 0; i < 9; ++i) ret &= (A[i]==B[i]); return ret;}
+inline bool  operator==(const mat3& A, const mat3& B) {return (A[0]==B[0] && A[1]==B[1] && A[2]==B[2]);}
 inline bool  operator!=(const mat3& A, const mat3& B) {return !operator==(A,B);}
 
-inline mat3& operator- (mat3& A) {for (int i = 0; i < 9; ++i) A[i] = -A[i]; return A;}
+inline mat3  operator- (const mat3& A) {return mat3(-A[0], -A[1], -A[2]);}
 
 // Matrix/Matrix
-inline mat3& operator+=(mat3& A, const mat3& B) {for (int i = 0; i < 9; ++i) A[i] += B[i]; return A;}
+inline mat3& operator+=(mat3& A, const mat3& B) {A[0] += B[0]; A[1] += B[1]; A[2] += B[2]; return A;}
 inline mat3  operator+ (mat3  A, const mat3& B) {A += B; return A;}
-inline mat3& operator-=(mat3& A, const mat3& B) {for (int i = 0; i < 9; ++i) A[i] -= B[i]; return A;}
+inline mat3& operator-=(mat3& A, const mat3& B) {A[0] -= B[0]; A[1] -= B[1]; A[2] -= B[2]; return A;}
 inline mat3  operator- (mat3  A, const mat3& B) {A -= B; return A;}
 
 // Matrix multiplication
 inline mat3  operator* (const mat3& A, const mat3& B) {
-    mat3 res(A.data[0][0] * B.data[0][0] + A.data[1][0] * B.data[0][1] + A.data[2][0] * B.data[0][2],
-             A.data[0][1] * B.data[0][0] + A.data[1][1] * B.data[0][1] + A.data[2][1] * B.data[0][2],
-             A.data[0][2] * B.data[0][0] + A.data[1][2] * B.data[0][1] + A.data[2][2] * B.data[0][2],
+    return mat3(A[0][0] * B[0][0] + A[1][0] * B[0][1] + A[2][0] * B[0][2],
+                A[0][1] * B[0][0] + A[1][1] * B[0][1] + A[2][1] * B[0][2],
+                A[0][2] * B[0][0] + A[1][2] * B[0][1] + A[2][2] * B[0][2],
 
-             A.data[0][0] * B.data[1][0] + A.data[1][0] * B.data[1][1] + A.data[2][0] * B.data[1][2],
-             A.data[0][1] * B.data[1][0] + A.data[1][1] * B.data[1][1] + A.data[2][1] * B.data[1][2],
-             A.data[0][2] * B.data[1][0] + A.data[1][2] * B.data[1][1] + A.data[2][2] * B.data[1][2],
+                A[0][0] * B[1][0] + A[1][0] * B[1][1] + A[2][0] * B[1][2],
+                A[0][1] * B[1][0] + A[1][1] * B[1][1] + A[2][1] * B[1][2],
+                A[0][2] * B[1][0] + A[1][2] * B[1][1] + A[2][2] * B[1][2],
 
-             A.data[0][0] * B.data[2][0] + A.data[1][0] * B.data[2][1] + A.data[2][0] * B.data[2][2],
-             A.data[0][1] * B.data[2][0] + A.data[1][1] * B.data[2][1] + A.data[2][1] * B.data[2][2],
-             A.data[0][2] * B.data[2][0] + A.data[1][2] * B.data[2][1] + A.data[2][2] * B.data[2][2]);
-    return res;
+                A[0][0] * B[2][0] + A[1][0] * B[2][1] + A[2][0] * B[2][2],
+                A[0][1] * B[2][0] + A[1][1] * B[2][1] + A[2][1] * B[2][2],
+                A[0][2] * B[2][0] + A[1][2] * B[2][1] + A[2][2] * B[2][2]);
 }
 // Horizontal/Row vector
 inline vec3  operator* (vec3 A, const mat3& B) {
-    vec3 res(A.x * B.data[0][0] + A.y * B.data[0][1] + A.z * B.data[0][2],
-             A.x * B.data[1][0] + A.y * B.data[1][1] + A.z * B.data[1][2],
-             A.x * B.data[2][0] + A.y * B.data[2][1] + A.z * B.data[2][2]);
-    return res;
+    return vec3(A.x * B[0][0] + A.y * B[0][1] + A.z * B[0][2],
+                A.x * B[1][0] + A.y * B[1][1] + A.z * B[1][2],
+                A.x * B[2][0] + A.y * B[2][1] + A.z * B[2][2]);
 }
 // Vertical/Column vector
-inline vec3  operator* (const mat3& A, vec3 B) {
-    vec3 res(A.data[0][0] * B.x + A.data[1][0] * B.y + A.data[2][0] * B.z,
-             A.data[0][1] * B.x + A.data[1][1] * B.y + A.data[2][1] * B.z,
-             A.data[0][2] * B.x + A.data[1][2] * B.y + A.data[2][2] * B.z);
-    return res;
-}
+inline vec3  operator* (const mat3& A, vec3 B) {return A[0] * B.x + A[1] * B.y + A[2] * B.z;}
 
 // Scalar
-inline mat3& operator*=(mat3& A, const float B) {for (int i = 0; i < 9; ++i) A[i] *= B; return A;}
+inline mat3& operator*=(mat3& A, const float B) {A[0] *= B; A[1] *= B; A[2] *= B; return A;}
 inline mat3  operator* (mat3  A, const float B) {A *= B; return A;}
 inline mat3  operator* (const float B, mat3  A) {A *= B; return A;}
-inline mat3& operator/=(mat3& A, const float B) {for (int i = 0; i < 9; ++i) A[i] /= B; return A;}
+inline mat3& operator/=(mat3& A, const float B) {A[0] /= B; A[1] /= B; A[2] /= B; return A;}
 inline mat3  operator/ (mat3  A, const float B) {A /= B; return A;}
 
 
@@ -157,62 +145,54 @@ struct mat4 {
 
 std::ostream& operator<<(std::ostream& os, const mat4& mat);
 
-inline bool  operator==(const mat4& A, const mat4& B) {bool ret = true; for (int i = 0; i < 16; ++i) ret &= (A[i]==B[i]); return ret;}
+inline bool  operator==(const mat4& A, const mat4& B) {return (A[0]==B[0] && A[1]==B[1] && A[2]==B[2] && A[3]==B[3]);}
 inline bool  operator!=(const mat4& A, const mat4& B) {return !operator==(A,B);}
 
-inline mat4& operator- (mat4& A) {for (int i = 0; i < 16; ++i) A[i] = -A[i]; return A;}
+inline mat4  operator- (const mat4& A) {return mat4(-A[0], -A[1], -A[2], -A[3]);}
 
 // Matrix/Matrix
-inline mat4& operator+=(mat4& A, const mat4& B) {for (int i = 0; i < 16; ++i) A[i] += B[i]; return A;}
+inline mat4& operator+=(mat4& A, const mat4& B) {A[0] += B[0]; A[1] += B[1]; A[2] += B[2]; A[3] += B[3]; return A;}
 inline mat4  operator+ (mat4  A, const mat4& B) {A += B; return A;}
-inline mat4& operator-=(mat4& A, const mat4& B) {for (int i = 0; i < 16; ++i) A[i] -= B[i]; return A;}
+inline mat4& operator-=(mat4& A, const mat4& B) {A[0] -= B[0]; A[1] -= B[1]; A[2] -= B[2]; A[3] -= B[3]; return A;}
 inline mat4  operator- (mat4  A, const mat4& B) {A -= B; return A;}
 
 // Matrix multiplication
 inline mat4  operator* (const mat4& A, const mat4& B) {
-    mat4 res(A.data[0][0] * B.data[0][0] + A.data[1][0] * B.data[0][1] + A.data[2][0] * B.data[0][2] + A.data[3][0] * B.data[0][3],
-             A.data[0][1] * B.data[0][0] + A.data[1][1] * B.data[0][1] + A.data[2][1] * B.data[0][2] + A.data[3][1] * B.data[0][3],
-             A.data[0][2] * B.data[0][0] + A.data[1][2] * B.data[0][1] + A.data[2][2] * B.data[0][2] + A.data[3][2] * B.data[0][3],
-             A.data[0][3] * B.data[0][0] + A.data[1][3] * B.data[0][1] + A.data[2][3] * B.data[0][2] + A.data[3][3] * B.data[0][3],
+    return mat4(A[0][0] * B[0][0] + A[1][0] * B[0][1] + A[2][0] * B[0][2] + A[3][0] * B[0][3],
+                A[0][1] * B[0][0] + A[1][1] * B[0][1] + A[2][1] * B[0][2] + A[3][1] * B[0][3],
+                A[0][2] * B[0][0] + A[1][2] * B[0][1] + A[2][2] * B[0][2] + A[3][2] * B[0][3],
+                A[0][3] * B[0][0] + A[1][3] * B[0][1] + A[2][3] * B[0][2] + A[3][3] * B[0][3],
 
-             A.data[0][0] * B.data[1][0] + A.data[1][0] * B.data[1][1] + A.data[2][0] * B.data[1][2] + A.data[3][0] * B.data[1][3],
-             A.data[0][1] * B.data[1][0] + A.data[1][1] * B.data[1][1] + A.data[2][1] * B.data[1][2] + A.data[3][1] * B.data[1][3],
-             A.data[0][2] * B.data[1][0] + A.data[1][2] * B.data[1][1] + A.data[2][2] * B.data[1][2] + A.data[3][2] * B.data[1][3],
-             A.data[0][3] * B.data[1][0] + A.data[1][3] * B.data[1][1] + A.data[2][3] * B.data[1][2] + A.data[3][3] * B.data[1][3],
+                A[0][0] * B[1][0] + A[1][0] * B[1][1] + A[2][0] * B[1][2] + A[3][0] * B[1][3],
+                A[0][1] * B[1][0] + A[1][1] * B[1][1] + A[2][1] * B[1][2] + A[3][1] * B[1][3],
+                A[0][2] * B[1][0] + A[1][2] * B[1][1] + A[2][2] * B[1][2] + A[3][2] * B[1][3],
+                A[0][3] * B[1][0] + A[1][3] * B[1][1] + A[2][3] * B[1][2] + A[3][3] * B[1][3],
 
-             A.data[0][0] * B.data[2][0] + A.data[1][0] * B.data[2][1] + A.data[2][0] * B.data[2][2] + A.data[3][0] * B.data[2][3],
-             A.data[0][1] * B.data[2][0] + A.data[1][1] * B.data[2][1] + A.data[2][1] * B.data[2][2] + A.data[3][1] * B.data[2][3],
-             A.data[0][2] * B.data[2][0] + A.data[1][2] * B.data[2][1] + A.data[2][2] * B.data[2][2] + A.data[3][2] * B.data[2][3],
-             A.data[0][3] * B.data[2][0] + A.data[1][3] * B.data[2][1] + A.data[2][3] * B.data[2][2] + A.data[3][3] * B.data[2][3],
+                A[0][0] * B[2][0] + A[1][0] * B[2][1] + A[2][0] * B[2][2] + A[3][0] * B[2][3],
+                A[0][1] * B[2][0] + A[1][1] * B[2][1] + A[2][1] * B[2][2] + A[3][1] * B[2][3],
+                A[0][2] * B[2][0] + A[1][2] * B[2][1] + A[2][2] * B[2][2] + A[3][2] * B[2][3],
+                A[0][3] * B[2][0] + A[1][3] * B[2][1] + A[2][3] * B[2][2] + A[3][3] * B[2][3],
 
-             A.data[0][0] * B.data[3][0] + A.data[1][0] * B.data[3][1] + A.data[2][0] * B.data[3][2] + A.data[3][0] * B.data[3][3],
-             A.data[0][1] * B.data[3][0] + A.data[1][1] * B.data[3][1] + A.data[2][1] * B.data[3][2] + A.data[3][1] * B.data[3][3],
-             A.data[0][2] * B.data[3][0] + A.data[1][2] * B.data[3][1] + A.data[2][2] * B.data[3][2] + A.data[3][2] * B.data[3][3],
-             A.data[0][3] * B.data[3][0] + A.data[1][3] * B.data[3][1] + A.data[2][3] * B.data[3][2] + A.data[3][3] * B.data[3][3]);
-    return res;
+                A[0][0] * B[3][0] + A[1][0] * B[3][1] + A[2][0] * B[3][2] + A[3][0] * B[3][3],
+                A[0][1] * B[3][0] + A[1][1] * B[3][1] + A[2][1] * B[3][2] + A[3][1] * B[3][3],
+                A[0][2] * B[3][0] + A[1][2] * B[3][1] + A[2][2] * B[3][2] + A[3][2] * B[3][3],
+                A[0][3] * B[3][0] + A[1][3] * B[3][1] + A[2][3] * B[3][2] + A[3][3] * B[3][3]);
 }
 // Horizontal/Row vector
 inline vec4  operator* (vec4 A, const mat4& B) {
-    vec4 res(A.x * B.data[0][0] + A.y * B.data[0][1] + A.z * B.data[0][2] + A.w * B.data[0][3],
-             A.x * B.data[1][0] + A.y * B.data[1][1] + A.z * B.data[1][2] + A.w * B.data[1][3],
-             A.x * B.data[2][0] + A.y * B.data[2][1] + A.z * B.data[2][2] + A.w * B.data[2][3],
-             A.x * B.data[3][0] + A.y * B.data[3][1] + A.z * B.data[3][2] + A.w * B.data[3][3]);
-    return res;
+    return vec4(A.x * B[0][0] + A.y * B[0][1] + A.z * B[0][2] + A.w * B[0][3],
+                A.x * B[1][0] + A.y * B[1][1] + A.z * B[1][2] + A.w * B[1][3],
+                A.x * B[2][0] + A.y * B[2][1] + A.z * B[2][2] + A.w * B[2][3],
+                A.x * B[3][0] + A.y * B[3][1] + A.z * B[3][2] + A.w * B[3][3]);
 }
 // Vertical/Column vector
-inline vec4  operator* (const mat4& A, vec4 B) {
-    vec4 res(A.data[0][0] * B.x + A.data[1][0] * B.y + A.data[2][0] * B.z + A.data[3][0] * B.w,
-             A.data[0][1] * B.x + A.data[1][1] * B.y + A.data[2][1] * B.z + A.data[3][1] * B.w,
-             A.data[0][2] * B.x + A.data[1][2] * B.y + A.data[2][2] * B.z + A.data[3][2] * B.w,
-             A.data[0][3] * B.x + A.data[1][3] * B.y + A.data[2][3] * B.z + A.data[3][3] * B.w);
-    return res;
-}
+inline vec4  operator* (const mat4& A, vec4 B) {return A[0] * B.x + A[1] * B.y + A[2] * B.z + A[3] * B.w;}
 
 // Scalar
-inline mat4& operator*=(mat4& A, const float B) {for (int i = 0; i < 16; ++i) A[i] *= B; return A;}
+inline mat4& operator*=(mat4& A, const float B) {A[0] *= B; A[1] *= B; A[2] *= B; A[3] *= B; return A;}
 inline mat4  operator* (mat4  A, const float B) {A *= B; return A;}
 inline mat4  operator* (const float B, mat4  A) {A *= B; return A;}
-inline mat4& operator/=(mat4& A, const float B) {for (int i = 0; i < 16; ++i) A[i] /= B; return A;}
+inline mat4& operator/=(mat4& A, const float B) {A[0] /= B; A[1] /= B; A[2] /= B; A[3] /= B; return A;}
 inline mat4  operator/ (mat4  A, const float B) {A /= B; return A;}
 
 
