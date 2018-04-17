@@ -7,16 +7,20 @@
 // TODO(Derek): allow init using N vecNs
 
 struct mat2 {
-    float data[2][2];
+    vec2 data[2];
 
     mat2();
     explicit mat2(float diag);
     explicit mat2(float amat[4]);
+    mat2(vec2 x, vec2 y);
     mat2(float x0, float y0,
          float x1, float y1);
 
-    float operator[](int i) const;
-    float& operator[](int i);
+    vec2 operator[](int i) const;
+    vec2& operator[](int i);
+
+    float access(int i) const;
+    float& access(int i);
 };
 
 std::ostream& operator<<(std::ostream& os, const mat2& mat);
@@ -64,17 +68,21 @@ inline mat2  operator/ (mat2  A, const float B) {A /= B; return A;}
 
 
 struct mat3 {
-    float data[3][3];
+    vec3 data[3];
 
     mat3();
     explicit mat3(float diag);
     explicit mat3(float amat[9]);
+    mat3(vec3 x, vec3 y, vec3 z);
     mat3(float x0, float y0, float z0,
          float x1, float y1, float z1,
          float x2, float y2, float z2);
 
-    float operator[](int i) const;
-    float& operator[](int i);
+    vec3 operator[](int i) const;
+    vec3& operator[](int i);
+
+    float access(int i) const;
+    float& access(int i);
 };
 
 std::ostream& operator<<(std::ostream& os, const mat3& mat);
@@ -129,18 +137,22 @@ inline mat3  operator/ (mat3  A, const float B) {A /= B; return A;}
 
 
 struct mat4 {
-    float data[4][4];
+    vec4 data[4];
 
     mat4();
     explicit mat4(float diag);
     explicit mat4(float amat[16]);
+    mat4(vec4 x, vec4 y, vec4 z, vec4 w);
     mat4(float x0, float y0, float z0, float w0,
          float x1, float y1, float z1, float w1,
          float x2, float y2, float z2, float w2,
          float x3, float y3, float z3, float w3);
 
-    float operator[](int i) const;
-    float& operator[](int i);
+    vec4 operator[](int i) const;
+    vec4& operator[](int i);
+
+    float access(int i) const;
+    float& access(int i);
 };
 
 std::ostream& operator<<(std::ostream& os, const mat4& mat);

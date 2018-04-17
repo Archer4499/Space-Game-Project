@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <algorithm>
+#include <cmath>
 
 #include "matrix.h"
 
@@ -20,25 +21,40 @@ mat2::mat2(float diag) {
     data[0][1] = 0.0f; data[1][1] = diag;
 }
 mat2::mat2(float amat[4]) {
+    // NOTE: probably not guaranteed to actually work because of padding and things (but does for me)
     std::copy(amat, amat + 4, &data[0][0]);
+    // data[0] = vec2(amat);
+    // data[1] = vec2(amat+2);
+}
+mat2::mat2(vec2 x, vec2 y) {
+    data[0] = x;
+    data[1] = y;
 }
 mat2::mat2(float x0, float y0,
            float x1, float y1) {
     data[0][0] = x0; data[1][0] = y0;
     data[0][1] = x1; data[1][1] = y1;
 }
-float mat2::operator[](int i) const {
-    assert(i >= 0 && i < 4);
-    return data[0][i];
+vec2 mat2::operator[](int i) const {
+    assert(i >= 0 && i < 2);
+    return data[i];
 }
-float& mat2::operator[](int i) {
+vec2& mat2::operator[](int i) {
+    assert(i >= 0 && i < 2);
+    return data[i];
+}
+float mat2::access(int i) const {
     assert(i >= 0 && i < 4);
-    return data[0][i];
+    return data[i/2][i%2];
+}
+float& mat2::access(int i) {
+    assert(i >= 0 && i < 4);
+    return data[i/2][i%2];
 }
 
 std::ostream& operator<< (std::ostream& os, const mat2& mat) {
-    os << "\n [" << mat[0] << ", " << mat[2] << "],\n ["
-                 << mat[1] << ", " << mat[3] << "]";
+    os << "\n [" << mat.access(0) << ", " << mat.access(2) << "]\n ["
+                 << mat.access(1) << ", " << mat.access(3) << "]\n";
     return os;
 }
 
@@ -52,6 +68,11 @@ mat3::mat3(float diag) {
 mat3::mat3(float amat[9]) {
     std::copy(amat, amat + 9, &data[0][0]);
 }
+mat3::mat3(vec3 x, vec3 y, vec3 z) {
+    data[0] = x;
+    data[1] = y;
+    data[2] = z;
+}
 mat3::mat3(float x0, float y0, float z0,
            float x1, float y1, float z1,
            float x2, float y2, float z2) {
@@ -59,19 +80,27 @@ mat3::mat3(float x0, float y0, float z0,
     data[0][1] = x1; data[1][1] = y1; data[2][1] = z1;
     data[0][2] = x2; data[1][2] = y2; data[2][2] = z2;
 }
-float mat3::operator[](int i) const {
-    assert(i >= 0 && i < 9);
-    return data[0][i];
+vec3 mat3::operator[](int i) const {
+    assert(i >= 0 && i < 3);
+    return data[i];
 }
-float& mat3::operator[](int i) {
+vec3& mat3::operator[](int i) {
+    assert(i >= 0 && i < 3);
+    return data[i];
+}
+float mat3::access(int i) const {
     assert(i >= 0 && i < 9);
-    return data[0][i];
+    return data[i/3][i%3];
+}
+float& mat3::access(int i) {
+    assert(i >= 0 && i < 9);
+    return data[i/3][i%3];
 }
 
 std::ostream& operator<< (std::ostream& os, const mat3& mat) {
-    os << "\n [" << mat[0] << ", " << mat[3] << ", " << mat[6] << "],\n ["
-                 << mat[1] << ", " << mat[4] << ", " << mat[7] << "],\n ["
-                 << mat[2] << ", " << mat[5] << ", " << mat[8] << "]";
+    os << "\n [" << mat.access(0) << ", " << mat.access(3) << ", " << mat.access(6) << "]\n ["
+                 << mat.access(1) << ", " << mat.access(4) << ", " << mat.access(7) << "]\n ["
+                 << mat.access(2) << ", " << mat.access(5) << ", " << mat.access(8) << "]\n";
     return os;
 }
 
@@ -86,6 +115,12 @@ mat4::mat4(float diag) {
 mat4::mat4(float amat[16]) {
     std::copy(amat, amat + 16, &data[0][0]);
 }
+mat4::mat4(vec4 x, vec4 y, vec4 z, vec4 w) {
+    data[0] = x;
+    data[1] = y;
+    data[2] = z;
+    data[3] = w;
+}
 mat4::mat4(float x0, float y0, float z0, float w0,
            float x1, float y1, float z1, float w1,
            float x2, float y2, float z2, float w2,
@@ -95,20 +130,28 @@ mat4::mat4(float x0, float y0, float z0, float w0,
     data[0][2] = x2; data[1][2] = y2; data[2][2] = z2; data[3][2] = w2;
     data[0][3] = x3; data[1][3] = y3; data[2][3] = z3; data[3][3] = w3;
 }
-float mat4::operator[](int i) const {
-    assert(i >= 0 && i < 16);
-    return data[0][i];
+vec4 mat4::operator[](int i) const {
+    assert(i >= 0 && i < 4);
+    return data[i];
 }
-float& mat4::operator[](int i) {
+vec4& mat4::operator[](int i) {
+    assert(i >= 0 && i < 4);
+    return data[i];
+}
+float mat4::access(int i) const {
     assert(i >= 0 && i < 16);
-    return data[0][i];
+    return data[i/4][i%4];
+}
+float& mat4::access(int i) {
+    assert(i >= 0 && i < 16);
+    return data[i/4][i%4];
 }
 
 std::ostream& operator<< (std::ostream& os, const mat4& mat) {
-    os << "\n [" << mat[0] << ", " << mat[4] << ", " << mat[8]  << ", " << mat[12] << "],\n ["
-                 << mat[1] << ", " << mat[5] << ", " << mat[9]  << ", " << mat[13] << "],\n ["
-                 << mat[2] << ", " << mat[6] << ", " << mat[10] << ", " << mat[14] << "],\n ["
-                 << mat[3] << ", " << mat[7] << ", " << mat[11] << ", " << mat[15] << "]";
+    os << "\n [" << mat.access(0) << ", " << mat.access(4) << ", " << mat.access(8)  << ", " << mat.access(12) << "]\n ["
+                 << mat.access(1) << ", " << mat.access(5) << ", " << mat.access(9)  << ", " << mat.access(13) << "]\n ["
+                 << mat.access(2) << ", " << mat.access(6) << ", " << mat.access(10) << ", " << mat.access(14) << "]\n ["
+                 << mat.access(3) << ", " << mat.access(7) << ", " << mat.access(11) << ", " << mat.access(15) << "]\n";
     return os;
 }
 
