@@ -156,12 +156,68 @@ std::ostream& operator<< (std::ostream& os, const mat4& mat) {
 }
 
 
+mat4 transpose(const mat4& in) {
+    mat4 out;
+    out[0][0] = in[0][0];
+    out[0][1] = in[1][0];
+    out[0][2] = in[2][0];
+    out[0][3] = in[3][0];
 
-mat4 translate(mat4 trans, vec3 in) {
-    mat4 out = mat4(trans);
-    out[12] += in.x;
-    out[13] += in.y;
-    out[14] += in.z;
+    out[1][0] = in[0][1];
+    out[1][1] = in[1][1];
+    out[1][2] = in[2][1];
+    out[1][3] = in[3][1];
 
+    out[2][0] = in[0][2];
+    out[2][1] = in[1][2];
+    out[2][2] = in[2][2];
+    out[2][3] = in[3][2];
+
+    out[3][0] = in[0][3];
+    out[3][1] = in[1][3];
+    out[3][2] = in[2][3];
+    out[3][3] = in[3][3];
+    return out;
+}
+
+mat4 scale(const mat4& in, const vec3& s) {
+    mat4 out(in);
+    out[0] *= s.x;
+    out[1] *= s.y;
+    out[2] *= s.z;
+    return out;
+}
+
+mat4 translate(const mat4& in, const vec3& trans) {
+    mat4 out(in);
+    out[3] += in[0] * trans.x + in[1] * trans.y + in[2] * trans.z;
+    return out;
+}
+
+mat4 rotate(const mat4& in, float angle, const vec3& axis) {
+    float c = cos(angle);
+    float s = sin(angle);
+
+    vec3 nAxis(normalize(axis));
+    vec3 temp((1.0f - c) * nAxis);
+
+    mat3 Rotate;
+    Rotate[0][0] = c + temp[0] * nAxis[0];
+    Rotate[0][1] = temp[0] * nAxis[1] + s * nAxis[2];
+    Rotate[0][2] = temp[0] * nAxis[2] - s * nAxis[1];
+
+    Rotate[1][0] = temp[1] * nAxis[0] - s * nAxis[2];
+    Rotate[1][1] = c + temp[1] * nAxis[1];
+    Rotate[1][2] = temp[1] * nAxis[2] + s * nAxis[0];
+
+    Rotate[2][0] = temp[2] * nAxis[0] + s * nAxis[1];
+    Rotate[2][1] = temp[2] * nAxis[1] - s * nAxis[0];
+    Rotate[2][2] = c + temp[2] * nAxis[2];
+
+    mat4 out;
+    out[0] = in[0] * Rotate[0][0] + in[1] * Rotate[0][1] + in[2] * Rotate[0][2];
+    out[1] = in[0] * Rotate[1][0] + in[1] * Rotate[1][1] + in[2] * Rotate[1][2];
+    out[2] = in[0] * Rotate[2][0] + in[1] * Rotate[2][1] + in[2] * Rotate[2][2];
+    out[3] = in[3];
     return out;
 }

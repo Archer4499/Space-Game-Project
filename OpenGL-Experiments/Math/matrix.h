@@ -217,4 +217,12 @@ inline mat4  operator/ (mat4  A, const float B) {A /= B; return A;}
 
 
 
-mat4 translate(mat4 trans, vec3 in);
+mat4 transpose(const mat4& in);
+mat4 scale(const mat4& in, const vec3& s);
+mat4 translate(const mat4& in, const vec3& trans);
+mat4 rotate(const mat4& in, float angle, const vec3& axis);
+
+/*
+    det
+    inverse
+*/
