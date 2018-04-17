@@ -180,9 +180,8 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
 
             float tc[2];
             if (attrib.texcoords.size() > 0) {
-                // Flip Y coord.
                 tc[0] = attrib.texcoords[2 * idx.texcoord_index];
-                tc[1] = 1.0f - attrib.texcoords[2 * idx.texcoord_index + 1];
+                tc[1] = attrib.texcoords[2 * idx.texcoord_index + 1];
             } else {
                 tc[0] = 0.0f;
                 tc[1] = 0.0f;
@@ -216,6 +215,9 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
         glEnableVertexAttribArray(1);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+    } else {
+        LOG_F(ERR, "No valid object info in file: {}", modelPath);
+        return 1;
     }
 
 
