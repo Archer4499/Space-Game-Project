@@ -27,10 +27,10 @@
 #define VERTEX_FILE "Resources/Shaders/shader.vert"
 #define FRAGMENT_FILE "Resources/Shaders/shader.frag"
 // #define TEXTURE_FILE "Resources/Textures/awesomeface.png"
-#define TEXTURE_FILE "Resources/Textures/container.jpg"
-#define MODEL_FILE "Resources/Models/container.obj"
-// #define TEXTURE_FILE "Resources/Textures/chalet.jpg"
-// #define MODEL_FILE "Resources/Models/chalet.obj"
+// #define TEXTURE_FILE "Resources/Textures/container.jpg"
+// #define MODEL_FILE "Resources/Models/container.obj"
+#define TEXTURE_FILE "Resources/Textures/chalet.jpg"
+#define MODEL_FILE "Resources/Models/chalet.obj"
 // #define TEXTURE_FILE "Resources/Textures/item_box.png"
 // #define MODEL_FILE "Resources/Models/item_box.obj"
 
@@ -55,7 +55,7 @@ void processInput(GLFWwindow *window) {
 
 void render() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void cleanup() {
@@ -85,8 +85,8 @@ int main(int argc, char const *argv[]) {
         }
     }
 
-    int width = std::stoi(conf.data["width"]);
-    int height = std::stoi(conf.data["height"]);
+    int screenWidth = std::stoi(conf.data["width"]);
+    int screenHeight = std::stoi(conf.data["height"]);
     LOG_F(INFO, "Config loaded: {}", CONFIG_FILE);
     // END Load config
 
@@ -104,7 +104,7 @@ int main(int argc, char const *argv[]) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWwindow* window = glfwCreateWindow(width, height, "OpenGL Experiments", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL Experiments", NULL, NULL);
     if (window == NULL) {
         LOG_F(FATAL, "Failed to create GLFW window");
         cleanup();
@@ -122,32 +122,34 @@ int main(int argc, char const *argv[]) {
         return -1;
     }
 
+    glEnable(GL_DEPTH_TEST);
+
     LOG_F(INFO, "Loading Shaders");
     int shaderProgram = loadShader(VERTEX_FILE, FRAGMENT_FILE);
 
 
     LOG_F(INFO, "Loading textures");
-    // unsigned int texture1 = loadTexture(TEXTURE1_FILE);
-    // unsigned int texture2 = loadTexture(TEXTURE2_FILE);
     unsigned int atexture = loadTexture(TEXTURE_FILE);
 
 
     LOG_F(INFO, "Loading models");
-    // unsigned int VBO, VAO, EBO;
     unsigned int VAO, VBO, numVertices;
-    // if (loadModelOld(&VBO, &VAO, &EBO)) {
     if (loadModel(MODEL_FILE, &VAO, &VBO, &numVertices)) {
         cleanup();
         return -1;
     }
 
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
     glUseProgram(shaderProgram);
 
     glUniform1i(glGetUniformLocation(shaderProgram, "atexture"), 0);
     // glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
     // glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
+
+    // Set projection transform
+    mat4 projection(1.0f);
+    projection = perspective(radians(45.0f), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+    // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
 
 
     LOG_F(INFO, "Main loop");
@@ -156,7 +158,7 @@ int main(int argc, char const *argv[]) {
 
         render();
 
-        // TODO(Derek): move into render function
+        // TODO(Derek): move into render function somehow
         // bind textures on corresponding texture units
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, atexture);
@@ -164,24 +166,23 @@ int main(int argc, char const *argv[]) {
         // glActiveTexture(GL_TEXTURE1);
         // glBindTexture(GL_TEXTURE_2D, texture2);
 
-        // render container
         glUseProgram(shaderProgram);
 
+        // Transformations
+        mat4 model(1.0f), view(1.0f);
+        model = rotate(model, static_cast<float>(glfwGetTime()), vec3(0.5f, 1.0f, 0.0f));
+        view  = translate(view, vec3(0.0f, 0.0f, -3.0f));
 
-        mat4 transform(1.0f);
-        transform = translate(transform, vec3(0.5f, -0.5f, 0.0f));
-        transform = rotate(transform, glfwGetTime(), vec3(0.0f, 0.0f, 1.0f));
+        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+        unsigned int viewLoc  = glGetUniformLocation(shaderProgram, "view");
 
-        // get matrix's uniform location and set matrix
-        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, &(transform[0].x));
-
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+        ////
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, numVertices);
-        // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        // END Section //
 
 
         glfwSwapBuffers(window);
