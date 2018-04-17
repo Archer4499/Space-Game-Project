@@ -221,3 +221,37 @@ mat4 rotate(const mat4& in, float angle, const vec3& axis) {
     out[3] = in[3];
     return out;
 }
+
+// Right-handed, depth: negative one to one
+mat4 perspective(float fovy, float aspect, float zNear, float zFar) {
+    float const tanHalfFovy = tan(fovy / 2.0f);
+
+    mat4 out(0.0f);
+    out[0][0] = 1.0f / (aspect * tanHalfFovy);
+    out[1][1] = 1.0f / (tanHalfFovy);
+    out[2][2] = - (zFar + zNear) / (zFar - zNear);
+    out[2][3] = -1.0f;
+    out[3][2] = - (2.0f * zFar * zNear) / (zFar - zNear);
+    return out;
+}
+
+mat4 ortho(float left, float right, float bottom, float top) {
+    mat4 out(1.0f);
+    out[0][0] = 2.0f / (right - left);
+    out[1][1] = 2.0f / (top - bottom);
+    out[3][0] = - (right + left) / (right - left);
+    out[3][1] = - (top + bottom) / (top - bottom);
+    return out;
+}
+
+// Right-handed, depth: negative one to one
+mat4 ortho(float left, float right, float bottom, float top, float zNear, float zFar) {
+    mat4 out(1.0f);
+    out[0][0] =  2.0f / (right - left);
+    out[1][1] =  2.0f / (top - bottom);
+    out[2][2] = -2.0f / (zFar - zNear);
+    out[3][0] = - (right + left) / (right - left);
+    out[3][1] = - (top + bottom) / (top - bottom);
+    out[3][2] = - (zFar + zNear) / (zFar - zNear);
+    return out;
+}

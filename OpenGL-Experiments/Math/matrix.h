@@ -201,8 +201,13 @@ mat4 transpose(const mat4& in);
 mat4 scale(const mat4& in, const vec3& s);
 mat4 translate(const mat4& in, const vec3& trans);
 mat4 rotate(const mat4& in, float angle, const vec3& axis);
+mat4 perspective(float fovy, float aspect, float zNear, float zFar);
+mat4 ortho(float left, float right, float bottom, float top, float zNear, float zFar);
+mat4 ortho(float left, float right, float bottom, float top);
+
 
 /*
+    lookAt
     det
     inverse
 */
