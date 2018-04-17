@@ -5,6 +5,7 @@
 
 // NOTE: Possibly have raw and pretty print
 // NOTE: Printing floats is tricky...
+// NOTE: https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
 // TODO(Derek): implement utility functions
 // mag
 // magSquared
@@ -35,7 +36,7 @@ inline bool  operator!=(const vec2& A, const vec2& B) {return !operator==(A,B);}
 // inline bool  operator<=(const vec2& A, const vec2& B) {return !operator> (A,B);}
 // inline bool  operator>=(const vec2& A, const vec2& B) {return !operator< (A,B);}
 
-inline vec2& operator- (vec2& A) {A.x = -A.x; A.y = -A.y; return A;}
+inline vec2  operator- (const vec2& A) {return vec2(-A.x, -A.y);}
 
 // Component-wise operations
 inline vec2& operator+=(vec2& A, const vec2& B) {A.x += B.x; A.y += B.y; return A;}
@@ -72,7 +73,7 @@ std::ostream& operator<<(std::ostream& os, const vec3& vec);
 inline bool  operator==(const vec3& A, const vec3& B) {return (A.x == B.x) && (A.y == B.y) && (A.z == B.z);}
 inline bool  operator!=(const vec3& A, const vec3& B) {return !operator==(A,B);}
 
-inline vec3& operator- (vec3& A) {A.x = -A.x; A.y = -A.y; A.z = -A.z; return A;}
+inline vec3  operator- (const vec3& A) {return vec3(-A.x, -A.y, -A.z);}
 
 // Component-wise operations
 inline vec3& operator+=(vec3& A, const vec3& B) {A.x += B.x; A.y += B.y; A.z += B.z; return A;}
@@ -108,7 +109,7 @@ std::ostream& operator<<(std::ostream&, const vec4&);
 inline bool  operator==(const vec4& A, const vec4& B) {return (A.x == B.x) && (A.y == B.y) && (A.z == B.z) && (A.w == B.w);}
 inline bool  operator!=(const vec4& A, const vec4& B) {return !operator==(A,B);}
 
-inline vec4& operator- (vec4& A) {A.x = -A.x; A.y = -A.y; A.z = -A.z; A.w = -A.w; return A;}
+inline vec4  operator- (const vec4& A) {return vec4(-A.x, -A.y, -A.z, -A.w);}
 
 // Component-wise operations
 inline vec4& operator+=(vec4& A, const vec4& B) {A.x += B.x; A.y += B.y; A.z += B.z; A.w += B.w; return A;}
