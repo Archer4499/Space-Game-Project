@@ -14,7 +14,6 @@
 // #define LOG_STREAM_OVERLOAD
 // #define LOG_STREAM
 
-// TODO(Derek): Possibly add FATAL
 enum LogLevel {
     NO_LOG,
     FATAL,
@@ -56,33 +55,24 @@ void log(LogLevel errLevel, const char *file, unsigned int line, const char* for
     logb(errLevel, file, line, message);
 }
 
-#ifdef LOG_STREAM_OVERLOAD
+#if defined LOG_STREAM_OVERLOAD || defined LOG_STREAM
 #include "fmt/ostream.h"
 #endif
 
 #ifdef LOG_STREAM
-#include <sstream>
 
 #define LOG_S(errLevel) StreamLogger(errLevel, __FILE__, __LINE__)
 
-// TODO(Derek): replace sstream with fmt
 class StreamLogger {
 public:
     StreamLogger(LogLevel errLevel, const char *file, unsigned line) : _errLevel(errLevel), _file(file), _line(line) {}
     StreamLogger::~StreamLogger() {
-        std::string message = _ss.str();
-        log(_errLevel, _file, _line, message.c_str());
+        logb(_errLevel, _file, _line, _message.str());
     }
 
     template<typename T>
     StreamLogger& operator<<(const T& t) {
-        _ss << t;
-        return *this;
-    }
-
-    // std::endl and other iomanip:s.
-    StreamLogger& operator<<(std::ostream&(*f)(std::ostream&)) {
-        f(_ss);
+        _message.write("{}", t);
         return *this;
     }
 
@@ -90,7 +80,7 @@ private:
     LogLevel    _errLevel;
     const char* _file;
     unsigned    _line;
-    std::ostringstream _ss;
+    fmt::MemoryWriter _message;
 };
 
 #endif // ifdef LOG_STREAM
