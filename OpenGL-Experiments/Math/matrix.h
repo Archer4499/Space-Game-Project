@@ -4,7 +4,6 @@
 
 // Data stored in column-major order
 // TODO(Derek): implement utility functions
-// TODO(Derek): allow init using N vecNs
 
 struct mat2 {
     vec2 data[2];
@@ -25,7 +24,6 @@ struct mat2 {
 
 std::ostream& operator<<(std::ostream& os, const mat2& mat);
 
-// TODO(Derek): can use 2 vec2 comparisons now
 inline bool  operator==(const mat2& A, const mat2& B) {return (A[0]==B[0] && A[1]==B[1]);}
 inline bool  operator!=(const mat2& A, const mat2& B) {return !operator==(A,B);}
 
@@ -202,8 +200,8 @@ mat4 scale(const mat4& in, const vec3& s);
 mat4 translate(const mat4& in, const vec3& trans);
 mat4 rotate(const mat4& in, float angle, const vec3& axis);
 mat4 perspective(float fovy, float aspect, float zNear, float zFar);
-mat4 ortho(float left, float right, float bottom, float top, float zNear, float zFar);
 mat4 ortho(float left, float right, float bottom, float top);
+mat4 ortho(float left, float right, float bottom, float top, float zNear, float zFar);
 
 
 /*

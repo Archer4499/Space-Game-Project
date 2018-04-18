@@ -2,11 +2,9 @@
 
 #include <ostream>
 
-
-// NOTE: Possibly have raw and pretty print
-// NOTE: Printing floats is tricky...
-// NOTE: https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
+// TODO(Derek): implement format_arg with floating point precision and raw/pretty print as input
 // TODO(Derek): implement utility functions
+// NOTE: https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
 // mag
 // magSquared
 // cross
@@ -30,7 +28,7 @@ std::ostream& operator<<(std::ostream& os, const vec2& vec);
 // Exact float comparison
 inline bool  operator==(const vec2& A, const vec2& B) {return (A.x == B.x) && (A.y == B.y);}
 inline bool  operator!=(const vec2& A, const vec2& B) {return !operator==(A,B);}
-// TODO(Derek): Not sure what (if anything) these would mean:
+// TODO(Derek): Not sure what (if anything) these would mean
 // inline bool  operator< (const vec2& A, const vec2& B) {return ;}
 // inline bool  operator> (const vec2& A, const vec2& B) {return  operator< (B,A);}
 // inline bool  operator<=(const vec2& A, const vec2& B) {return !operator> (A,B);}
