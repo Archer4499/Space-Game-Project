@@ -7,6 +7,7 @@
 
 #include "loadResources.h"
 #include "logging.h"
+#include "Math\math.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -150,12 +151,17 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
     // NOTE(optimisation): use map or set for a unique collection of vertices(with texCoords/normals) and re-index that
     // NOTE: possibly use different VBOs for different shapes
 
+    struct Vertex {
+        vec3 pos;
+        vec2 texCoord;
+    };
+
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
     std::string err;
 
-    std::vector<float> buffer;  // pos(3 float), texCoord(2 float)
+    std::vector<Vertex> buffer;
 
     *VBO = 0;
     *numVertices = 0;
@@ -172,27 +178,22 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
         return 1;
     }
 
-    buffer.reserve(5*shapes[0].mesh.indices.size()*shapes.size());
+    buffer.reserve(shapes.size() * shapes[0].mesh.indices.size() * sizeof(Vertex));
 
     for (size_t i = 0; i < shapes.size(); ++i) {
         for (size_t k = 0; k < shapes[i].mesh.indices.size(); ++k) {
             tinyobj::index_t idx = shapes[i].mesh.indices[k];
+            Vertex vert;
 
-            float tc[2];
+            vert.pos = vec3(&attrib.vertices[3 * idx.vertex_index]);
+
             if (attrib.texcoords.size() > 0) {
-                tc[0] = attrib.texcoords[2 * idx.texcoord_index];
-                tc[1] = attrib.texcoords[2 * idx.texcoord_index + 1];
+                vert.texCoord = vec2(&attrib.texcoords[2 * idx.texcoord_index]);
             } else {
-                tc[0] = 0.0f;
-                tc[1] = 0.0f;
+                vert.texCoord = vec2(0.0f);
             }
 
-            buffer.push_back(attrib.vertices[3 * idx.vertex_index + 0]);
-            buffer.push_back(attrib.vertices[3 * idx.vertex_index + 1]);
-            buffer.push_back(attrib.vertices[3 * idx.vertex_index + 2]);
-
-            buffer.push_back(tc[0]);
-            buffer.push_back(tc[1]);
+            buffer.push_back(vert);
 
             ++*numVertices;
         }
@@ -205,13 +206,13 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
         glBindVertexArray(*VAO);
 
         glBindBuffer(GL_ARRAY_BUFFER, *VBO);
-        glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), &buffer[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(Vertex), &buffer[0].pos[0], GL_STATIC_DRAW);
 
         // position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0));
         glEnableVertexAttribArray(0);
         // texture coord attribute
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(sizeof(Vertex().pos)));
         glEnableVertexAttribArray(1);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
