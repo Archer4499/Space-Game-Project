@@ -2,8 +2,9 @@
 
 #if LOG_TYPE != LOG_TYPE_NO
 
-#include <cstdio>
 #include <chrono>
+
+#include "fmt/time.h"
 
 
 LogLevel setLogLevel = NO_LOG;
@@ -14,15 +15,10 @@ std::string curDateTime() {
     auto now = std::chrono::system_clock::now();
 
     time_t now_t = std::chrono::system_clock::to_time_t(now);
-    std::tm now_tm;
-    localtime_s(&now_tm, &now_t);
 
     auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() % 1000;
 
-    char dateTime[30];
-    strftime(dateTime, sizeof(dateTime), "%Y-%m-%d %H:%M:%S.", &now_tm);
-
-    std::string fullDateTime = fmt::format("{}.{:03}", dateTime, milli);
+    std::string fullDateTime = fmt::format("{:%Y-%m-%d %H:%M:%S}.{:03}", fmt::localtime(now_t), milli);
 
     return fullDateTime;
 }
