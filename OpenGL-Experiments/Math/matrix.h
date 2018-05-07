@@ -3,6 +3,7 @@
 #include "vector.h"
 
 // Data stored in column-major order
+// Right-handed operations
 // TODO(Derek): implement utility functions
 
 struct mat2 {
@@ -202,10 +203,10 @@ mat4 rotate(const mat4& in, float angle, const vec3& axis);
 mat4 perspective(float fovy, float aspect, float zNear, float zFar);
 mat4 ortho(float left, float right, float bottom, float top);
 mat4 ortho(float left, float right, float bottom, float top, float zNear, float zFar);
+mat4 lookAt(const vec3& eye, const vec3& center, const vec3& up);
 
 
 /*
-    lookAt
     det
     inverse
 */

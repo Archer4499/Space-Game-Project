@@ -255,3 +255,26 @@ mat4 ortho(float left, float right, float bottom, float top, float zNear, float 
     out[3][2] = - (zFar + zNear) / (zFar - zNear);
     return out;
 }
+
+// Right-handed
+mat4 lookAt(const vec3& eye, const vec3& center, const vec3& up) {
+    vec3 const f(normalize(center - eye));
+    vec3 const s(normalize(cross(f, up)));
+    vec3 const u(cross(s, f));
+
+    mat4 out(1.0f);
+    out[0][0] =  s.x;
+    out[1][0] =  s.y;
+    out[2][0] =  s.z;
+    out[0][1] =  u.x;
+    out[1][1] =  u.y;
+    out[2][1] =  u.z;
+    out[0][2] = -f.x;
+    out[1][2] = -f.y;
+    out[2][2] = -f.z;
+    out[3][0] = -dot(s, eye);
+    out[3][1] = -dot(u, eye);
+    out[3][2] =  dot(f, eye);
+
+    return out;
+}
