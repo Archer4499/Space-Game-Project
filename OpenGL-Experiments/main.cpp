@@ -27,10 +27,10 @@
 #define VERTEX_FILE "Resources/Shaders/shader.vert"
 #define FRAGMENT_FILE "Resources/Shaders/shader.frag"
 // #define TEXTURE_FILE "Resources/Textures/awesomeface.png"
-// #define TEXTURE_FILE "Resources/Textures/container.jpg"
-// #define MODEL_FILE "Resources/Models/container.obj"
-#define TEXTURE_FILE "Resources/Textures/chalet.jpg"
-#define MODEL_FILE "Resources/Models/chalet.obj"
+#define TEXTURE_FILE "Resources/Textures/container.jpg"
+#define MODEL_FILE "Resources/Models/container.obj"
+// #define TEXTURE_FILE "Resources/Textures/chalet.jpg"
+// #define MODEL_FILE "Resources/Models/chalet.obj"
 // #define TEXTURE_FILE "Resources/Textures/item_box.png"
 // #define MODEL_FILE "Resources/Models/item_box.obj"
 
@@ -40,6 +40,7 @@
 // TODO(Derek): hot loading of resource files
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
 // TODO(Derek): Give math and logging their own repositories
+// TODO(Derek): use relative paths for Additional Include Directories
 // NOTE: __declspec(deprecated) for deprecating functions
 ////////////////////
 
@@ -112,7 +113,7 @@ int main(int argc, char const *argv[]) {
     }
 
     glfwMakeContextCurrent(window);
-    // glfwSwapInterval(1); // Vsync
+    glfwSwapInterval(1); // Vsync
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
@@ -171,7 +172,10 @@ int main(int argc, char const *argv[]) {
         // Transformations
         mat4 model(1.0f), view(1.0f);
         model = rotate(model, static_cast<float>(glfwGetTime()), vec3(0.5f, 1.0f, 0.0f));
-        view  = translate(view, vec3(0.0f, 0.0f, -3.0f));
+        // view  = translate(view, vec3(0.0f, 0.0f, -3.0f));
+        view  = lookAt(vec3(0.0f, 0.0f, 3.0f),
+                       vec3(0.0f, 0.0f, 0.0f),
+                       vec3(0.0f, 1.0f, 0.0f));
 
         unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
         unsigned int viewLoc  = glGetUniformLocation(shaderProgram, "view");
