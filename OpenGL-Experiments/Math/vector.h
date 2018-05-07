@@ -7,8 +7,6 @@
 // NOTE: https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
 // mag
 // magSquared
-// cross
-// dot
 
 
 struct vec2 {
@@ -126,4 +124,8 @@ inline vec4& operator/=(vec4& A, const float B) {A.x /= B; A.y /= B; A.z /= B; A
 inline vec4  operator/ (vec4  A, const float B) {A /= B; return A;}
 
 
-vec3 normalize(const vec3& in);
+vec3 normalize(vec3 v);
+float dot(const vec2& a, const vec2& b);
+float dot(const vec3& a, const vec3& b);
+float dot(const vec4& a, const vec4& b);
+vec3 cross(const vec3& a, const vec3& b);

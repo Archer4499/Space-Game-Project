@@ -160,17 +160,36 @@ std::ostream& operator<< (std::ostream& os, const vec4& vec) {
 }
 
 
-vec3 normalize(const vec3& in) {
-    vec3 out(in);
-    float len2 = in.x * in.x + in.y * in.y + in.z * in.z;
+vec3 normalize(vec3 v) {
+    float len2 = v.x * v.x + v.y * v.y + v.z * v.z;
 
     if (len2 > 0.0f) {
         float len = sqrtf(len2);
 
-        out.x /= len;
-        out.y /= len;
-        out.z /= len;
+        v.x /= len;
+        v.y /= len;
+        v.z /= len;
     }
 
-    return out;
+    return v;
+}
+
+float dot(const vec2& a, const vec2& b) {
+    vec2 tmp(a * b);
+    return tmp.x + tmp.y;
+}
+float dot(const vec3& a, const vec3& b) {
+    vec3 tmp(a * b);
+    return tmp.x + tmp.y + tmp.z;
+}
+float dot(const vec4& a, const vec4& b) {
+    vec4 tmp(a * b);
+    return tmp.x + tmp.y + tmp.z + tmp.w;
+}
+
+vec3 cross(const vec3& a, const vec3& b) {
+    return vec3(
+        a.y * b.z - b.y * a.z,
+        a.z * b.x - b.z * a.x,
+        a.x * b.y - b.x * a.y);
 }
