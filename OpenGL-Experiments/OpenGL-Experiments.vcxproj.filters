@@ -101,6 +101,9 @@
     <ClInclude Include="fmt\ostream.h">
       <Filter>Header Files\fmt</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\shader.vert">

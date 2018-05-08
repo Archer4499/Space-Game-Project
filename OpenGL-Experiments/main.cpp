@@ -27,6 +27,7 @@
 
 #include "config.h"
 #include "loadResources.h"
+#include "camera.h"
 #include "math/math.h"
 
 #define LOG_LEVEL INFO
@@ -45,10 +46,22 @@
 // #define MODEL_FILE "Resources/Models/item_box.obj"
 
 
+// Globals //
+// camera
+Camera camera(vec3(0.0f, 0.0f, 3.0f));
+float lastX = 0.0f;
+float lastY = 0.0f;
+bool firstMouse = true;
+
+// timing
+float deltaTime = 0.0f; // Time between current frame and last frame
+float lastFrameTime = 0.0f;
+/////////////
 
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+    // TODO(Derek): move camera to new centre?
 }
 
 void processInput(GLFWwindow *window) {
@@ -177,51 +190,48 @@ int main(int argc, char const *argv[]) {
     // glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
     // glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 
-    // Set projection transform
-    mat4 projection(1.0f);
-    projection = perspective(radians(45.0f), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
-    // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
 
 
     LOG_F(INFO, "Main loop");
     while (!glfwWindowShouldClose(window)) {
-        processInput(window);
+            // update deltaTime
+            float currentFrameTime = static_cast<float>(glfwGetTime());
+            deltaTime = abs(currentFrameTime - lastFrameTime); // Ensure time doesn't go backwards due to precision
+            lastFrameTime = currentFrameTime;
+            //
 
-        render();
+            processInput(window);
 
-        // TODO(Derek): move into render function somehow
-        // bind textures on corresponding texture units
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, atexture);
-        // glBindTexture(GL_TEXTURE_2D, texture1);
-        // glActiveTexture(GL_TEXTURE1);
-        // glBindTexture(GL_TEXTURE_2D, texture2);
+            render();
 
-        glUseProgram(shaderProgram);
+            // TODO(Derek): move into render function somehow
+            // bind textures on corresponding texture units
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, atexture);
+            // glBindTexture(GL_TEXTURE_2D, texture1);
+            // glActiveTexture(GL_TEXTURE1);
+            // glBindTexture(GL_TEXTURE_2D, texture2);
 
-        // Transformations
-        mat4 model(1.0f), view(1.0f);
-        model = rotate(model, static_cast<float>(glfwGetTime()), vec3(0.5f, 1.0f, 0.0f));
-        // view  = translate(view, vec3(0.0f, 0.0f, -3.0f));
-        view  = lookAt(vec3(0.0f, 0.0f, 3.0f),
-                       vec3(0.0f, 0.0f, 0.0f),
-                       vec3(0.0f, 1.0f, 0.0f));
+            glUseProgram(shaderProgram);
 
-        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-        unsigned int viewLoc  = glGetUniformLocation(shaderProgram, "view");
+            // Transformations
+            int width, height;
+            glfwGetFramebufferSize(window, &width, &height);
+            mat4 projection = perspective(radians(camera.Zoom), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
 
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model[0][0]);
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-        ////
+            mat4 model = rotate(mat4(1.0f), lastFrameTime, vec3(0.5f, 1.0f, 0.0f));
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, numVertices);
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            mat4 view  = camera.GetViewMatrix();
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+            ////
 
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+            glBindVertexArray(VAO);
+            glDrawArrays(GL_TRIANGLES, 0, numVertices);
+            // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glfwPollEvents();
+            glfwSwapBuffers(window);
     }
 
 

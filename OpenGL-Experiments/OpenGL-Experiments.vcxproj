@@ -85,6 +85,7 @@
     <ClCompile Include="Math\vector.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="fmt\format.h" />
     <ClInclude Include="fmt\ostream.h" />
