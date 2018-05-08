@@ -5,8 +5,6 @@
 // TODO(Derek): implement format_arg with floating point precision and raw/pretty print as input
 // TODO(Derek): implement utility functions
 // NOTE: https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
-// mag
-// magSquared
 
 
 struct vec2 {
@@ -124,7 +122,15 @@ inline vec4& operator/=(vec4& A, const float B) {A.x /= B; A.y /= B; A.z /= B; A
 inline vec4  operator/ (vec4  A, const float B) {A /= B; return A;}
 
 
+float lengthSq(vec2 v);
+float lengthSq(vec3 v);
+float lengthSq(vec4 v);
+float length(vec2 v);
+float length(vec3 v);
+float length(vec4 v);
+vec2 normalize(vec2 v);
 vec3 normalize(vec3 v);
+vec4 normalize(vec4 v);
 float dot(const vec2& a, const vec2& b);
 float dot(const vec3& a, const vec3& b);
 float dot(const vec4& a, const vec4& b);

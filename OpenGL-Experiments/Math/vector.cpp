@@ -159,19 +159,51 @@ std::ostream& operator<< (std::ostream& os, const vec4& vec) {
     return os;
 }
 
+float lengthSq(vec2 in) {
+    return pow(in.x, 2) + pow(in.y, 2);
+}
+float lengthSq(vec3 in) {
+    return pow(in.x, 2) + pow(in.y, 2) + pow(in.z, 2);
+}
+float lengthSq(vec4 in) {
+    return pow(in.x, 2) + pow(in.y, 2) + pow(in.z, 2) + pow(in.w, 2);
+}
+float length(vec2 in) {
+    return sqrtf(lengthSq(in));
+}
+float length(vec3 in) {
+    return sqrtf(lengthSq(in));
+}
+float length(vec4 in) {
+    return sqrtf(lengthSq(in));
+}
 
-vec3 normalize(vec3 v) {
-    float len2 = v.x * v.x + v.y * v.y + v.z * v.z;
+vec2 normalize(vec2 in) {
+    float len2 = lengthSq(in);
 
     if (len2 > 0.0f) {
-        float len = sqrtf(len2);
-
-        v.x /= len;
-        v.y /= len;
-        v.z /= len;
+        in /= sqrtf(len2);
     }
 
-    return v;
+    return in;
+}
+vec3 normalize(vec3 in) {
+    float len2 = lengthSq(in);
+
+    if (len2 > 0.0f) {
+        in /= sqrtf(len2);
+    }
+
+    return in;
+}
+vec4 normalize(vec4 in) {
+    float len2 = lengthSq(in);
+
+    if (len2 > 0.0f) {
+        in /= sqrtf(len2);
+    }
+
+    return in;
 }
 
 float dot(const vec2& a, const vec2& b) {
