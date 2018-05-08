@@ -63,6 +63,7 @@ void render() {
 
 void cleanup() {
     glfwTerminate();
+    LOG_F(INFO, "Clean-up");
     logClose();
 }
 
@@ -90,6 +91,7 @@ int main(int argc, char const *argv[]) {
 
     int confScreenWidth = conf.getInt("width");
     int confScreenHeight = conf.getInt("height");
+    bool confFullscreen = conf.getInt("fullscreen");
     LOG_F(INFO, "Config loaded: {}", CONFIG_FILE);
     // END Load config
 
@@ -108,7 +110,32 @@ int main(int argc, char const *argv[]) {
 #endif
 
     GLFWwindow* window = NULL;
+
+    // TODO(Derek): Set window icon
+    // TODO(Derek): Allow to be changed during runtime ( http://www.glfw.org/docs/latest/window_guide.html )
+    if (confFullscreen == 0) {
         window = glfwCreateWindow(confScreenWidth, confScreenHeight, "OpenGL Experiments", NULL, NULL);
+        LOG_F(INFO, "Windowed mode enabled");
+    } else if (confFullscreen == 1) {
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+        window = glfwCreateWindow(mode->width, mode->height, "OpenGL Experiments", monitor, NULL);
+        LOG_F(INFO, "Windowed fullscreen mode enabled");
+    } else if (confFullscreen == 2) {
+        LOG_F(FATAL, "Fullscreen mode not yet implemented");
+        cleanup();
+        return -1;
+    } else {
+        LOG_F(FATAL, "Fullscreen mode setting invalid");
+        cleanup();
+        return -1;
+    }
     if (window == NULL) {
         LOG_F(FATAL, "Failed to create GLFW window");
         cleanup();

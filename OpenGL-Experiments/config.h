@@ -18,6 +18,7 @@ struct Config {
     Config() {
         this->data["width"] =   "800";
         this->data["height"] =  "600";
+        this->data["fullscreen"] =  "false";
     }
 
     std::string getString(std::string label);
