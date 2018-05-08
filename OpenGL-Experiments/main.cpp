@@ -246,6 +246,8 @@ int main(int argc, char const *argv[]) {
 
     LOG_F(INFO, "Main loop");
     while (!glfwWindowShouldClose(window)) {
+        // Only do things if window is focused
+        if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
             // update deltaTime
             float currentFrameTime = static_cast<float>(glfwGetTime());
             deltaTime = abs(currentFrameTime - lastFrameTime); // Ensure time doesn't go backwards due to precision
@@ -284,6 +286,11 @@ int main(int argc, char const *argv[]) {
             // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             glfwPollEvents();
             glfwSwapBuffers(window);
+        } else {
+            // Time pauses while unfocused
+            glfwWaitEvents();
+            glfwSetTime(static_cast<double>(lastFrameTime));
+        }
     }
 
 
