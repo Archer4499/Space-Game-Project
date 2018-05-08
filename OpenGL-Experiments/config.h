@@ -19,6 +19,10 @@ struct Config {
         this->data["width"] =   "800";
         this->data["height"] =  "600";
     }
+
+    std::string getString(std::string label);
+    int         getInt(std::string label);
+    bool        getBool(std::string label);
 };
 
 

@@ -6,6 +6,16 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+// todo/note area //
+// TODO(Derek): Log more info and errs
+// TODO(Derek): hot loading of resource files
+// TODO(Derek): Replace operator>> overloads with format_arg then remove define
+// TODO(Derek): Give math and logging their own repositories
+// TODO(Derek): use relative paths for Additional Include Directories
+// NOTE: __declspec(deprecated) for deprecating functions
+////////////////////
+
+
 // TODO(Derek): Remove requirement for these defines
 #define LOG_TYPE_NO 0
 #define LOG_TYPE_COUT 1
@@ -35,14 +45,6 @@
 // #define MODEL_FILE "Resources/Models/item_box.obj"
 
 
-// todo/note area //
-// TODO(Derek): Log more info and errs
-// TODO(Derek): hot loading of resource files
-// TODO(Derek): Replace operator>> overloads with format_arg then remove define
-// TODO(Derek): Give math and logging their own repositories
-// TODO(Derek): use relative paths for Additional Include Directories
-// NOTE: __declspec(deprecated) for deprecating functions
-////////////////////
 
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -86,8 +88,8 @@ int main(int argc, char const *argv[]) {
         }
     }
 
-    int screenWidth = std::stoi(conf.data["width"]);
-    int screenHeight = std::stoi(conf.data["height"]);
+    int confScreenWidth = conf.getInt("width");
+    int confScreenHeight = conf.getInt("height");
     LOG_F(INFO, "Config loaded: {}", CONFIG_FILE);
     // END Load config
 
@@ -105,7 +107,8 @@ int main(int argc, char const *argv[]) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL Experiments", NULL, NULL);
+    GLFWwindow* window = NULL;
+        window = glfwCreateWindow(confScreenWidth, confScreenHeight, "OpenGL Experiments", NULL, NULL);
     if (window == NULL) {
         LOG_F(FATAL, "Failed to create GLFW window");
         cleanup();
@@ -113,7 +116,8 @@ int main(int argc, char const *argv[]) {
     }
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Vsync
+    // Vsync
+    glfwSwapInterval(1);
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 

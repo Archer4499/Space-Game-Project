@@ -5,6 +5,19 @@
 #include "config.h"
 
 
+
+std::string Config::getString(std::string label) {
+    return data[label];
+}
+int Config::getInt(std::string label) {
+    return std::stoi(data[label]);
+}
+bool Config::getBool(std::string label) {
+    std::string value = data[label];
+    return value == "true" || value == "1";
+}
+
+
 int skipSpaces(std::string str, int i) {
     while (str[i] == ' ') ++i;
 
