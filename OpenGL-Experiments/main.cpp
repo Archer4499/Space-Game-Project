@@ -65,8 +65,54 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 }
 
 void processInput(GLFWwindow *window) {
+    // Meta
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    // Controls
+    // TODO(Derek): Allow key remapping: map(GLFW_KEY_W)
+    int input = NONE;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        input |= FORWARD;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        input |= BACKWARD;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        input |= LEFT;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        input |= RIGHT;
+
+    camera.ProcessKeyboard(input, deltaTime);
+}
+
+void mouse_callback(GLFWwindow* window, double aXPos, double aYPos) {
+    float xPos = static_cast<float>(aXPos);
+    float yPos = static_cast<float>(aYPos);
+    if (firstMouse) {
+        lastX = xPos;
+        lastY = yPos;
+        firstMouse = false;
+    }
+
+    float xOffset = xPos - lastX;
+    float yOffset = lastY - yPos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xPos;
+    lastY = yPos;
+
+    camera.ProcessMouseMovement(xOffset, yOffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+    camera.ProcessMouseScroll(static_cast<float>(yOffset));
+}
+
+void window_focus_callback(GLFWwindow* window, int focused) {
+    // TODO(Derek): when trying to resize window mouse moves to centre of window
+    if (focused) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    } else {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
 }
 
 void render() {
@@ -160,6 +206,12 @@ int main(int argc, char const *argv[]) {
     glfwSwapInterval(1);
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetWindowFocusCallback(window, window_focus_callback);
+
+    // Capture mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         LOG_F(FATAL, "Failed to initialise GLAD");
