@@ -160,13 +160,13 @@ std::ostream& operator<< (std::ostream& os, const vec4& vec) {
 }
 
 float lengthSq(vec2 in) {
-    return pow(in.x, 2) + pow(in.y, 2);
+    return powf(in.x, 2) + powf(in.y, 2);
 }
 float lengthSq(vec3 in) {
-    return pow(in.x, 2) + pow(in.y, 2) + pow(in.z, 2);
+    return powf(in.x, 2) + powf(in.y, 2) + powf(in.z, 2);
 }
 float lengthSq(vec4 in) {
-    return pow(in.x, 2) + pow(in.y, 2) + pow(in.z, 2) + pow(in.w, 2);
+    return powf(in.x, 2) + powf(in.y, 2) + powf(in.z, 2) + powf(in.w, 2);
 }
 float length(vec2 in) {
     return sqrtf(lengthSq(in));
