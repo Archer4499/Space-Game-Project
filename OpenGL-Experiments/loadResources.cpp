@@ -149,10 +149,12 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
     // Return 0 if success
     // Return 1 if failed to load model file
     // NOTE(optimisation): use map or set for a unique collection of vertices(with texCoords/normals) and re-index that
+    //      ^ Doesn't really help much for the effort required
     // NOTE: possibly use different VBOs for different shapes
 
     struct Vertex {
         vec3 pos;
+        vec3 normal;
         vec2 texCoord;
     };
 
@@ -178,14 +180,21 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
         return 1;
     }
 
+    if (attrib.normals.size() == 0) {
+        LOG_F(ERR, "Object: {} has no normals.", modelPath);
+        return 1;
+    }
+
     buffer.reserve(shapes.size() * shapes[0].mesh.indices.size() * sizeof(Vertex));
 
+    // Load vertices from indices
     for (size_t i = 0; i < shapes.size(); ++i) {
         for (size_t k = 0; k < shapes[i].mesh.indices.size(); ++k) {
             tinyobj::index_t idx = shapes[i].mesh.indices[k];
             Vertex vert;
 
             vert.pos = vec3(&attrib.vertices[3 * idx.vertex_index]);
+            vert.normal = vec3(&attrib.normals[3 * idx.normal_index]);
 
             if (attrib.texcoords.size() > 0) {
                 vert.texCoord = vec2(&attrib.texcoords[2 * idx.texcoord_index]);
@@ -211,9 +220,12 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
         // position attribute
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0));
         glEnableVertexAttribArray(0);
-        // texture coord attribute
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(sizeof(Vertex().pos)));
+        // normal attribute
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(sizeof(vec3)));
         glEnableVertexAttribArray(1);
+        // texture coord attribute
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(2*sizeof(vec3)));
+        glEnableVertexAttribArray(2);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     } else {
