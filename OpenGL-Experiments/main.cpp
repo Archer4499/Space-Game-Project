@@ -150,7 +150,7 @@ int main(int argc, char const *argv[]) {
 
     int confScreenWidth = conf.getInt("width");
     int confScreenHeight = conf.getInt("height");
-    bool confFullscreen = conf.getInt("fullscreen");
+    int confFullscreen = conf.getInt("fullscreen");
     LOG_F(INFO, "Config loaded: {}", CONFIG_FILE);
     // END Load config
 
@@ -284,6 +284,7 @@ int main(int argc, char const *argv[]) {
             glBindVertexArray(VAO);
             glDrawArrays(GL_TRIANGLES, 0, numVertices);
             // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glBindVertexArray(0);
             glfwPollEvents();
             glfwSwapBuffers(window);
         } else {
