@@ -1,5 +1,4 @@
 #pragma warning (disable : 4996)
-#include <iostream>
 #include <fstream>
 
 #include "config.h"
@@ -28,7 +27,7 @@ int loadConfig(Config *conf, const char *fileName) {
     std::ifstream fs(fileName);
 
     if (!fs.is_open()) {
-        // File could not be opened
+        LOG_F(ERR, "Error opening config file: {} during load", fileName);
         return 1;
     }
 
@@ -88,19 +87,18 @@ int saveConfig(Config *conf, const char *fileName) {
     // Returns 1 on file error
     // TODO(Derek): Keep format/comments from old file
 
-    std::ofstream fs(fileName);
+    FILE *fs = _fsopen(fileName, "w", _SH_DENYWR);
 
-    if (!fs.is_open()) {
-        // File could not be opened
+    if (fs == NULL) {
+        LOG_F(ERR, "Error opening config file: {} during save", fileName);
         return 1;
     }
 
     for (std::map<std::string, std::string>::iterator it = (conf->data).begin(); it != (conf->data).end(); ++it) {
-        fs << it->first << ": " << it->second << std::endl;
+        fmt::print(fs, "{}: {}\n", it->first, it->second);
     }
 
-    fs.close();
-
+    fclose(fs);
 
     return 0;
 }
