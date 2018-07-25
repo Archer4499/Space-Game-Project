@@ -59,7 +59,7 @@ float lastFrameTime = 0.0f;
 /////////////
 
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
     glViewport(0, 0, width, height);
     // TODO(Derek): move camera to new centre?
 }
@@ -84,7 +84,7 @@ void processInput(GLFWwindow *window) {
     camera.ProcessKeyboard(input, deltaTime);
 }
 
-void mouse_callback(GLFWwindow* window, double aXPos, double aYPos) {
+void mouse_callback(GLFWwindow *window, double aXPos, double aYPos) {
     float xPos = static_cast<float>(aXPos);
     float yPos = static_cast<float>(aYPos);
     if (firstMouse) {
@@ -102,11 +102,11 @@ void mouse_callback(GLFWwindow* window, double aXPos, double aYPos) {
     camera.ProcessMouseMovement(xOffset, yOffset);
 }
 
-void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+void scroll_callback(GLFWwindow *window, double xOffset, double yOffset) {
     camera.ProcessMouseScroll(static_cast<float>(yOffset));
 }
 
-void window_focus_callback(GLFWwindow* window, int focused) {
+void window_focus_callback(GLFWwindow *window, int focused) {
     // TODO(Derek): when trying to resize window mouse moves to centre of window
     if (focused) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -122,7 +122,7 @@ void render() {
 
 void cleanup() {
     glfwTerminate();
-    LOG_F(INFO, "Clean-up");
+    LOG_F(INFO, "Running clean-up");
     logClose();
 }
 
@@ -138,11 +138,13 @@ int main(int argc, char const *argv[]) {
 
     if (int err = loadConfig(&conf, CONFIG_FILE)) {
         if (err == 1) {
-            LOG_F(ERR, "Failed to load config file, using and saving defaults: {}", CONFIG_FILE);
-            saveConfig(&conf, CONFIG_FILE);
-            LOG_F(INFO, "Config file saved: {}", CONFIG_FILE);
+            LOG_F(ERR, "Using and saving default config");
+            if (saveConfig(&conf, CONFIG_FILE)) {
+                cleanup();
+                return -1;
+            }
+            LOG_F(INFO, "Config file saved to: {}", CONFIG_FILE);
         } else if (err == 2) {
-            LOG_F(FATAL, "Config file invalid: {}", CONFIG_FILE);
             cleanup();
             return -1;
         }
@@ -151,7 +153,7 @@ int main(int argc, char const *argv[]) {
     int confScreenWidth = conf.getInt("width");
     int confScreenHeight = conf.getInt("height");
     int confFullscreen = conf.getInt("fullscreen");
-    LOG_F(INFO, "Config loaded: {}", CONFIG_FILE);
+    LOG_F(INFO, "Config loaded from: {}", CONFIG_FILE);
     // END Load config
 
 
