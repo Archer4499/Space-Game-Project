@@ -1,13 +1,14 @@
 #include <glad/glad.h>
 
 #include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
+// #include <iostream>
+// #include <fstream>
+// #include <sstream>
 
 #include "loadResources.h"
 #include "logging.h"
 #include "Math\math.h"
+#include "fmt\format.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -15,19 +16,39 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-std::string readFile(const char *filePath) {
-    std::ifstream fs(filePath);
+// std::string readFile(const char *filePath) {
+//     std::ifstream fs(filePath);
 
-    if(!fs.is_open()) {
+//     if(!fs.is_open()) {
+//         LOG_F(ERR, "Could not read file: {}", filePath);
+//         return "";
+//     }
+
+//     std::stringstream buffer;
+//     buffer << fs.rdbuf();
+
+//     fs.close();
+//     return buffer.str();
+// }
+
+std::string readFile(const char *filePath) {
+    fmt::memory_buffer out;
+    size_t totalLen = 0;
+
+    if (FILE *fp = _fsopen(filePath, "r", _SH_DENYWR)) {
+        char buffer[1024];
+        while (size_t len = fread(buffer, 1, sizeof(buffer), fp)) {
+            fmt::format_to(out, "{}", buffer);
+            totalLen += len;
+            // This deals with not being able to use fmt::format_to_n because it is giving an error about not being able to access a private member
+            out.resize(totalLen);
+        }
+        fclose(fp);
+        return fmt::to_string(out);
+    } else {
         LOG_F(ERR, "Could not read file: {}", filePath);
         return "";
     }
-
-    std::stringstream buffer;
-    buffer << fs.rdbuf();
-
-    fs.close();
-    return buffer.str();
 }
 
 
