@@ -45,31 +45,27 @@ int loadConfig(Config *conf, const char *fileName) {
         // Tag
         std::string tag;
 
-        while (line[i] != ':') {
+        while (line[i] != ':' && i < line.length()) {
             tag += line[i++];
         }
 
-
-        // Value
-        if (line[i++] != ':') {
-            // Invalid line
+        if (tag.length() == 0 || line[i++] != ':') {
+            LOG_F(ERR, "Invalid line in config file: {} at char index:{}", fileName, static_cast<int>(fs.tellg()) - (line.length()-i-1));
             return 2;
         }
 
         i = skipWhiteSpace(line, i);
 
+        // Value
         std::string value;
 
-        while (i < line.length()) {
-            // Ignore comments at end of line (no spaces in values)
-            if (line[i] == '#' || line[i] == ' ') {
-                if (value.length() == 0) {
-                    // Invalid value
-                    return 2;
-                }
-                break;
-            }
+        // Ignore comments at end of line (no spaces in values)
+        while (line[i] != '#' && !isspace(line[i]) && i < line.length()) {
             value += line[i++];
+        }
+        if (value.length() == 0) {
+            LOG_F(ERR, "Invalid value in config file: {} at char index:{}", fileName, static_cast<int>(fs.tellg()) - (line.length()-i));
+            return 2;
         }
 
         // Assign value
