@@ -27,6 +27,6 @@ struct Config {
 };
 
 
-int loadConfig(Config *conf, std::string fileName);
+int loadConfig(Config *conf, const char *fileName);
 
-int saveConfig(Config *conf, std::string fileName);
+int saveConfig(Config *conf, const char *fileName);

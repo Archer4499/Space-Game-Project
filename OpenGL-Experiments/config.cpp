@@ -19,7 +19,7 @@ bool Config::getBool(std::string label) {
 }
 
 
-int loadConfig(Config *conf, std::string fileName) {
+int loadConfig(Config *conf, const char *fileName) {
     // Return 0 if config file loaded properly
     // Return 1 and conf contains default values on file read error
     // Return 2 if invalid file format, conf not guaranteed to contain default values
@@ -83,7 +83,7 @@ int loadConfig(Config *conf, std::string fileName) {
 }
 
 
-int saveConfig(Config *conf, std::string fileName) {
+int saveConfig(Config *conf, const char *fileName) {
     // Returns 0 on successful save
     // Returns 1 on file error
     // TODO(Derek): Keep format/comments from old file
