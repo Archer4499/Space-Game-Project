@@ -25,22 +25,19 @@ std::string curDateTime() {
 
 
 int logOpen(const char *alogPath, const char *amode, LogLevel alogLevel) {
-#if LOG_TYPE == LOG_TYPE_FILE
     setLogLevel = alogLevel;
 
+#if LOG_TYPE == LOG_TYPE_FILE
     logFILE = _fsopen(alogPath, amode, _SH_DENYWR);
 
     if (logFILE == NULL) {
-        perror ("Error opening file");
+        perror("Error opening file");
         return 1;
     }
-
-    return 0;
 #else
-    setLogLevel = alogLevel;
     logFILE = stdout;
-    return 0;
 #endif
+    return 0;
 }
 
 
@@ -83,7 +80,7 @@ void logb(LogLevel errLevel, const char *file, unsigned int line, std::string me
     std::string fullMessage = prefix + message;
 
     fmt::print(logFILE, "{}\n", fullMessage);
-    fflush(logFILE); // Ensures log is up to date if we crash
+    fflush(logFILE); // Ensures log is up to date if we crash (Hopefully...)
 
     if (ferror(logFILE)) {
         fmt::print(stderr, "There is a problem with the log file at: {}:{}\n", file, line);
