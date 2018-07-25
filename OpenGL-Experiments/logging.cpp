@@ -4,6 +4,7 @@
 
 #include <chrono>
 
+#include "fmt/format.h"
 #include "fmt/time.h"
 
 

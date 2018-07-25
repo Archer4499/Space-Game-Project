@@ -75,7 +75,6 @@
   <ItemGroup>
     <ClCompile Include="config.cpp" />
     <ClCompile Include="fmt\format.cc" />
-    <ClCompile Include="fmt\ostream.cc" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="loadResources.cpp" />
     <ClCompile Include="logging.cpp" />
@@ -87,8 +86,11 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="fmt\core.h" />
+    <ClInclude Include="fmt\format-inl.h" />
     <ClInclude Include="fmt\format.h" />
     <ClInclude Include="fmt\ostream.h" />
+    <ClInclude Include="fmt\time.h" />
     <ClInclude Include="loadResources.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="Math\func.h" />
