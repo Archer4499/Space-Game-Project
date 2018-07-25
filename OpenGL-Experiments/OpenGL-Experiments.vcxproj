@@ -98,6 +98,7 @@
     <ClInclude Include="Math\matrix.h" />
     <ClInclude Include="Math\vector.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="stringUtils.h" />
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>

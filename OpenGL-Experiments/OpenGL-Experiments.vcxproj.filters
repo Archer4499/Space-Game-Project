@@ -110,6 +110,9 @@
     <ClInclude Include="fmt\format-inl.h">
       <Filter>Header Files\fmt</Filter>
     </ClInclude>
+    <ClInclude Include="stringUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\shader.vert">

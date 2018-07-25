@@ -3,7 +3,8 @@
 #include <fstream>
 
 #include "config.h"
-
+#include "stringUtils.h"
+#include "logging.h"
 
 
 std::string Config::getString(std::string label) {
@@ -15,13 +16,6 @@ int Config::getInt(std::string label) {
 bool Config::getBool(std::string label) {
     std::string value = data[label];
     return value == "true" || value == "1";
-}
-
-
-int skipSpaces(std::string str, int i) {
-    while (str[i] == ' ') ++i;
-
-    return i;
 }
 
 
@@ -44,7 +38,7 @@ int loadConfig(Config *conf, std::string fileName) {
         size_t i = 0;
 
         // Line:
-        i = skipSpaces(line, i);
+        i = skipWhiteSpace(line, i);
 
         // Skip Comment Lines
         if (line[i] == '#') continue;
@@ -56,7 +50,6 @@ int loadConfig(Config *conf, std::string fileName) {
             tag += line[i++];
         }
 
-        i = skipSpaces(line, i);
 
         // Value
         if (line[i++] != ':') {
@@ -64,7 +57,7 @@ int loadConfig(Config *conf, std::string fileName) {
             return 2;
         }
 
-        i = skipSpaces(line, i);
+        i = skipWhiteSpace(line, i);
 
         std::string value;
 
