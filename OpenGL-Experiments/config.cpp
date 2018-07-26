@@ -4,6 +4,7 @@
 #include "config.h"
 #include "stringUtils.h"
 #include "logging.h"
+#include "fmt\core.h"
 
 
 std::string Config::getString(std::string label) {

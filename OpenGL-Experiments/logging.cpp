@@ -43,7 +43,7 @@ int logOpen(const char *alogPath, const char *amode, LogLevel alogLevel) {
 
 
 void logb(LogLevel errLevel, const char *file, unsigned int line, std::string message) {
-    if (errLevel > setLogLevel) return;
+    if (errLevel > setLogLevel || errLevel == NO_LOG) return;
 
     if (logFILE == NULL) {
         fmt::print(stderr, "Log file/stream has either been closed or not yet been opened with logOpen(..) at: {}:{}\n", file, line);
