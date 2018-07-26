@@ -9,6 +9,7 @@
 #include "logging.h"
 #include "Math\math.h"
 #include "fmt\format.h"
+#include "stringUtils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -303,6 +304,53 @@ int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    return 0;
+}
+
+int loadAllObjects(const char *listPath, std::vector<renderObject> allObjects) {
+    LOG_F(INFO, "Loading all objects from: {}", listPath);
+    std::string list = readFile(listPath);
+    if (list == "") {
+        LOG_F(WARN, "Object list file empty, no objects loaded.");
+        return 1;
+    }
+
+    size_t i = 0;
+
+    if (stringUntilSpace(list, i) == "v1.0") {
+        // File v1.0
+        std::string name, posStr, rotStr, scaleStr;
+
+        while (i < list.length()) {
+            skipComments(list, i);
+            name = stringUntilSpace(list, i);
+            if (name != "") {
+                posStr = stringUntilSpace(list, i);
+                if (posStr == "") {
+                    LOG_F(WARN, "Object list file invalid at char: {}", i);
+                    return 1;
+                }
+                rotStr = stringUntilSpace(list, i);
+                if (rotStr == "") {
+                    LOG_F(WARN, "Object list file invalid at char: {}", i);
+                    return 1;
+                }
+                scaleStr = stringUntilSpace(list, i);
+                if (scaleStr == "") {
+                    LOG_F(WARN, "Object list file invalid at char: {}", i);
+                    return 1;
+                }
+
+                LOG_F(INFO, "Loading: {} at {}:{}:{}", name, posStr, rotStr, scaleStr);
+                // TODO(Derek): load object
+            }
+            skipComments(list, i);
+        }
+    } else {
+        LOG_F(WARN, "Object list file either invalid or version not supported");
+        return 1;
+    }
 
     return 0;
 }

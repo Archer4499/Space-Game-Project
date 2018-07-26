@@ -3,6 +3,8 @@
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
 
+#include <vector>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -35,6 +37,9 @@
 // #define LOG_MODE "a"
 #define LOG_FILE "debug.log"
 #define CONFIG_FILE "config.cfg"
+
+#define OBJECTS_LIST_FILE "Resources/Models/objects.list"
+
 #define VERTEX_FILE "Resources/Shaders/shader.vert"
 #define FRAGMENT_FILE "Resources/Shaders/shader.frag"
 // #define TEXTURE_FILE "Resources/Textures/awesomeface.png"
@@ -234,6 +239,12 @@ int main(int argc, char const *argv[]) {
     LOG_F(INFO, "Loading models");
     unsigned int VAO, VBO, numVertices;
     if (loadModel(MODEL_FILE, &VAO, &VBO, &numVertices)) {
+        cleanup();
+        return -1;
+    }
+
+    std::vector<renderObject> allObjects;
+    if (loadAllObjects(OBJECTS_LIST_FILE, allObjects)) {
         cleanup();
         return -1;
     }
