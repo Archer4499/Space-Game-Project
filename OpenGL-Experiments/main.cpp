@@ -3,10 +3,10 @@
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
 
-#include <vector>
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include <vector>
 
 // todo/note area //
 // TODO(Derek): Log more info and errs
@@ -18,15 +18,7 @@
 ////////////////////
 
 
-// TODO(Derek): Remove requirement for these defines
-#define LOG_TYPE_NO 0
-#define LOG_TYPE_COUT 1
-#define LOG_TYPE_FILE 2
-
-#define LOG_TYPE LOG_TYPE_FILE
-#define LOG_STREAM_OVERLOAD
 #include "logging.h"
-
 #include "config.h"
 #include "loadResources.h"
 #include "camera.h"
@@ -40,6 +32,7 @@
 
 #define OBJECTS_LIST_FILE "Resources/Models/objects.list"
 
+// TODO(Derek): replace using objects.list
 #define VERTEX_FILE "Resources/Shaders/shader.vert"
 #define FRAGMENT_FILE "Resources/Shaders/shader.frag"
 // #define TEXTURE_FILE "Resources/Textures/awesomeface.png"

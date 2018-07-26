@@ -1,19 +1,13 @@
 #pragma once
 
-
-#ifndef LOG_TYPE_NO
 #define LOG_TYPE_NO 0
 #define LOG_TYPE_COUT 1
 #define LOG_TYPE_FILE 2
-#endif
 
-#ifndef LOG_TYPE
+// Settings
 #define LOG_TYPE LOG_TYPE_FILE
-#endif
-
-// #define LOG_STREAM_OVERLOAD
-// #undef LOG_STREAM_OVERLOAD
-// #define LOG_STREAM
+#define LOG_STREAM_OVERLOAD
+////
 
 enum LogLevel {
     NO_LOG,
@@ -27,7 +21,7 @@ enum LogLevel {
 #if LOG_TYPE == LOG_TYPE_NO
 
 #define LOG_F(errLevel, ...)
-int logOpen(const char *alogPath="debug.log", const char *amode="w", LogLevel alogLevel=WARN) {}
+int logOpen(const char *alogPath="debug.log", const char *amode="w", LogLevel alogLevel=WARN) {return 0;}
 void logClose() {}
 
 #else // LOG_TYPE != LOG_TYPE_NO
@@ -57,7 +51,7 @@ void log(LogLevel errLevel, const char *file, unsigned int line, const char* for
     logb(errLevel, file, line, message);
 }
 
-// #if defined LOG_STREAM_OVERLOAD || defined LOG_STREAM
+
 #ifdef LOG_STREAM_OVERLOAD
 // Allows user defined types with operator<< overloads to be used in LOG_F
 #include "fmt/ostream.h"
