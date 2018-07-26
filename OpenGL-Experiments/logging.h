@@ -21,6 +21,7 @@ enum LogLevel {
 #if LOG_TYPE == LOG_TYPE_NO
 
 #define LOG_F(errLevel, ...)
+// TODO(Derek): Define LOG_S using a null output stream
 int logOpen(const char *alogPath="debug.log", const char *amode="w", LogLevel alogLevel=WARN) {return 0;}
 void logClose() {}
 
