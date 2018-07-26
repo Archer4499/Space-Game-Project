@@ -82,6 +82,7 @@
     <ClCompile Include="Math\func.cpp" />
     <ClCompile Include="Math\matrix.cpp" />
     <ClCompile Include="Math\vector.cpp" />
+    <ClCompile Include="stringUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />

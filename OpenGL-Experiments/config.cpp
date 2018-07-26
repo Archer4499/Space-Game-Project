@@ -37,7 +37,7 @@ int loadConfig(Config *conf, const char *fileName) {
         size_t i = 0;
 
         // Line:
-        i = skipWhiteSpace(line, i);
+        eatSpaces(line, i);
 
         // Skip Comment Lines
         if (line[i] == '#') continue;
@@ -54,7 +54,7 @@ int loadConfig(Config *conf, const char *fileName) {
             return 2;
         }
 
-        i = skipWhiteSpace(line, i);
+        eatSpaces(line, i);
 
         // Value
         std::string value;

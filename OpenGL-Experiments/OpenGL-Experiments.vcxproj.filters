@@ -63,6 +63,9 @@
     <ClCompile Include="fmt\format.cc">
       <Filter>Source Files\fmt</Filter>
     </ClCompile>
+    <ClCompile Include="stringUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h">
