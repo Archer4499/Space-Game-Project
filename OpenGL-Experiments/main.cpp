@@ -32,16 +32,13 @@
 
 #define OBJECTS_LIST_FILE "Resources/Models/objects.list"
 
-// TODO(Derek): replace using objects.list
 #define VERTEX_FILE "Resources/Shaders/shader.vert"
 #define FRAGMENT_FILE "Resources/Shaders/shader.frag"
+
 // #define TEXTURE_FILE "Resources/Textures/awesomeface.png"
 #define TEXTURE_FILE "Resources/Textures/container.jpg"
-#define MODEL_FILE "Resources/Models/container.obj"
 // #define TEXTURE_FILE "Resources/Textures/chalet.jpg"
-// #define MODEL_FILE "Resources/Models/chalet.obj"
 // #define TEXTURE_FILE "Resources/Textures/item_box.png"
-// #define MODEL_FILE "Resources/Models/item_box.obj"
 
 
 // Globals //
@@ -216,24 +213,19 @@ int main(int argc, char const *argv[]) {
 
     glEnable(GL_DEPTH_TEST);
 
+
     LOG_F(DEBUG, "Loading Shaders");
     int shaderProgram = loadShader(VERTEX_FILE, FRAGMENT_FILE);
-
 
     LOG_F(DEBUG, "Loading textures");
     unsigned int atexture = loadTexture(TEXTURE_FILE);
 
-
-    LOG_F(DEBUG, "Loading models");
-    unsigned int VAO, VBO, numVertices;
-    if (loadModel(MODEL_FILE, &VAO, &VBO, &numVertices)) {
-        return shutDown(-1);
-    }
-
+    // Objects
     std::vector<renderObject> allObjects;
     if (loadAllObjects(OBJECTS_LIST_FILE, allObjects)) {
         return shutDown(-1);
     }
+
 
     glUseProgram(shaderProgram);
 
@@ -273,17 +265,27 @@ int main(int argc, char const *argv[]) {
             mat4 projection = perspective(radians(camera.Zoom), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
 
-            mat4 model = rotate(mat4(1.0f), lastFrameTime, vec3(0.5f, 1.0f, 0.0f));
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
-
             mat4 view  = camera.GetViewMatrix();
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
             ////
 
-            glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, numVertices);
-            // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-            glBindVertexArray(0);
+
+            for (renderObject obj: allObjects) {
+                mat4 model(1.0f);
+                model = translate(model, obj.pos);
+                model = rotate(model, obj.angle, obj.rot);
+                model = scale(model, obj.scale);
+                glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+                glBindVertexArray(obj.VAO);
+                glDrawArrays(GL_TRIANGLES, 0, obj.numVertices);
+            }
+
+
+            // glBindVertexArray(VAO);
+            // glDrawArrays(GL_TRIANGLES, 0, numVertices);
+            // // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            // glBindVertexArray(0);
+
             glfwPollEvents();
             glfwSwapBuffers(window);
         } else {
@@ -295,9 +297,11 @@ int main(int argc, char const *argv[]) {
 
 
     // TODO(Derek): move into cleanup function
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    // glDeleteBuffers(1, &EBO);
+    for (renderObject obj: allObjects) {
+        glDeleteVertexArrays(1, &obj.VAO);
+        glDeleteBuffers(1, &obj.VBO);
+        // glDeleteBuffers(1, &obj.EBO);
+    }
 
 
     return shutDown(0);

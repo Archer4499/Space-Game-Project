@@ -1,13 +1,10 @@
+#include "loadResources.h"
+
 #include <glad/glad.h>
 
 #include <string>
-// #include <iostream>
-// #include <fstream>
-// #include <sstream>
 
-#include "loadResources.h"
 #include "logging.h"
-#include "Math\math.h"
 #include "fmt\format.h"
 #include "stringUtils.h"
 
@@ -17,20 +14,6 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-// std::string readFile(const char *filePath) {
-//     std::ifstream fs(filePath);
-
-//     if(!fs.is_open()) {
-//         LOG_F(ERR, "Could not read file: {}", filePath);
-//         return "";
-//     }
-
-//     std::stringstream buffer;
-//     buffer << fs.rdbuf();
-
-//     fs.close();
-//     return buffer.str();
-// }
 
 std::string readFile(const char *filePath) {
     fmt::memory_buffer out;
@@ -308,7 +291,8 @@ int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
     return 0;
 }
 
-int loadAllObjects(const char *listPath, std::vector<renderObject> allObjects) {
+int loadAllObjects(const char *listPath, std::vector<renderObject> &allObjects) {
+    // TODO(Derek): Just loading model for now, loading matching texture to do later
     LOG_F(DEBUG, "Loading all objects from: {}", listPath);
     std::string list = readFile(listPath);
     if (list == "") {
@@ -323,7 +307,8 @@ int loadAllObjects(const char *listPath, std::vector<renderObject> allObjects) {
         std::string name, posStr, rotStr, scaleStr;
 
         while (i < list.length()) {
-            skipComments(list, i);
+            while (skipComments(list, i)); // Skip any consecutive comment lines
+            // TODO(Derek): sanitize name
             name = stringUntilSpace(list, i);
             if (name != "") {
                 posStr = stringUntilSpace(list, i);
@@ -342,8 +327,42 @@ int loadAllObjects(const char *listPath, std::vector<renderObject> allObjects) {
                     return 1;
                 }
 
-                LOG_F(INFO, "Loading: {} at {}:{}:{}", name, posStr, rotStr, scaleStr);
-                // TODO(Derek): load object
+                float angle;
+                vec3 pos, rot, scale;
+
+                try {
+                    // Parsing "float,float,float"
+                    // ++ skips the ','
+                    size_t end1 = 0, end2 = 0, end3 = 0;
+                    float x = std::stof(posStr, &end1);
+                    float y = std::stof(posStr.substr(++end1), &end2);
+                    float z = std::stof(posStr.substr(end1 + (++end2)));
+                    pos = {x, y, z};
+
+                    angle = std::stof(rotStr, &end1);
+                    x = std::stof(rotStr.substr(++end1), &end2);
+                    y = std::stof(rotStr.substr(end1 + (++end2)), &end3);
+                    z = std::stof(rotStr.substr(end1 + end2 + (++end3)));
+                    rot = {x, y, z};
+
+                    x = std::stof(scaleStr, &end1);
+                    y = std::stof(scaleStr.substr(++end1), &end2);
+                    z = std::stof(scaleStr.substr(end1 + (++end2)));
+                    scale = {x, y, z};
+                } catch(...) {
+                    LOG_F(WARN, "Object list file contains invalid float on line with char: {}", i);
+                    return 1;
+                }
+
+                LOG_F(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
+
+                unsigned int VAO, VBO, numVertices;
+                if (loadModel(name.c_str(), &VAO, &VBO, &numVertices)) {
+                    return 1;
+                }
+
+                renderObject obj = {pos, angle, rot, scale, VAO, VBO, numVertices, 0};
+                allObjects.push_back(obj);
             }
             skipComments(list, i);
         }
