@@ -43,9 +43,9 @@ int loadConfig(Config *conf, const char *fileName) {
         size_t i = 0;
         ++lineCount;
 
-        // Skip Comment Lines
+        // Skip Comment and blank Lines
         eatSpaces(line, i);
-        if (line[i] == '#') continue;
+        if (i >= line.length() || line[i] == '#') continue;
 
         // Tag
         std::string tag = stringUntilSpace(line, i);
