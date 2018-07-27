@@ -72,13 +72,13 @@ public:
         vec3 ddPos(0.0f);
 
         if (direction & FORWARD)
-            ddPos += Front;
+            ddPos += vec3(Front.x, 0.0f, Front.z);
         if (direction & BACKWARD)
-            ddPos -= Front;
+            ddPos -= vec3(Front.x, 0.0f, Front.z);
         if (direction & LEFT)
-            ddPos -= normalize(cross(Front, Up));
+            ddPos -= Right;
         if (direction & RIGHT)
-            ddPos += normalize(cross(Front, Up));
+            ddPos += Right;
 
         ddPos = normalize(ddPos);
 
