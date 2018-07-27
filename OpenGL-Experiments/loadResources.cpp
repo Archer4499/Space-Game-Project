@@ -36,8 +36,7 @@ std::string readFile(const char *filePath) {
 }
 
 
-int loadShader(const char *vertexPath, const char *fragmentPath) {
-    // TODO(Derek): return success value and use reference value for shader
+int loadShader(const char *vertexPath, const char *fragmentPath, unsigned int &shaderProgram) {
     int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -63,6 +62,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
         glGetShaderInfoLog(vertexShader, sizeof(infoLog), NULL, infoLog);
         if (!success) {
             LOG_F(ERR, "Vertex Shader Compilation Failed: {}", infoLog);
+            return 1;
         } else {
             LOG_F(DEBUG, "{}", infoLog);
         }
@@ -80,6 +80,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
         glGetShaderInfoLog(fragmentShader, sizeof(infoLog), NULL, infoLog);
         if (!success) {
             LOG_F(ERR, "Fragment Shader Compilation Failed: {}", infoLog);
+            return 1;
         } else {
             LOG_F(DEBUG, "{}", infoLog);
         }
@@ -88,7 +89,6 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
 
     // Link shaders
     LOG_F(DEBUG, "Linking program");
-    int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
@@ -100,6 +100,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
         glGetShaderInfoLog(shaderProgram, sizeof(infoLog), NULL, infoLog);
         if (!success) {
             LOG_F(ERR, "Shader Program Linking Failed: {}", infoLog);
+            return 1;
         } else {
             LOG_F(DEBUG, "{}", infoLog);
         }
@@ -108,15 +109,15 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    return shaderProgram;
+    return 0;
 }
 
 
-int loadTexture(const char *texturePath, unsigned int *texID) {
+int loadTexture(const char *texturePath, unsigned int &texID) {
     int texWidth, texHeight, nrChannels;
 
-    glGenTextures(1, texID);
-    glBindTexture(GL_TEXTURE_2D, *texID);
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_2D, texID);
      // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   // set texture wrapping to GL_REPEAT (default wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -152,7 +153,7 @@ int loadTexture(const char *texturePath, unsigned int *texID) {
 }
 
 
-int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsigned int *numVertices) {
+int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsigned int &numVertices) {
     // Return 0 if success
     // Return 1 if failed to load model file
     // NOTE(optimisation): use map or set for a unique collection of vertices(with texCoords/normals) and re-index that
@@ -172,8 +173,8 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
 
     std::vector<Vertex> buffer;
 
-    *VBO = 0;
-    *numVertices = 0;
+    VBO = 0;
+    numVertices = 0;
 
     bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath);
 
@@ -211,17 +212,17 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
 
             buffer.push_back(vert);
 
-            ++*numVertices;
+            ++numVertices;
         }
     }
 
     if (buffer.size() > 0) {
-        glGenVertexArrays(1, VAO);
-        glGenBuffers(1, VBO);
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
 
-        glBindVertexArray(*VAO);
+        glBindVertexArray(VAO);
 
-        glBindBuffer(GL_ARRAY_BUFFER, *VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(Vertex), &buffer[0].pos[0], GL_STATIC_DRAW);
 
         // position attribute
@@ -241,8 +242,8 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
     }
 
 
-    LOG_F(DEBUG, "Loaded model: {}, Vertices = {}, TexCoords = {}, Indices = {}", modelPath, attrib.vertices.size()/3, attrib.texcoords.size()/2, *numVertices);
-    // LOG_F(INFO, "Transformed into: {} vertices", *numVertices);
+    LOG_F(DEBUG, "Loaded model: {}, Vertices = {}, TexCoords = {}, Indices = {}", modelPath, attrib.vertices.size()/3, attrib.texcoords.size()/2, numVertices);
+    // LOG_F(INFO, "Transformed into: {} vertices", numVertices);
 
     return 0;
 }
@@ -294,7 +295,6 @@ int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
 }
 
 int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects) {
-    // TODO(Derek): Just loading model for now, loading matching texture to do later
     // TODO(Derek): Handle spaces in file paths
     LOG_F(DEBUG, "Loading all objects from: {}", listPath);
     std::string list = readFile(listPath);
@@ -361,7 +361,7 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 LOG_F(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
 
                 unsigned int VAO, VBO, numVertices;
-                if (loadModel(name.c_str(), &VAO, &VBO, &numVertices)) {
+                if (loadModel(name.c_str(), VAO, VBO, numVertices)) {
                     return 1;
                 }
 
@@ -399,12 +399,12 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 }
 
                 unsigned int VAO, VBO, numVertices;
-                if (loadModel(objFile.c_str(), &VAO, &VBO, &numVertices)) {
+                if (loadModel(objFile.c_str(), VAO, VBO, numVertices)) {
                     return 1;
                 }
 
                 unsigned int texID;
-                if (loadTexture(texFile.c_str(), &texID)) {
+                if (loadTexture(texFile.c_str(), texID)) {
                     return 1;
                 }
 

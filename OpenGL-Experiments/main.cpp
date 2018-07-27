@@ -215,15 +215,20 @@ int main(int argc, char const *argv[]) {
 
 
     LOG_F(DEBUG, "Loading Shaders");
-    int shaderProgram = loadShader(VERTEX_FILE, FRAGMENT_FILE);
+    unsigned int shaderProgram = glCreateProgram();
+    if (loadShader(VERTEX_FILE, FRAGMENT_FILE, shaderProgram)) {
+        LOG_F(FATAL, "Failed to load shaders");
+        return shutDown(-1);
+    }
 
     LOG_F(DEBUG, "Loading textures");
     unsigned int atexture;
-    loadTexture(TEXTURE_FILE, &atexture);
+    loadTexture(TEXTURE_FILE, atexture);
 
     // Objects
     std::vector<InstanceObject> allObjects;
     if (loadAllObjects(OBJECTS_LIST_FILE, allObjects)) {
+        LOG_F(FATAL, "Failed to load objects");
         return shutDown(-1);
     }
 
@@ -270,7 +275,7 @@ int main(int argc, char const *argv[]) {
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
             ////
 
-
+            // TODO(Derek): move inside render function
             for (InstanceObject obj: allObjects) {
                 mat4 model(1.0f);
                 model = translate(model, obj.pos);
