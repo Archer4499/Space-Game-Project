@@ -37,6 +37,7 @@ std::string readFile(const char *filePath) {
 
 
 int loadShader(const char *vertexPath, const char *fragmentPath) {
+    // TODO(Derek): return success value and use reference value for shader
     int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -111,13 +112,11 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
 }
 
 
-unsigned int loadTexture(const char *texturePath) {
-    // TODO(Derek): return success value and give texID in reference value
-    unsigned int textureID;
+int loadTexture(const char *texturePath, unsigned int *texID) {
     int texWidth, texHeight, nrChannels;
 
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    glGenTextures(1, texID);
+    glBindTexture(GL_TEXTURE_2D, *texID);
      // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   // set texture wrapping to GL_REPEAT (default wrapping method)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -130,7 +129,7 @@ unsigned int loadTexture(const char *texturePath) {
     unsigned char *data = stbi_load(texturePath, &texWidth, &texHeight, &nrChannels, 0);
     if (!data) {
         LOG_F(ERR, "Failed to load texture: {}", texturePath);
-        return NULL;
+        return 1;
     }
     LOG_F(DEBUG, "Loaded texture: {}, w = {}, h = {}, channels = {}", texturePath, texWidth, texHeight, nrChannels);
 
@@ -141,6 +140,7 @@ unsigned int loadTexture(const char *texturePath) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     } else {
         LOG_F(ERR, "Texture: {} not RGB or RGBA.", texturePath);
+        return 1;
     }
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -148,7 +148,7 @@ unsigned int loadTexture(const char *texturePath) {
 
     stbi_image_free(data);
 
-    return textureID;
+    return 0;
 }
 
 
@@ -404,8 +404,7 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 }
 
                 unsigned int texID;
-                texID = loadTexture(texFile.c_str());
-                if (false) { // TODO(Derek): use success value from loadTextures when it has one
+                if (loadTexture(texFile.c_str(), &texID)) {
                     return 1;
                 }
 

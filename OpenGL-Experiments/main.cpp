@@ -218,7 +218,8 @@ int main(int argc, char const *argv[]) {
     int shaderProgram = loadShader(VERTEX_FILE, FRAGMENT_FILE);
 
     LOG_F(DEBUG, "Loading textures");
-    unsigned int atexture = loadTexture(TEXTURE_FILE);
+    unsigned int atexture;
+    loadTexture(TEXTURE_FILE, &atexture);
 
     // Objects
     std::vector<InstanceObject> allObjects;
