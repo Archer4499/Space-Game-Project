@@ -112,6 +112,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
 
 
 unsigned int loadTexture(const char *texturePath) {
+    // TODO(Derek): return success value and give texID in reference value
     unsigned int textureID;
     int texWidth, texHeight, nrChannels;
 
@@ -294,6 +295,7 @@ int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
 
 int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects) {
     // TODO(Derek): Just loading model for now, loading matching texture to do later
+    // TODO(Derek): Handle spaces in file paths
     LOG_F(DEBUG, "Loading all objects from: {}", listPath);
     std::string list = readFile(listPath);
     if (list == "") {
@@ -303,12 +305,13 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
 
     size_t i = 0;
 
-    if (stringUntilSpace(list, i) == "v1.0") {
+    std::string ver = stringUntilSpace(list, i);
+    if (ver == "v1.0") {
         // File v1.0
         std::string name, posStr, rotStr, scaleStr;
 
         while (i < list.length()) {
-            while (skipComments(list, i)); // Skip any consecutive comment lines
+            while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
             // TODO(Derek): sanitize name
             name = stringUntilSpace(list, i);
             if (name != "") {
@@ -368,7 +371,103 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 InstanceObject obj = {pos, angle, rot, scale, renObj};
                 allObjects.push_back(obj);
             }
-            skipComments(list, i);
+        }
+    } else if (ver == "v1.1") {
+        // File v1.1
+        std::map<std::string, RenderObject> renderObjects;
+        std::string name, objFile, texFile, posStr, rotStr, scaleStr;
+
+        while (i < list.length()) {
+            while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
+            // TODO(Derek): sanitize name
+            if (list[i] == ':') {
+                ++i;
+                name = stringUntilSpace(list, i);
+                if (name == "") {
+                    LOG_F(WARN, "Object list file contains invalid name at char: {}", i);
+                    return 1;
+                }
+                objFile = stringUntilSpace(list, i);
+                if (objFile == "") {
+                    LOG_F(WARN, "Object list file contains invalid object file name at char: {}", i);
+                    return 1;
+                }
+                texFile = stringUntilSpace(list, i);
+                if (texFile == "") {
+                    LOG_F(WARN, "Object list file contains invalid texture file name at char: {}", i);
+                    return 1;
+                }
+
+                unsigned int VAO, VBO, numVertices;
+                if (loadModel(objFile.c_str(), &VAO, &VBO, &numVertices)) {
+                    return 1;
+                }
+
+                unsigned int texID;
+                texID = loadTexture(texFile.c_str());
+                if (false) { // TODO(Derek): use success value from loadTextures when it has one
+                    return 1;
+                }
+
+                RenderObject renObj = {VAO, VBO, numVertices, texID};
+                // TODO(Derek): Check whether name already exists
+                renderObjects[name] = renObj;
+            } else if (list[i] == '@') {
+                ++i;
+                name = stringUntilSpace(list, i);
+                if (name == "") {
+                    LOG_F(WARN, "Object list file contains invalid name at char: {}", i);
+                    return 1;
+                }
+                posStr = stringUntilSpace(list, i);
+                if (posStr == "") {
+                    LOG_F(WARN, "Object list file contains invalid position at char: {}", i);
+                    return 1;
+                }
+                rotStr = stringUntilSpace(list, i);
+                if (rotStr == "") {
+                    LOG_F(WARN, "Object list file contains invalid rotation at char: {}", i);
+                    return 1;
+                }
+                scaleStr = stringUntilSpace(list, i);
+                if (scaleStr == "") {
+                    LOG_F(WARN, "Object list file contains invalid scale at char: {}", i);
+                    return 1;
+                }
+
+                float angle;
+                vec3 pos, rot, scale;
+
+                try {
+                    // Parsing "float,float,float"
+                    // ++ skips the ','
+                    size_t end1 = 0, end2 = 0, end3 = 0;
+                    float x = std::stof(posStr, &end1);
+                    float y = std::stof(posStr.substr(++end1), &end2);
+                    float z = std::stof(posStr.substr(end1 + (++end2)));
+                    pos = {x, y, z};
+
+                    angle = std::stof(rotStr, &end1);
+                    x = std::stof(rotStr.substr(++end1), &end2);
+                    y = std::stof(rotStr.substr(end1 + (++end2)), &end3);
+                    z = std::stof(rotStr.substr(end1 + end2 + (++end3)));
+                    rot = {x, y, z};
+
+                    x = std::stof(scaleStr, &end1);
+                    y = std::stof(scaleStr.substr(++end1), &end2);
+                    z = std::stof(scaleStr.substr(end1 + (++end2)));
+                    scale = {x, y, z};
+                } catch(...) {
+                    LOG_F(WARN, "Object list file contains invalid float on line with char: {}", i);
+                    return 1;
+                }
+
+                LOG_F(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
+
+                // TODO(Derek): check whether name exists first
+                InstanceObject obj = {pos, angle, rot, scale, renderObjects[name]};
+                allObjects.push_back(obj);
+            }
         }
     } else {
         LOG_F(WARN, "Object list file either invalid or version not supported");

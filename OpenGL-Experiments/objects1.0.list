@@ -1,0 +1,9 @@
+v1.0 #Name Position Rotation Scale
+Resources/Models/container.obj 0,0,0                        0,0,0,0  1,1,1
+Resources/Models/hex.obj       0,-1,0                       0,0,0,0  1,1,1
+Resources/Models/hex.obj       0.8660253882408142,-1,1.5    0,0,0,0  1,1.1,1
+Resources/Models/hex.obj       -0.8660253882408142,-1,1.5   0,0,0,0  1,0.9,1
+Resources/Models/hex.obj       0.8660253882408142,-1,-1.5   0,0,0,0  1,1.1,1
+Resources/Models/hex.obj       -0.8660253882408142,-1,-1.5  0,0,0,0  1,0.9,1
+Resources/Models/hex.obj       1.7320507764816284,-1,0      0,0,0,0  1,1.05,1
+Resources/Models/hex.obj       -1.7320507764816284,-1,0     0,0,0,0  1,1,1

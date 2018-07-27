@@ -30,7 +30,7 @@
 #define LOG_FILE "debug.log"
 #define CONFIG_FILE "config.cfg"
 
-#define OBJECTS_LIST_FILE "Resources/Models/objects.list"
+#define OBJECTS_LIST_FILE "objects.list"
 
 #define VERTEX_FILE "Resources/Shaders/shader.vert"
 #define FRAGMENT_FILE "Resources/Shaders/shader.frag"
