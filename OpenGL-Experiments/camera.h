@@ -91,12 +91,15 @@ public:
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void ProcessMouseMovement(float xoffset, float yoffset) {
+        // TODO(Derek): care about zoom level (fov)
         xoffset *= MouseSensitivity;
         yoffset *= MouseSensitivity;
 
         Yaw   += xoffset;
         Pitch += yoffset;
 
+        // Stop Yaw from reaching large values
+        Yaw = std::fmod(Yaw, 360.0f);
         // Make sure that when pitch is out of bounds, screen doesn't get flipped
         Pitch = clamp(Pitch, -85.0f, 85.0f);
 
