@@ -32,7 +32,7 @@ std::string stringUntilSpace(const std::string &str, size_t &i, const bool shoul
 }
 
 
-void skipComments(const std::string &str, size_t &i) {
+bool skipComments(const std::string &str, size_t &i) {
     size_t pos = i;
     eatSpaces(str, pos);
     if (pos < str.length() && str[pos] == '#') {
@@ -44,5 +44,7 @@ void skipComments(const std::string &str, size_t &i) {
             ++pos;
         }
         i = pos;
+        return true;
     }
+    return false;
 }
