@@ -15,7 +15,8 @@ enum Camera_Movement {
 // Default camera values
 #define YAW         -90.0f
 #define PITCH        0.0f
-#define SPEED        2.5f
+#define SPEED        9.0f
+#define FRICTION     5.0f
 #define SENSITIVITY  0.05f
 #define ZOOM         45.0f
 
@@ -34,12 +35,14 @@ public:
     float Pitch;
     // Camera options
     float MovementSpeed;
+    float Friction;
     float MouseSensitivity;
     float Zoom;
 
     explicit Camera(vec3 position = vec3(0.0f, 0.0f, 0.0f), vec3 up = vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) {
         Front = vec3(0.0f, 0.0f, -1.0f);
         MovementSpeed = SPEED;
+        Friction = FRICTION;
         MouseSensitivity = SENSITIVITY;
         Zoom = ZOOM;
         Pos = position;
@@ -80,7 +83,7 @@ public:
         ddPos = normalize(ddPos);
 
         ddPos *= MovementSpeed;
-        ddPos += -2.0f*DPos;
+        ddPos -= Friction*DPos;
         Pos += (0.5f*ddPos*powf(deltaTime, 2) + DPos*deltaTime);
         ddPos *= deltaTime;
         DPos += vec3(ddPos.x, 0.0f, ddPos.z);
