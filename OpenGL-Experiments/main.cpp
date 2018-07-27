@@ -24,7 +24,7 @@
 #include "camera.h"
 #include "math/math.h"
 
-#define LOG_LEVEL INFO
+#define LOG_LEVEL DEBUG
 #define LOG_MODE "w"
 // #define LOG_MODE "a"
 #define LOG_FILE "debug.log"
@@ -118,10 +118,12 @@ void render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void cleanup() {
+int shutDown(int exitCode) {
     glfwTerminate();
     LOG_F(INFO, "Running clean-up");
+    LOG_F(INFO, "Exit code: {}", exitCode);
     logClose();
+    return exitCode;
 }
 
 
@@ -138,13 +140,11 @@ int main(int argc, char const *argv[]) {
         if (err == 1) {
             LOG_F(ERR, "Using and saving default config");
             if (saveConfig(&conf, CONFIG_FILE)) {
-                cleanup();
-                return -1;
+                return shutDown(-1);
             }
             LOG_F(INFO, "Config file saved to: {}", CONFIG_FILE);
         } else if (err == 2) {
-            cleanup();
-            return -1;
+            return shutDown(-1);
         }
     }
 
@@ -158,8 +158,7 @@ int main(int argc, char const *argv[]) {
     // Init GLFW
     if (!glfwInit()) {
         LOG_F(FATAL, "Failed to initialize GLFW.");
-        cleanup();
-        return -1;
+        return shutDown(-1);
     }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -174,7 +173,7 @@ int main(int argc, char const *argv[]) {
     // TODO(Derek): Allow to be changed during runtime ( http://www.glfw.org/docs/latest/window_guide.html )
     if (confFullscreen == 0) {
         window = glfwCreateWindow(confScreenWidth, confScreenHeight, "OpenGL Experiments", NULL, NULL);
-        LOG_F(INFO, "Windowed mode enabled");
+        LOG_F(INFO, "Windowed mode, width: {}, height: {}", confScreenWidth, confScreenHeight);
     } else if (confFullscreen == 1) {
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -185,20 +184,17 @@ int main(int argc, char const *argv[]) {
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
         window = glfwCreateWindow(mode->width, mode->height, "OpenGL Experiments", monitor, NULL);
-        LOG_F(INFO, "Windowed fullscreen mode enabled");
+        LOG_F(INFO, "Windowed fullscreen mode, width: {}, height: {}", mode->width, mode->height);
     } else if (confFullscreen == 2) {
         LOG_F(FATAL, "Fullscreen mode not yet implemented");
-        cleanup();
-        return -1;
+        return shutDown(-1);
     } else {
         LOG_F(FATAL, "Fullscreen mode setting invalid");
-        cleanup();
-        return -1;
+        return shutDown(-1);
     }
     if (window == NULL) {
         LOG_F(FATAL, "Failed to create GLFW window");
-        cleanup();
-        return -1;
+        return shutDown(-1);
     }
 
     glfwMakeContextCurrent(window);
@@ -215,31 +211,28 @@ int main(int argc, char const *argv[]) {
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         LOG_F(FATAL, "Failed to initialise GLAD");
-        cleanup();
-        return -1;
+        return shutDown(-1);
     }
 
     glEnable(GL_DEPTH_TEST);
 
-    LOG_F(INFO, "Loading Shaders");
+    LOG_F(DEBUG, "Loading Shaders");
     int shaderProgram = loadShader(VERTEX_FILE, FRAGMENT_FILE);
 
 
-    LOG_F(INFO, "Loading textures");
+    LOG_F(DEBUG, "Loading textures");
     unsigned int atexture = loadTexture(TEXTURE_FILE);
 
 
-    LOG_F(INFO, "Loading models");
+    LOG_F(DEBUG, "Loading models");
     unsigned int VAO, VBO, numVertices;
     if (loadModel(MODEL_FILE, &VAO, &VBO, &numVertices)) {
-        cleanup();
-        return -1;
+        return shutDown(-1);
     }
 
     std::vector<renderObject> allObjects;
     if (loadAllObjects(OBJECTS_LIST_FILE, allObjects)) {
-        cleanup();
-        return -1;
+        return shutDown(-1);
     }
 
     glUseProgram(shaderProgram);
@@ -250,7 +243,7 @@ int main(int argc, char const *argv[]) {
 
 
 
-    LOG_F(INFO, "Main loop");
+    LOG_F(DEBUG, "Main loop");
     while (!glfwWindowShouldClose(window)) {
         // Only do things if window is focused
         if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
@@ -307,6 +300,5 @@ int main(int argc, char const *argv[]) {
     // glDeleteBuffers(1, &EBO);
 
 
-    cleanup();
-    return 0;
+    return shutDown(0);
 }
