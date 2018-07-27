@@ -221,7 +221,7 @@ int main(int argc, char const *argv[]) {
     unsigned int atexture = loadTexture(TEXTURE_FILE);
 
     // Objects
-    std::vector<renderObject> allObjects;
+    std::vector<InstanceObject> allObjects;
     if (loadAllObjects(OBJECTS_LIST_FILE, allObjects)) {
         return shutDown(-1);
     }
@@ -270,14 +270,14 @@ int main(int argc, char const *argv[]) {
             ////
 
 
-            for (renderObject obj: allObjects) {
+            for (InstanceObject obj: allObjects) {
                 mat4 model(1.0f);
                 model = translate(model, obj.pos);
                 model = rotate(model, obj.angle, obj.rot);
                 model = scale(model, obj.scale);
                 glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
-                glBindVertexArray(obj.VAO);
-                glDrawArrays(GL_TRIANGLES, 0, obj.numVertices);
+                glBindVertexArray(obj.renderObj.VAO);
+                glDrawArrays(GL_TRIANGLES, 0, obj.renderObj.numVertices);
             }
 
 
@@ -297,9 +297,9 @@ int main(int argc, char const *argv[]) {
 
 
     // TODO(Derek): move into cleanup function
-    for (renderObject obj: allObjects) {
-        glDeleteVertexArrays(1, &obj.VAO);
-        glDeleteBuffers(1, &obj.VBO);
+    for (InstanceObject obj: allObjects) {
+        glDeleteVertexArrays(1, &obj.renderObj.VAO);
+        glDeleteBuffers(1, &obj.renderObj.VBO);
         // glDeleteBuffers(1, &obj.EBO);
     }
 

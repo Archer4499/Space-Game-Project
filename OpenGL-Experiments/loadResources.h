@@ -10,13 +10,17 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
 
 int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO);
 
-struct renderObject {
-    vec3 pos;
-    float angle;
-    vec3 rot;
-    vec3 scale;
+struct RenderObject {
     unsigned int VAO, VBO, numVertices;
     unsigned int texID;
 };
 
-int loadAllObjects(const char *listPath, std::vector<renderObject> &allObjects);
+struct InstanceObject {
+    vec3 pos;
+    float angle;
+    vec3 rot;
+    vec3 scale;
+    RenderObject renderObj;
+};
+
+int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects);

@@ -292,7 +292,7 @@ int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
     return 0;
 }
 
-int loadAllObjects(const char *listPath, std::vector<renderObject> &allObjects) {
+int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects) {
     // TODO(Derek): Just loading model for now, loading matching texture to do later
     LOG_F(DEBUG, "Loading all objects from: {}", listPath);
     std::string list = readFile(listPath);
@@ -362,7 +362,10 @@ int loadAllObjects(const char *listPath, std::vector<renderObject> &allObjects) 
                     return 1;
                 }
 
-                renderObject obj = {pos, angle, rot, scale, VAO, VBO, numVertices, 0};
+                unsigned int texID = 0;
+
+                RenderObject renObj = {VAO, VBO, numVertices, texID};
+                InstanceObject obj = {pos, angle, rot, scale, renObj};
                 allObjects.push_back(obj);
             }
             skipComments(list, i);
