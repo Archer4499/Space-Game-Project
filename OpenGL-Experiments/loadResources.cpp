@@ -68,7 +68,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
     char infoLog[512];
 
     // Compile vertex shader
-    LOG_F(INFO, "Compiling vertex shader.");
+    LOG_F(DEBUG, "Compiling vertex shader.");
     glShaderSource(vertexShader, 1, &vertexShaderSrc, NULL);
     glCompileShader(vertexShader);
 
@@ -80,12 +80,12 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
         if (!success) {
             LOG_F(ERR, "Vertex Shader Compilation Failed: {}", infoLog);
         } else {
-            LOG_F(INFO, "{}", infoLog);
+            LOG_F(DEBUG, "{}", infoLog);
         }
     }
 
     // Compile fragment shader
-    LOG_F(INFO, "Compiling fragment shader.");
+    LOG_F(DEBUG, "Compiling fragment shader.");
     glShaderSource(fragmentShader, 1, &fragmentShaderSrc, NULL);
     glCompileShader(fragmentShader);
 
@@ -97,13 +97,13 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
         if (!success) {
             LOG_F(ERR, "Fragment Shader Compilation Failed: {}", infoLog);
         } else {
-            LOG_F(INFO, "{}", infoLog);
+            LOG_F(DEBUG, "{}", infoLog);
         }
     }
 
 
     // Link shaders
-    LOG_F(INFO, "Linking program");
+    LOG_F(DEBUG, "Linking program");
     int shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
@@ -117,7 +117,7 @@ int loadShader(const char *vertexPath, const char *fragmentPath) {
         if (!success) {
             LOG_F(ERR, "Shader Program Linking Failed: {}", infoLog);
         } else {
-            LOG_F(INFO, "{}", infoLog);
+            LOG_F(DEBUG, "{}", infoLog);
         }
     }
 
@@ -148,7 +148,7 @@ unsigned int loadTexture(const char *texturePath) {
         LOG_F(ERR, "Failed to load texture: {}", texturePath);
         return NULL;
     }
-    LOG_F(INFO, "Loaded texture: {}, w = {}, h = {}, channels = {}", texturePath, texWidth, texHeight, nrChannels);
+    LOG_F(DEBUG, "Loaded texture: {}, w = {}, h = {}, channels = {}", texturePath, texWidth, texHeight, nrChannels);
 
     if (nrChannels == 3) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -256,8 +256,8 @@ int loadModel(const char *modelPath, unsigned int *VAO, unsigned int *VBO, unsig
     }
 
 
-    LOG_F(INFO, "Loaded model: {}, Vertices = {}, TexCoords = {}, Indices = {}", modelPath, attrib.vertices.size()/3, attrib.texcoords.size()/2, *numVertices);
-    LOG_F(INFO, "Transformed into: {} vertices", *numVertices);
+    LOG_F(DEBUG, "Loaded model: {}, Vertices = {}, TexCoords = {}, Indices = {}", modelPath, attrib.vertices.size()/3, attrib.texcoords.size()/2, *numVertices);
+    // LOG_F(INFO, "Transformed into: {} vertices", *numVertices);
 
     return 0;
 }
@@ -309,7 +309,7 @@ int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
 }
 
 int loadAllObjects(const char *listPath, std::vector<renderObject> allObjects) {
-    LOG_F(INFO, "Loading all objects from: {}", listPath);
+    LOG_F(DEBUG, "Loading all objects from: {}", listPath);
     std::string list = readFile(listPath);
     if (list == "") {
         LOG_F(WARN, "Object list file empty, no objects loaded.");
