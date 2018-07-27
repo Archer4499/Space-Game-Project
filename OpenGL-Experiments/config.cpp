@@ -11,7 +11,11 @@ std::string Config::getString(std::string label) {
     return data[label];
 }
 int Config::getInt(std::string label) {
-    return std::stoi(data[label]);
+    try {
+        return std::stoi(data[label]);
+    } catch (...) {
+        return 0;
+    }
 }
 bool Config::getBool(std::string label) {
     std::string value = data[label];
@@ -33,39 +37,33 @@ int loadConfig(Config *conf, const char *fileName) {
     }
 
     std::string line;
+    size_t lineCount = 0;
 
     while (std::getline(fs, line)) {
         size_t i = 0;
-
-        // Line:
-        eatSpaces(line, i);
+        ++lineCount;
 
         // Skip Comment Lines
+        eatSpaces(line, i);
         if (line[i] == '#') continue;
 
         // Tag
-        std::string tag;
-
-        while (line[i] != ':' && i < line.length()) {
-            tag += line[i++];
-        }
-
-        if (tag.length() == 0 || line[i++] != ':') {
-            LOG_F(ERR, "Invalid line in config file: {} at char index:{}", fileName, static_cast<int>(fs.tellg()) - (line.length()-i-1));
+        std::string tag = stringUntilSpace(line, i);
+        if (tag.length() == 0) {
+            LOG_F(ERR, "Invalid line in config file: {} at line:{}, column:{}", fileName, lineCount, i+1);
             return 2;
         }
 
-        eatSpaces(line, i);
-
         // Value
-        std::string value;
-
-        // Ignore comments at end of line (no spaces in values)
-        while (line[i] != '#' && !isspace(line[i]) && i < line.length()) {
-            value += line[i++];
-        }
+        std::string value = stringUntilSpace(line, i);
         if (value.length() == 0) {
-            LOG_F(ERR, "Invalid value in config file: {} at char index:{}", fileName, static_cast<int>(fs.tellg()) - (line.length()-i));
+            LOG_F(ERR, "Invalid value in config file: {} at line:{}, column:{}", fileName, lineCount, i+1);
+            return 2;
+        }
+
+        // Allow only comments at end of line
+        if (i < line.length() && line[i] != '#') {
+            LOG_F(ERR, "Invalid text at end of line in config file: {} at line:{}, column:{}", fileName, lineCount, i+1);
             return 2;
         }
 
@@ -92,7 +90,7 @@ int saveConfig(Config *conf, const char *fileName) {
     }
 
     for (std::map<std::string, std::string>::iterator it = (conf->data).begin(); it != (conf->data).end(); ++it) {
-        fmt::print(fs, "{}: {}\n", it->first, it->second);
+        fmt::print(fs, "{} {}\n", it->first, it->second);
     }
 
     fclose(fs);
