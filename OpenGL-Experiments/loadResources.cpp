@@ -114,38 +114,48 @@ int loadShader(const char *vertexPath, const char *fragmentPath, unsigned int &s
 
 
 int loadTexture(const char *texturePath, unsigned int &texID) {
-    int texWidth, texHeight, nrChannels;
+    int texWidth, texHeight, nrComponents;
+
+    // tell stb_image.h to flip loaded texture's on the y-axis.
+    stbi_set_flip_vertically_on_load(true);
+
+    unsigned char *data = stbi_load(texturePath, &texWidth, &texHeight, &nrComponents, 0);
+    if (!data) {
+        LOG_F(ERR, "Failed to load texture: {}", texturePath);
+        stbi_image_free(data);
+        return 1;
+    }
+
+    GLenum format;
+    if (nrComponents == 1) {
+        format = GL_RED;
+    } else if (nrComponents == 3) {
+        format = GL_RGB;
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    } else if (nrComponents == 4) {
+        format = GL_RGBA;
+    } else {
+        LOG_F(ERR, "Texture: {} not RED, RGB or RGBA.", texturePath);
+        stbi_image_free(data);
+        return 1;
+    }
 
     glGenTextures(1, &texID);
+
     glBindTexture(GL_TEXTURE_2D, texID);
-     // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   // set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexImage2D(GL_TEXTURE_2D, 0, format, texWidth, texHeight, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     // set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-
-    unsigned char *data = stbi_load(texturePath, &texWidth, &texHeight, &nrChannels, 0);
-    if (!data) {
-        LOG_F(ERR, "Failed to load texture: {}", texturePath);
-        return 1;
-    }
-    LOG_F(DEBUG, "Loaded texture: {}, w = {}, h = {}, channels = {}", texturePath, texWidth, texHeight, nrChannels);
-
-    if (nrChannels == 3) {
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    } else if (nrChannels == 4) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texWidth, texHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    } else {
-        LOG_F(ERR, "Texture: {} not RGB or RGBA.", texturePath);
-        return 1;
-    }
-    glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    LOG_F(DEBUG, "Loaded texture: {}, w = {}, h = {}, channels = {}", texturePath, texWidth, texHeight, nrComponents);
 
     stbi_image_free(data);
 
@@ -176,14 +186,14 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
     VBO = 0;
     numVertices = 0;
 
-    bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath);
+    bool success = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath);
 
     if (!err.empty()) {
         LOG_F(ERR, "LoadObj error: {}", err);
         return 1;
     }
 
-    if (!ret) {
+    if (!success) {
         LOG_F(ERR, "Loading object: {} failed.", modelPath);
         return 1;
     }
