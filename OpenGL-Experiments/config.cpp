@@ -31,10 +31,7 @@ int loadConfig(Config *conf, const char *fileName) {
 
     std::ifstream fs(fileName);
 
-    if (!fs.is_open()) {
-        LOG_F(ERR, "Error opening config file: {} during load", fileName);
-        return 1;
-    }
+    LOG_RETURN(ERR, !fs.is_open(), 1, "Error opening config file: {} during load", fileName);
 
     std::string line;
     size_t lineCount = 0;
@@ -49,23 +46,14 @@ int loadConfig(Config *conf, const char *fileName) {
 
         // Tag
         std::string tag = stringUntilSpace(line, i);
-        if (tag.length() == 0) {
-            LOG_F(ERR, "Invalid line in config file: {} at line:{}, column:{}", fileName, lineCount, i+1);
-            return 2;
-        }
+        LOG_RETURN(ERR, tag.empty(), 2, "Invalid line in config file: {} at line:{}, column:{}", fileName, lineCount, i+1);
 
         // Value
         std::string value = stringUntilSpace(line, i);
-        if (value.length() == 0) {
-            LOG_F(ERR, "Invalid value in config file: {} at line:{}, column:{}", fileName, lineCount, i+1);
-            return 2;
-        }
+        LOG_RETURN(ERR, value.empty(), 2, "Invalid value in config file: {} at line:{}, column:{}", fileName, lineCount, i+1);
 
         // Allow only comments at end of line
-        if (i < line.length() && line[i] != '#') {
-            LOG_F(ERR, "Invalid text at end of line in config file: {} at line:{}, column:{}", fileName, lineCount, i+1);
-            return 2;
-        }
+        LOG_RETURN(ERR, (i < line.length() && line[i] != '#'), 2, "Invalid text at end of line in config file: {} at line:{}, column:{}", fileName, lineCount, i+1);
 
         // Assign value
         conf->data[tag] = value;
@@ -84,10 +72,7 @@ int saveConfig(Config *conf, const char *fileName) {
 
     FILE *fs = _fsopen(fileName, "w", _SH_DENYWR);
 
-    if (fs == NULL) {
-        LOG_F(ERR, "Error opening config file: {} during save", fileName);
-        return 1;
-    }
+    LOG_RETURN(ERR, fs == NULL, 1, "Error opening config file: {} during save", fileName);
 
     for (std::map<std::string, std::string>::iterator it = (conf->data).begin(); it != (conf->data).end(); ++it) {
         fmt::print(fs, "{} {}\n", it->first, it->second);

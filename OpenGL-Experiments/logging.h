@@ -34,7 +34,6 @@ void logClose() {}
 
 #include "fmt/core.h"
 
-#define LOG_F(errLevel, format, ...) log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG(errLevel, format, ...) log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_IF(errLevel, condition, format, ...) if (condition) log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__)
 #define LOG_RETURN(errLevel, condition, returnCode, format, ...) if (condition) { log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__); return returnCode; }
@@ -57,7 +56,7 @@ void log(LogLevel errLevel, const char *file, unsigned int line, const char* for
 
 
 #ifdef LOG_STREAM_OVERLOAD
-// Allows user defined types with operator<< overloads to be used in LOG_F
+// Allows user defined types with operator<< overloads to be used in LOG
 #include "fmt/ostream.h"
 #endif
 

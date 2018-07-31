@@ -14,7 +14,8 @@
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
 // TODO(Derek): Give math and logging their own repositories
 // TODO(Derek): use relative paths for Additional Include Directories
-// NOTE: __declspec(deprecated) for deprecating functions
+// TODO(Derek): rename models to meshes
+// NOTE: __declspec(deprecated("Message here")) int function() {} for deprecating functions
 ////////////////////
 
 
@@ -117,8 +118,8 @@ void render() {
 
 int shutDown(int exitCode) {
     glfwTerminate();
-    LOG_F(INFO, "Running clean-up");
-    LOG_F(INFO, "Exit code: {}", exitCode);
+    LOG(INFO, "Running clean-up");
+    LOG(INFO, "Exit code: {}", exitCode);
     logClose();
     return exitCode;
 }
@@ -135,11 +136,11 @@ int main(int argc, char const *argv[]) {
 
     if (int err = loadConfig(&conf, CONFIG_FILE)) {
         if (err == 1) {
-            LOG_F(ERR, "Using and saving default config");
+            LOG(ERR, "Using and saving default config");
             if (saveConfig(&conf, CONFIG_FILE)) {
                 return shutDown(-1);
             }
-            LOG_F(INFO, "Config file saved to: {}", CONFIG_FILE);
+            LOG(INFO, "Config file saved to: {}", CONFIG_FILE);
         } else if (err == 2) {
             return shutDown(-1);
         }
@@ -148,15 +149,14 @@ int main(int argc, char const *argv[]) {
     int confScreenWidth = conf.getInt("width");
     int confScreenHeight = conf.getInt("height");
     int confFullscreen = conf.getInt("fullscreen");
-    LOG_F(INFO, "Config loaded from: {}", CONFIG_FILE);
+    LOG(INFO, "Config loaded from: {}", CONFIG_FILE);
     // END Load config
 
 
     // Init GLFW
-    if (!glfwInit()) {
-        LOG_F(FATAL, "Failed to initialize GLFW.");
-        return shutDown(-1);
-    }
+    int success = glfwInit();
+    LOG_RETURN(FATAL, !success, shutDown(-1), "Failed to initialize GLFW.");
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -170,7 +170,7 @@ int main(int argc, char const *argv[]) {
     // TODO(Derek): Allow to be changed during runtime ( http://www.glfw.org/docs/latest/window_guide.html )
     if (confFullscreen == 0) {
         window = glfwCreateWindow(confScreenWidth, confScreenHeight, "OpenGL Experiments", NULL, NULL);
-        LOG_F(INFO, "Windowed mode, width: {}, height: {}", confScreenWidth, confScreenHeight);
+        LOG(INFO, "Windowed mode, width: {}, height: {}", confScreenWidth, confScreenHeight);
     } else if (confFullscreen == 1) {
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -181,18 +181,15 @@ int main(int argc, char const *argv[]) {
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
         window = glfwCreateWindow(mode->width, mode->height, "OpenGL Experiments", monitor, NULL);
-        LOG_F(INFO, "Windowed fullscreen mode, width: {}, height: {}", mode->width, mode->height);
+        LOG(INFO, "Windowed fullscreen mode, width: {}, height: {}", mode->width, mode->height);
     } else if (confFullscreen == 2) {
-        LOG_F(FATAL, "Fullscreen mode not yet implemented");
+        LOG(FATAL, "Fullscreen mode not yet implemented");
         return shutDown(-1);
     } else {
-        LOG_F(FATAL, "Fullscreen mode setting invalid");
+        LOG(FATAL, "Fullscreen mode setting invalid");
         return shutDown(-1);
     }
-    if (window == NULL) {
-        LOG_F(FATAL, "Failed to create GLFW window");
-        return shutDown(-1);
-    }
+    LOG_RETURN(FATAL, window == NULL, shutDown(-1), "Failed to create GLFW window");
 
     glfwMakeContextCurrent(window);
     // Vsync
@@ -206,31 +203,25 @@ int main(int argc, char const *argv[]) {
     // Capture mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        LOG_F(FATAL, "Failed to initialise GLAD");
-        return shutDown(-1);
-    }
+    success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    LOG_RETURN(FATAL, !success, shutDown(-1), "Failed to initialise GLAD");
 
     glEnable(GL_DEPTH_TEST);
 
 
-    LOG_F(DEBUG, "Loading Shaders");
+    LOG(DEBUG, "Loading Shaders");
     unsigned int shaderProgram = glCreateProgram();
-    if (loadShader(VERTEX_FILE, FRAGMENT_FILE, shaderProgram)) {
-        LOG_F(FATAL, "Failed to load shaders");
-        return shutDown(-1);
-    }
+    int ret = loadShader(VERTEX_FILE, FRAGMENT_FILE, shaderProgram);
+    LOG_RETURN(FATAL, ret, shutDown(-1), "Failed to load shaders");
 
-    LOG_F(DEBUG, "Loading textures");
+    LOG(DEBUG, "Loading textures");
     unsigned int atexture;
     loadTexture(TEXTURE_FILE, atexture);
 
     // Objects
     std::vector<InstanceObject> allObjects;
-    if (loadAllObjects(OBJECTS_LIST_FILE, allObjects)) {
-        LOG_F(FATAL, "Failed to load objects");
-        return shutDown(-1);
-    }
+    ret = loadAllObjects(OBJECTS_LIST_FILE, allObjects);
+    LOG_RETURN(FATAL, ret, shutDown(-1), "Failed to load objects");
 
 
     glUseProgram(shaderProgram);
@@ -241,7 +232,7 @@ int main(int argc, char const *argv[]) {
 
 
 
-    LOG_F(DEBUG, "Main loop");
+    LOG(DEBUG, "Main loop");
     while (!glfwWindowShouldClose(window)) {
         // Only do things if window is focused
         if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
