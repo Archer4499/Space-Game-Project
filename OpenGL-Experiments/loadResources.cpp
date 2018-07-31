@@ -181,7 +181,6 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
     std::vector<tinyobj::material_t> materials;
     std::string err;
 
-    std::vector<Vertex> buffer;
 
     VBO = 0;
     numVertices = 0;
@@ -189,8 +188,7 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
     bool success = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath);
 
     if (!err.empty()) {
-        LOG_F(ERR, "LoadObj error: {}", err);
-        return 1;
+        LOG_F(WARN, "LoadObj error: {}", err);
     }
 
     if (!success) {
@@ -203,7 +201,8 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
         return 1;
     }
 
-    buffer.reserve(shapes.size() * shapes[0].mesh.indices.size() * sizeof(Vertex));
+    // Reserve enough space
+    std::vector<Vertex> buffer(shapes.size() * shapes[0].mesh.indices.size());
 
     // Load vertices from indices
     for (size_t i = 0; i < shapes.size(); ++i) {
@@ -390,8 +389,9 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
         while (i < list.length()) {
             while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
             // TODO(Derek): sanitize name
-            if (list[i] == ':') {
+            if (list[i] == ':') { // RenderObject
                 ++i;
+
                 name = stringUntilSpace(list, i);
                 if (name == "") {
                     LOG_F(WARN, "Object list file contains invalid name at char: {}", i);
@@ -421,7 +421,7 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 RenderObject renObj = {VAO, VBO, numVertices, texID};
                 // TODO(Derek): Check whether name already exists
                 renderObjects[name] = renObj;
-            } else if (list[i] == '@') {
+            } else if (list[i] == '@') { // InstanceObject
                 ++i;
                 name = stringUntilSpace(list, i);
                 if (name == "") {
