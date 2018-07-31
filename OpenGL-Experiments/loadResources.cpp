@@ -19,20 +19,18 @@ std::string readFile(const char *filePath) {
     fmt::memory_buffer out;
     size_t totalLen = 0;
 
-    if (FILE *fp = _fsopen(filePath, "r", _SH_DENYWR)) {
-        char buffer[1024];
-        while (size_t len = fread(buffer, 1, sizeof(buffer), fp)) {
-            fmt::format_to(out, "{}", buffer);
-            totalLen += len;
-            // This deals with not being able to use fmt::format_to_n because it is giving an error about not being able to access a private member
-            out.resize(totalLen);
-        }
-        fclose(fp);
-        return fmt::to_string(out);
-    } else {
-        LOG_F(ERR, "Could not read file: {}", filePath);
-        return "";
+    FILE *fp = _fsopen(filePath, "r", _SH_DENYWR);
+    LOG_RETURN(ERR, fp == NULL, "", "Could not read file: {}", filePath);
+
+    char buffer[1024];
+    while (size_t len = fread(buffer, 1, sizeof(buffer), fp)) {
+        fmt::format_to(out, "{}", buffer);
+        totalLen += len;
+        // This deals with not being able to use fmt::format_to_n because it is giving an error about not being able to access a private member
+        out.resize(totalLen);
     }
+    fclose(fp);
+    return fmt::to_string(out);
 }
 
 
@@ -46,12 +44,12 @@ int loadShader(const char *vertexPath, const char *fragmentPath, unsigned int &s
     const char *vertexShaderSrc = vertexShaderStr.c_str();
     const char *fragmentShaderSrc = fragmentShaderStr.c_str();
 
-    int success;
-    int logLength;
+    int success = 0;
+    int logLength = 0;
     char infoLog[512];
 
     // Compile vertex shader
-    LOG_F(DEBUG, "Compiling vertex shader.");
+    LOG(DEBUG, "Compiling vertex shader.");
     glShaderSource(vertexShader, 1, &vertexShaderSrc, NULL);
     glCompileShader(vertexShader);
 
@@ -61,34 +59,36 @@ int loadShader(const char *vertexPath, const char *fragmentPath, unsigned int &s
     if (logLength > 1) {
         glGetShaderInfoLog(vertexShader, sizeof(infoLog), NULL, infoLog);
         if (!success) {
-            LOG_F(ERR, "Vertex Shader Compilation Failed: {}", infoLog);
+            LOG(ERR, "Vertex Shader Compilation Failed: {}", infoLog);
             return 1;
         } else {
-            LOG_F(DEBUG, "{}", infoLog);
+            LOG(DEBUG, "{}", infoLog);
         }
     }
 
     // Compile fragment shader
-    LOG_F(DEBUG, "Compiling fragment shader.");
+    LOG(DEBUG, "Compiling fragment shader.");
     glShaderSource(fragmentShader, 1, &fragmentShaderSrc, NULL);
     glCompileShader(fragmentShader);
 
     // Check fragment shader
+    success = 0;
+    logLength = 0;
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &logLength);
     if (logLength > 1) {
         glGetShaderInfoLog(fragmentShader, sizeof(infoLog), NULL, infoLog);
         if (!success) {
-            LOG_F(ERR, "Fragment Shader Compilation Failed: {}", infoLog);
+            LOG(ERR, "Fragment Shader Compilation Failed: {}", infoLog);
             return 1;
         } else {
-            LOG_F(DEBUG, "{}", infoLog);
+            LOG(DEBUG, "{}", infoLog);
         }
     }
 
 
     // Link shaders
-    LOG_F(DEBUG, "Linking program");
+    LOG(DEBUG, "Linking program");
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
@@ -99,10 +99,10 @@ int loadShader(const char *vertexPath, const char *fragmentPath, unsigned int &s
     if (logLength > 1) {
         glGetShaderInfoLog(shaderProgram, sizeof(infoLog), NULL, infoLog);
         if (!success) {
-            LOG_F(ERR, "Shader Program Linking Failed: {}", infoLog);
+            LOG(ERR, "Shader Program Linking Failed: {}", infoLog);
             return 1;
         } else {
-            LOG_F(DEBUG, "{}", infoLog);
+            LOG(DEBUG, "{}", infoLog);
         }
     }
 
@@ -121,7 +121,7 @@ int loadTexture(const char *texturePath, unsigned int &texID) {
 
     unsigned char *data = stbi_load(texturePath, &texWidth, &texHeight, &nrComponents, 0);
     if (!data) {
-        LOG_F(ERR, "Failed to load texture: {}", texturePath);
+        LOG(ERR, "Failed to load texture: {}", texturePath);
         stbi_image_free(data);
         return 1;
     }
@@ -135,7 +135,7 @@ int loadTexture(const char *texturePath, unsigned int &texID) {
     } else if (nrComponents == 4) {
         format = GL_RGBA;
     } else {
-        LOG_F(ERR, "Texture: {} not RED, RGB or RGBA.", texturePath);
+        LOG(ERR, "Texture: {} not RED, RGB or RGBA.", texturePath);
         stbi_image_free(data);
         return 1;
     }
@@ -155,13 +155,16 @@ int loadTexture(const char *texturePath, unsigned int &texID) {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    LOG_F(DEBUG, "Loaded texture: {}, w = {}, h = {}, channels = {}", texturePath, texWidth, texHeight, nrComponents);
+    LOG(DEBUG, "Loaded texture: {}, w = {}, h = {}, channels = {}", texturePath, texWidth, texHeight, nrComponents);
 
     stbi_image_free(data);
 
     return 0;
 }
 
+void CalcNormal(vec3 &N, vec3 v0, vec3 v1, vec3 v2) {
+    N = normalize(cross(v2-v0, v1-v0));
+}
 
 int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsigned int &numVertices) {
     // Return 0 if success
@@ -174,6 +177,7 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
         vec3 pos;
         vec3 normal;
         vec2 texCoord;
+        // vec3 colour;
     };
 
     tinyobj::attrib_t attrib;
@@ -181,28 +185,21 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
     std::vector<tinyobj::material_t> materials;
     std::string err;
 
+    std::vector<Vertex> buffer;
 
     VBO = 0;
     numVertices = 0;
 
     bool success = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath);
 
-    if (!err.empty()) {
-        LOG_F(WARN, "LoadObj error: {}", err);
-    }
+    LOG_IF(WARN, !err.empty(), "LoadObj error: {}", err);
+    LOG_RETURN(ERR, !success, 1, "Loading object: {} failed.", modelPath);
 
-    if (!success) {
-        LOG_F(ERR, "Loading object: {} failed.", modelPath);
-        return 1;
-    }
-
-    if (attrib.normals.size() == 0) {
-        LOG_F(ERR, "Object: {} has no normals.", modelPath);
-        return 1;
-    }
+    // TODO(Derek): handle this case
+    LOG_RETURN(ERR, attrib.normals.size() == 0, 1, "Object: {} has no normals.", modelPath);
 
     // Reserve enough space
-    std::vector<Vertex> buffer(shapes.size() * shapes[0].mesh.indices.size());
+    buffer.reserve(shapes.size() * shapes[0].mesh.indices.size());
 
     // Load vertices from indices
     for (size_t i = 0; i < shapes.size(); ++i) {
@@ -211,6 +208,7 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
             Vertex vert;
 
             vert.pos = vec3(&attrib.vertices[3 * idx.vertex_index]);
+            // vert.colour = vec3(&attrib.colors[3 * idx.vertex_index]);
             vert.normal = vec3(&attrib.normals[3 * idx.normal_index]);
 
             if (attrib.texcoords.size() > 0) {
@@ -225,34 +223,31 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
         }
     }
 
-    if (buffer.size() > 0) {
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
+    LOG_RETURN(ERR, buffer.empty(), 1, "No valid object info in file: {}", modelPath);
 
-        glBindVertexArray(VAO);
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
 
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(Vertex), &buffer[0].pos[0], GL_STATIC_DRAW);
+    glBindVertexArray(VAO);
 
-        // position attribute
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0));
-        // normal attribute
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
-        // texture coord attribute
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, texCoord)));
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(Vertex), &buffer[0].pos[0], GL_STATIC_DRAW);
 
-        glBindVertexArray(0);
-    } else {
-        LOG_F(ERR, "No valid object info in file: {}", modelPath);
-        return 1;
-    }
+    // position attribute
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0));
+    // normal attribute
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
+    // texture coord attribute
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, texCoord)));
+
+    glBindVertexArray(0);
 
 
-    LOG_F(DEBUG, "Loaded model: {}, Vertices = {}, TexCoords = {}, Indices = {}", modelPath, attrib.vertices.size()/3, attrib.texcoords.size()/2, numVertices);
-    // LOG_F(INFO, "Transformed into: {} vertices", numVertices);
+    LOG(DEBUG, "Loaded model: {}, Vertices = {}, TexCoords = {}, Indices = {}", modelPath, attrib.vertices.size()/3, attrib.texcoords.size()/2, numVertices);
+    // LOG(INFO, "Transformed into: {} vertices", numVertices);
 
     return 0;
 }
@@ -304,13 +299,12 @@ int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
 }
 
 int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects) {
-    // TODO(Derek): Handle spaces in file paths
-    LOG_F(DEBUG, "Loading all objects from: {}", listPath);
+    // TODO(Derek): Handle spaces in input file paths
+    // TODO(Derek): sanitize input
+    LOG(DEBUG, "Loading all objects from: {}", listPath);
+
     std::string list = readFile(listPath);
-    if (list == "") {
-        LOG_F(WARN, "Object list file empty, no objects loaded.");
-        return 1;
-    }
+    LOG_RETURN(WARN, list.empty(), 1, "Object list file empty, no objects loaded.");
 
     size_t i = 0;
 
@@ -321,24 +315,16 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
 
         while (i < list.length()) {
             while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
-            // TODO(Derek): sanitize name
             name = stringUntilSpace(list, i);
             if (name != "") {
                 posStr = stringUntilSpace(list, i);
-                if (posStr == "") {
-                    LOG_F(WARN, "Object list file invalid at char: {}", i);
-                    return 1;
-                }
+                LOG_RETURN(WARN, posStr.empty(), 1, "Object list file invalid at char: {}", i);
+
                 rotStr = stringUntilSpace(list, i);
-                if (rotStr == "") {
-                    LOG_F(WARN, "Object list file invalid at char: {}", i);
-                    return 1;
-                }
+                LOG_RETURN(WARN, rotStr.empty(), 1, "Object list file invalid at char: {}", i);
+
                 scaleStr = stringUntilSpace(list, i);
-                if (scaleStr == "") {
-                    LOG_F(WARN, "Object list file invalid at char: {}", i);
-                    return 1;
-                }
+                LOG_RETURN(WARN, scaleStr.empty(), 1, "Object list file invalid at char: {}", i);
 
                 float angle;
                 vec3 pos, rot, scale;
@@ -363,16 +349,13 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                     z = std::stof(scaleStr.substr(end1 + (++end2)));
                     scale = {x, y, z};
                 } catch(...) {
-                    LOG_F(WARN, "Object list file contains invalid float on line with char: {}", i);
-                    return 1;
+                    LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line with char: {}", i);
                 }
 
-                LOG_F(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
+                LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
 
                 unsigned int VAO, VBO, numVertices;
-                if (loadModel(name.c_str(), VAO, VBO, numVertices)) {
-                    return 1;
-                }
+                if (loadModel(name.c_str(), VAO, VBO, numVertices)) return 1;
 
                 unsigned int texID = 0;
 
@@ -389,60 +372,42 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
         while (i < list.length()) {
             while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
             // TODO(Derek): sanitize name
-            if (list[i] == ':') { // RenderObject
+            if (list[i] == ':') {
+                // RenderObject
                 ++i;
 
                 name = stringUntilSpace(list, i);
-                if (name == "") {
-                    LOG_F(WARN, "Object list file contains invalid name at char: {}", i);
-                    return 1;
-                }
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
+
                 objFile = stringUntilSpace(list, i);
-                if (objFile == "") {
-                    LOG_F(WARN, "Object list file contains invalid object file name at char: {}", i);
-                    return 1;
-                }
+                LOG_RETURN(WARN, objFile.empty(), 1, "Object list file contains invalid object file name at char: {}", i);
+
                 texFile = stringUntilSpace(list, i);
-                if (texFile == "") {
-                    LOG_F(WARN, "Object list file contains invalid texture file name at char: {}", i);
-                    return 1;
-                }
+                LOG_RETURN(WARN, texFile.empty(), 1, "Object list file contains invalid texture file name at char: {}", i);
 
                 unsigned int VAO, VBO, numVertices;
-                if (loadModel(objFile.c_str(), VAO, VBO, numVertices)) {
-                    return 1;
-                }
+                if (loadModel(objFile.c_str(), VAO, VBO, numVertices)) return 1;
 
                 unsigned int texID;
-                if (loadTexture(texFile.c_str(), texID)) {
-                    return 1;
-                }
+                if (loadTexture(texFile.c_str(), texID)) return 1;
 
                 RenderObject renObj = {VAO, VBO, numVertices, texID};
                 // TODO(Derek): Check whether name already exists
                 renderObjects[name] = renObj;
-            } else if (list[i] == '@') { // InstanceObject
+            } else if (list[i] == '@') {
+                // InstanceObject
                 ++i;
                 name = stringUntilSpace(list, i);
-                if (name == "") {
-                    LOG_F(WARN, "Object list file contains invalid name at char: {}", i);
-                    return 1;
-                }
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
+
                 posStr = stringUntilSpace(list, i);
-                if (posStr == "") {
-                    LOG_F(WARN, "Object list file contains invalid position at char: {}", i);
-                    return 1;
-                }
+                LOG_RETURN(WARN, posStr.empty(), 1, "Object list file contains invalid position at char: {}", i);
+
                 rotStr = stringUntilSpace(list, i);
-                if (rotStr == "") {
-                    LOG_F(WARN, "Object list file contains invalid rotation at char: {}", i);
-                    return 1;
-                }
+                LOG_RETURN(WARN, rotStr.empty(), 1, "Object list file contains invalid rotation at char: {}", i);
+
                 scaleStr = stringUntilSpace(list, i);
-                if (scaleStr == "") {
-                    LOG_F(WARN, "Object list file contains invalid scale at char: {}", i);
-                    return 1;
-                }
+                LOG_RETURN(WARN, scaleStr.empty(), 1, "Object list file contains invalid scale at char: {}", i);
 
                 float angle;
                 vec3 pos, rot, scale;
@@ -467,11 +432,10 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                     z = std::stof(scaleStr.substr(end1 + (++end2)));
                     scale = {x, y, z};
                 } catch(...) {
-                    LOG_F(WARN, "Object list file contains invalid float on line with char: {}", i);
-                    return 1;
+                    LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line with char: {}", i);
                 }
 
-                LOG_F(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
+                LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
 
                 // TODO(Derek): check whether name exists first
                 InstanceObject obj = {pos, angle, rot, scale, renderObjects[name]};
@@ -479,7 +443,7 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
             }
         }
     } else {
-        LOG_F(WARN, "Object list file either invalid or version not supported");
+        LOG(WARN, "Object list file either invalid or version not supported");
         return 1;
     }
 
