@@ -20,7 +20,9 @@ enum LogLevel {
 
 #if LOG_TYPE == LOG_TYPE_NO
 
-#define LOG_F(errLevel, ...)
+#define LOG(errLevel, ...)
+#define LOG_IF(errLevel, ...)
+#define LOG_RETURN(errLevel, condition, returnCode, ...) if (condition) return returnCode;
 // TODO(Derek): Define LOG_S using a null output stream
 int logOpen(const char *alogPath="debug.log", const char *amode="w", LogLevel alogLevel=WARN) {return 0;}
 void logClose() {}
@@ -32,9 +34,10 @@ void logClose() {}
 
 #include "fmt/core.h"
 
-// TODO(Derek): possibly change to LOG
-// TODO(Derek): add conditional log
 #define LOG_F(errLevel, format, ...) log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__)
+#define LOG(errLevel, format, ...) log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__)
+#define LOG_IF(errLevel, condition, format, ...) if (condition) log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__)
+#define LOG_RETURN(errLevel, condition, returnCode, format, ...) if (condition) { log(errLevel, __FILE__, __LINE__, format, __VA_ARGS__); return returnCode; }
 
 
 // std::string curDateTime();
