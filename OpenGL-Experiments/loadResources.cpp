@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 
 #include <string>
+#include <map>
+#include <unordered_map>
 
 #include "logging.h"
 #include "fmt\format.h"
@@ -162,11 +164,7 @@ int loadTexture(const char *texturePath, unsigned int &texID) {
     return 0;
 }
 
-void CalcNormal(vec3 &N, vec3 v0, vec3 v1, vec3 v2) {
-    N = normalize(cross(v2-v0, v1-v0));
-}
-
-int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsigned int &numVertices) {
+int loadMesh(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsigned int &numVertices) {
     // Return 0 if success
     // Return 1 if failed to load model file
     // NOTE(optimisation): use map or set for a unique collection of vertices(with texCoords/normals) and re-index that
@@ -177,7 +175,6 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
         vec3 pos;
         vec3 normal;
         vec2 texCoord;
-        // vec3 colour;
     };
 
     tinyobj::attrib_t attrib;
@@ -187,7 +184,7 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
 
     std::vector<Vertex> buffer;
 
-    VBO = 0;
+    VBO = 0; // TODO(Derek): Is this needed?
     numVertices = 0;
 
     bool success = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath);
@@ -208,7 +205,6 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
             Vertex vert;
 
             vert.pos = vec3(&attrib.vertices[3 * idx.vertex_index]);
-            // vert.colour = vec3(&attrib.colors[3 * idx.vertex_index]);
             vert.normal = vec3(&attrib.normals[3 * idx.normal_index]);
 
             if (attrib.texcoords.size() > 0) {
@@ -252,6 +248,215 @@ int loadModel(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsig
     return 0;
 }
 
+int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &renderObj) {
+    // Return 0 if success
+    // Return 1 if failed to load model file
+    // NOTE(optimisation): use map or set for a unique collection of vertices(with texCoords/normals) and re-index that
+    //      ^ Doesn't really help much for the effort required
+    // NOTE: possibly use different VBOs for different shapes
+
+    struct Material {
+        // vec3 ambient;
+        // vec3 diffuse;
+        // vec3 specular;
+        // vec3 transmittance;
+        // vec3 emission;
+        unsigned int ambientTex;
+        unsigned int diffuseTex;
+        unsigned int specularTex;
+        unsigned int specularHighlightTex;
+        unsigned int bumpTex;
+        unsigned int displacementTex;
+        unsigned int alphaTex;
+        unsigned int reflectionTex;
+    };
+
+    struct Vertex {
+        vec3 pos;
+        vec3 normal;
+        vec2 texCoord;
+    };
+
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string err;
+
+
+    bool success = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath, materialBaseDir);
+
+    LOG_IF(WARN, !err.empty(), "LoadObj error: {}", err);
+    LOG_RETURN(ERR, !success, 1, "Loading object: {} failed.", modelPath);
+
+    LOG_RETURN(ERR, shapes.empty(), 1, "No valid object info in file: {}", modelPath);
+
+    LOG(DEBUG, "Loading model: {} with {} materials, {} shapes, {} vertices and {} texCoords", modelPath, shapes.size(), materials.size(), attrib.vertices.size()/3, attrib.texcoords.size()/2);
+
+
+    std::unordered_map<std::string, unsigned int> textures; // TODO(Derek): make persistent across models
+    std::vector<Material> mats(materials.size());
+
+    // Materials
+    unsigned int texID;
+    for (size_t i = 0; i < materials.size(); ++i) {
+        LOG(DEBUG, "    Loading material: {}", materials[i].name);
+
+        // mats[i].ambient       = vec3(materials[i].ambient);
+        // mats[i].diffuse       = vec3(materials[i].diffuse);
+        // mats[i].specular      = vec3(materials[i].specular);
+        // mats[i].transmittance = vec3(materials[i].transmittance);
+        // mats[i].emission      = vec3(materials[i].emission);
+
+        if (!materials[i].ambient_texname.empty()) {
+            std::string name = materialBaseDir + materials[i].ambient_texname;
+            if (textures.count(name)) {
+                texID = textures[name];
+            } else {
+                if (loadTexture((name).c_str(), texID)) return 1;
+                textures[name] = texID;
+            }
+            mats[i].ambientTex = texID;
+        }
+        if (!materials[i].diffuse_texname.empty()) {
+            std::string name = materialBaseDir + materials[i].diffuse_texname;
+            if (textures.count(name)) {
+                texID = textures[name];
+            } else {
+                if (loadTexture((name).c_str(), texID)) return 1;
+                textures[name] = texID;
+            }
+            mats[i].diffuseTex = texID;
+        }
+        if (!materials[i].specular_texname.empty()) {
+            std::string name = materialBaseDir + materials[i].specular_texname;
+            if (textures.count(name)) {
+                texID = textures[name];
+            } else {
+                if (loadTexture((name).c_str(), texID)) return 1;
+                textures[name] = texID;
+            }
+            mats[i].specularTex = texID;
+        }
+        if (!materials[i].specular_highlight_texname.empty()) {
+            std::string name = materialBaseDir + materials[i].specular_highlight_texname;
+            if (textures.count(name)) {
+                texID = textures[name];
+            } else {
+                if (loadTexture((name).c_str(), texID)) return 1;
+                textures[name] = texID;
+            }
+            mats[i].specularHighlightTex = texID;
+        }
+        if (!materials[i].bump_texname.empty()) {
+            std::string name = materialBaseDir + materials[i].bump_texname;
+            if (textures.count(name)) {
+                texID = textures[name];
+            } else {
+                if (loadTexture((name).c_str(), texID)) return 1;
+                textures[name] = texID;
+            }
+            mats[i].bumpTex = texID;
+        }
+        if (!materials[i].displacement_texname.empty()) {
+            std::string name = materialBaseDir + materials[i].displacement_texname;
+            if (textures.count(name)) {
+                texID = textures[name];
+            } else {
+                if (loadTexture((name).c_str(), texID)) return 1;
+                textures[name] = texID;
+            }
+            mats[i].displacementTex = texID;
+        }
+        if (!materials[i].alpha_texname.empty()) {
+            std::string name = materialBaseDir + materials[i].alpha_texname;
+            if (textures.count(name)) {
+                texID = textures[name];
+            } else {
+                if (loadTexture((name).c_str(), texID)) return 1;
+                textures[name] = texID;
+            }
+            mats[i].alphaTex = texID;
+        }
+        if (!materials[i].reflection_texname.empty()) {
+            std::string name = materialBaseDir + materials[i].reflection_texname;
+            if (textures.count(name)) {
+                texID = textures[name];
+            } else {
+                if (loadTexture((name).c_str(), texID)) return 1;
+                textures[name] = texID;
+            }
+            mats[i].reflectionTex = texID;
+        }
+    }
+    //////////
+
+    bool hasNormals = attrib.normals.size() > 0;
+    bool hasTexCoords = attrib.texcoords.size() > 0;
+
+    // Load vertices from indices
+    for (const tinyobj::shape_t shape : shapes) {
+        size_t numVertices = shape.mesh.indices.size();
+        LOG_RETURN(ERR, numVertices == 0, 1, "No vertices in shape: {} in file: {}", shape.name, modelPath);
+
+        std::vector<Vertex> buffer(numVertices);
+
+        for (size_t i = 0; i < shape.mesh.num_face_vertices.size(); ++i) {
+            size_t matID = shape.mesh.material_ids[i];
+            // TODO(Derek): Use default material.
+            LOG_RETURN(ERR, (matID < 0 || matID >= materials.size()), 1, "Invalid material ID in shape: {} in file: {}", shape.name, modelPath);
+
+            for (size_t k = 0; k < 3; ++k) {
+                size_t j = (3*i)+k;
+                tinyobj::index_t idx = shape.mesh.indices[j];
+
+                buffer[j].pos = vec3(&attrib.vertices[3 * idx.vertex_index]);
+
+                if (hasNormals) {
+                    buffer[j].normal = vec3(&attrib.normals[3 * idx.normal_index]);
+                }
+
+                if (hasTexCoords) {
+                    buffer[j].texCoord = vec2(&attrib.texcoords[2 * idx.texcoord_index]);
+                } else {
+                    buffer[j].texCoord = vec2(0.0f);
+                }
+            }
+            if (!hasNormals) {
+                vec3 norm = normalize(cross(buffer[3*i+2].pos-buffer[3*i+0].pos, buffer[3*i+1].pos-buffer[3*i+0].pos));
+                buffer[3*i+0].normal = norm;
+                buffer[3*i+1].normal = norm;
+                buffer[3*i+2].normal = norm;
+            }
+        }
+
+        unsigned int VAO, VBO;
+
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
+
+        glGenBuffers(1, &VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        // TODO(Derek): how multiple VBOs??
+
+        glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(Vertex), &buffer[0].pos[0], GL_STATIC_DRAW);
+
+        // position attribute
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0));
+        // normal attribute
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
+        // texture coord attribute
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, texCoord)));
+        LOG(DEBUG, "    Loaded shape: {} with {} indices", shape.name, numVertices);
+
+        renderObj = {VAO, VBO, numVertices, 0};
+    }
+
+    glBindVertexArray(0);
+    return 0;
+}
 
 int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
     // Return 0 if success
@@ -355,7 +560,7 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
 
                 unsigned int VAO, VBO, numVertices;
-                if (loadModel(name.c_str(), VAO, VBO, numVertices)) return 1;
+                if (loadMesh(name.c_str(), VAO, VBO, numVertices)) return 1;
 
                 unsigned int texID = 0;
 
@@ -386,19 +591,20 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 LOG_RETURN(WARN, texFile.empty(), 1, "Object list file contains invalid texture file name at char: {}", i);
 
                 unsigned int VAO, VBO, numVertices;
-                if (loadModel(objFile.c_str(), VAO, VBO, numVertices)) return 1;
+                if (loadMesh(objFile.c_str(), VAO, VBO, numVertices)) return 1;
 
                 unsigned int texID;
                 if (loadTexture(texFile.c_str(), texID)) return 1;
 
-                RenderObject renObj = {VAO, VBO, numVertices, texID};
-                // TODO(Derek): Check whether name already exists
-                renderObjects[name] = renObj;
+                RenderObject renderObj = {VAO, VBO, numVertices, texID};
+                auto result = renderObjects.emplace(name, renderObj);
+                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate name at char: {}", i);
             } else if (list[i] == '@') {
                 // InstanceObject
                 ++i;
                 name = stringUntilSpace(list, i);
                 LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
+                LOG_RETURN(WARN, !renderObjects.count(name), 1, "Object list file contains undefined name on line at char: {}", i);
 
                 posStr = stringUntilSpace(list, i);
                 LOG_RETURN(WARN, posStr.empty(), 1, "Object list file contains invalid position at char: {}", i);
@@ -437,7 +643,102 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
 
                 LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
 
-                // TODO(Derek): check whether name exists first
+                InstanceObject obj = {pos, angle, rot, scale, renderObjects[name]};
+                allObjects.push_back(obj);
+            }
+        }
+    } else if (ver == "v1.2") {
+        // File v1.2
+        std::map<std::string, RenderObject> renderObjects;
+        std::string name, objFile, texFile, materialBaseDir, posStr, rotStr, scaleStr;
+
+        while (i < list.length()) {
+            while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
+            // TODO(Derek): sanitize name
+            if (list[i] == '&') {
+                // Mesh and texture
+                ++i;
+
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
+
+                objFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, objFile.empty(), 1, "Object list file contains invalid object file name at char: {}", i);
+
+                texFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, texFile.empty(), 1, "Object list file contains invalid texture file name at char: {}", i);
+
+                unsigned int VAO, VBO, numVertices;
+                if (loadMesh(objFile.c_str(), VAO, VBO, numVertices)) return 1;
+
+                unsigned int texID;
+                if (loadTexture(texFile.c_str(), texID)) return 1;
+
+                RenderObject renderObj = {VAO, VBO, numVertices, texID};
+                auto result = renderObjects.emplace(name, renderObj);
+                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate name at char: {}", i);
+            } else if (list[i] == ':') {
+                // Object (with .mtl info)
+                ++i;
+
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
+
+                objFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, objFile.empty(), 1, "Object list file contains invalid object file name at char: {}", i);
+
+                materialBaseDir = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, materialBaseDir.empty(), 1, "Object list file contains invalid material folder name at char: {}", i);
+
+                RenderObject renderObj;
+                if (loadModel(objFile.c_str(), materialBaseDir.c_str(), renderObj)) return 1;
+
+                auto result = renderObjects.emplace(name, renderObj);
+                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate name at char: {}", i);
+            } else if (list[i] == '@') {
+                // InstanceObject
+                ++i;
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
+                LOG_RETURN(WARN, !renderObjects.count(name), 1, "Object list file contains undefined name on line at char: {}", i);
+
+                posStr = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, posStr.empty(), 1, "Object list file contains invalid position at char: {}", i);
+
+                rotStr = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, rotStr.empty(), 1, "Object list file contains invalid rotation at char: {}", i);
+
+                scaleStr = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, scaleStr.empty(), 1, "Object list file contains invalid scale at char: {}", i);
+
+                float angle;
+                vec3 pos, rot, scale;
+
+                try {
+                    // Parsing "float,float,float"
+                    // ++ skips the ','
+                    size_t end1 = 0, end2 = 0, end3 = 0;
+                    float x = std::stof(posStr, &end1);
+                    float y = std::stof(posStr.substr(++end1), &end2);
+                    float z = std::stof(posStr.substr(end1 + (++end2)));
+                    pos = {x, y, z};
+
+                    angle = std::stof(rotStr, &end1);
+                    x = std::stof(rotStr.substr(++end1), &end2);
+                    y = std::stof(rotStr.substr(end1 + (++end2)), &end3);
+                    z = std::stof(rotStr.substr(end1 + end2 + (++end3)));
+                    rot = {x, y, z};
+
+                    x = std::stof(scaleStr, &end1);
+                    y = std::stof(scaleStr.substr(++end1), &end2);
+                    z = std::stof(scaleStr.substr(end1 + (++end2)));
+                    scale = {x, y, z};
+                } catch(...) {
+                    LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line with char: {}", i);
+                }
+
+                LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
+
                 InstanceObject obj = {pos, angle, rot, scale, renderObjects[name]};
                 allObjects.push_back(obj);
             }
