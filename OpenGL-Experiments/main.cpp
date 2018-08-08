@@ -14,7 +14,6 @@
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
 // TODO(Derek): Give math and logging their own repositories
 // TODO(Derek): use relative paths for Additional Include Directories
-// TODO(Derek): rename models to meshes
 // NOTE: __declspec(deprecated("Message here")) int function() {} for deprecating functions
 ////////////////////
 
@@ -35,11 +34,6 @@
 
 #define VERTEX_FILE "Resources/Shaders/shader.vert"
 #define FRAGMENT_FILE "Resources/Shaders/shader.frag"
-
-// #define TEXTURE_FILE "Resources/Textures/awesomeface.png"
-#define TEXTURE_FILE "Resources/Textures/container.jpg"
-// #define TEXTURE_FILE "Resources/Textures/chalet.jpg"
-// #define TEXTURE_FILE "Resources/Textures/item_box.png"
 
 
 // Globals //
@@ -103,6 +97,7 @@ void scroll_callback(GLFWwindow *window, double xOffset, double yOffset) {
 }
 
 void window_focus_callback(GLFWwindow *window, int focused) {
+    // TODO(Derek): stop camera jerking when refocused
     // TODO(Derek): when trying to resize window mouse moves to centre of window
     if (focused) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -214,23 +209,10 @@ int main(int argc, char const *argv[]) {
     int ret = loadShader(VERTEX_FILE, FRAGMENT_FILE, shaderProgram);
     LOG_RETURN(FATAL, ret, shutDown(-1), "Failed to load shaders");
 
-    LOG(DEBUG, "Loading textures");
-    unsigned int atexture;
-    loadTexture(TEXTURE_FILE, atexture);
-
     // Objects
     std::vector<InstanceObject> allObjects;
     ret = loadAllObjects(OBJECTS_LIST_FILE, allObjects);
     LOG_RETURN(FATAL, ret, shutDown(-1), "Failed to load objects");
-
-
-    glUseProgram(shaderProgram);
-
-    glUniform1i(glGetUniformLocation(shaderProgram, "atexture"), 0);
-    // glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
-    // glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
-
-
 
     LOG(DEBUG, "Main loop");
     while (!glfwWindowShouldClose(window)) {
@@ -246,17 +228,9 @@ int main(int argc, char const *argv[]) {
 
             render();
 
-            // TODO(Derek): move into render function somehow
-            // bind textures on corresponding texture units
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, atexture);
-            // glBindTexture(GL_TEXTURE_2D, texture1);
-            // glActiveTexture(GL_TEXTURE1);
-            // glBindTexture(GL_TEXTURE_2D, texture2);
-
             glUseProgram(shaderProgram);
 
-            // Transformations
+            // Camera transformations
             int width, height;
             glfwGetFramebufferSize(window, &width, &height);
             mat4 projection = perspective(radians(camera.Zoom), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
@@ -273,15 +247,9 @@ int main(int argc, char const *argv[]) {
                 model = rotate(model, obj.angle, obj.rot);
                 model = scale(model, obj.scale);
                 glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
-                glBindVertexArray(obj.renderObj.VAO);
-                glDrawArrays(GL_TRIANGLES, 0, obj.renderObj.numVertices);
+
+                obj.draw(shaderProgram);
             }
-
-
-            // glBindVertexArray(VAO);
-            // glDrawArrays(GL_TRIANGLES, 0, numVertices);
-            // // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-            // glBindVertexArray(0);
 
             glfwPollEvents();
             glfwSwapBuffers(window);
@@ -295,9 +263,11 @@ int main(int argc, char const *argv[]) {
 
     // TODO(Derek): move into cleanup function
     for (InstanceObject obj: allObjects) {
-        glDeleteVertexArrays(1, &obj.renderObj.VAO);
-        glDeleteBuffers(1, &obj.renderObj.VBO);
-        // glDeleteBuffers(1, &obj.EBO);
+        for (Model m : obj.renderObj.models) {
+            glDeleteVertexArrays(1, &m.VAO);
+            glDeleteBuffers(1, &m.VBO);
+            // glDeleteBuffers(1, &obj.EBO);
+        }
     }
 
 

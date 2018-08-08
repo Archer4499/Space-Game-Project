@@ -2,7 +2,6 @@
 
 #include <glad/glad.h>
 
-#include <string>
 #include <map>
 #include <unordered_map>
 
@@ -255,22 +254,6 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
     //      ^ Doesn't really help much for the effort required
     // NOTE: possibly use different VBOs for different shapes
 
-    struct Material {
-        // vec3 ambient;
-        // vec3 diffuse;
-        // vec3 specular;
-        // vec3 transmittance;
-        // vec3 emission;
-        unsigned int ambientTex;
-        unsigned int diffuseTex;
-        unsigned int specularTex;
-        unsigned int specularHighlightTex;
-        unsigned int bumpTex;
-        unsigned int displacementTex;
-        unsigned int alphaTex;
-        unsigned int reflectionTex;
-    };
-
     struct Vertex {
         vec3 pos;
         vec3 normal;
@@ -294,20 +277,45 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
 
 
     std::unordered_map<std::string, unsigned int> textures; // TODO(Derek): make persistent across models
-    std::vector<Material> mats(materials.size());
+    renderObj.materials.resize(materials.size());
 
     // Materials
     unsigned int texID;
     for (size_t i = 0; i < materials.size(); ++i) {
         LOG(DEBUG, "    Loading material: {}", materials[i].name);
 
-        // mats[i].ambient       = vec3(materials[i].ambient);
-        // mats[i].diffuse       = vec3(materials[i].diffuse);
-        // mats[i].specular      = vec3(materials[i].specular);
-        // mats[i].transmittance = vec3(materials[i].transmittance);
-        // mats[i].emission      = vec3(materials[i].emission);
+        // renderObj.materials[i].ambient       = vec3(materials[i].ambient);
+        // renderObj.materials[i].diffuse       = vec3(materials[i].diffuse);
+        // renderObj.materials[i].specular      = vec3(materials[i].specular);
+        // renderObj.materials[i].transmittance = vec3(materials[i].transmittance);
+        // renderObj.materials[i].emission      = vec3(materials[i].emission);
 
-        if (!materials[i].ambient_texname.empty()) {
+        std::string texNames[8] = {materials[i].ambient_texname,
+                                   materials[i].diffuse_texname,
+                                   materials[i].specular_texname,
+                                   materials[i].specular_highlight_texname,
+                                   materials[i].bump_texname,
+                                   materials[i].displacement_texname,
+                                   materials[i].alpha_texname,
+                                   materials[i].reflection_texname};
+
+        for (int j = 0; j < 8; ++j) {
+            if (!texNames[j].empty()) {
+                std::string name = materialBaseDir + texNames[j];
+                if (textures.count(name)) {
+                    texID = textures[name];
+                } else {
+                    if (loadTexture((name).c_str(), texID)) return 1;
+                    textures[name] = texID;
+                }
+                renderObj.materials[i].texID[j] = texID;
+            } else {
+                renderObj.materials[i].texID[j] = -1;
+            }
+        }
+
+
+        /*if (!materials[i].ambient_texname.empty()) {
             std::string name = materialBaseDir + materials[i].ambient_texname;
             if (textures.count(name)) {
                 texID = textures[name];
@@ -315,7 +323,10 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
                 if (loadTexture((name).c_str(), texID)) return 1;
                 textures[name] = texID;
             }
-            mats[i].ambientTex = texID;
+            renderObj.materials[i].ambient = true;
+            renderObj.materials[i].ambientTex = texID;
+        } else {
+            renderObj.materials[i].ambient = false;
         }
         if (!materials[i].diffuse_texname.empty()) {
             std::string name = materialBaseDir + materials[i].diffuse_texname;
@@ -325,7 +336,10 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
                 if (loadTexture((name).c_str(), texID)) return 1;
                 textures[name] = texID;
             }
-            mats[i].diffuseTex = texID;
+            renderObj.materials[i].diffuse = true;
+            renderObj.materials[i].diffuseTex = texID;
+        } else {
+            renderObj.materials[i].diffuse = false;
         }
         if (!materials[i].specular_texname.empty()) {
             std::string name = materialBaseDir + materials[i].specular_texname;
@@ -335,7 +349,10 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
                 if (loadTexture((name).c_str(), texID)) return 1;
                 textures[name] = texID;
             }
-            mats[i].specularTex = texID;
+            renderObj.materials[i].specular = true;
+            renderObj.materials[i].specularTex = texID;
+        } else {
+            renderObj.materials[i].specular = false;
         }
         if (!materials[i].specular_highlight_texname.empty()) {
             std::string name = materialBaseDir + materials[i].specular_highlight_texname;
@@ -345,7 +362,10 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
                 if (loadTexture((name).c_str(), texID)) return 1;
                 textures[name] = texID;
             }
-            mats[i].specularHighlightTex = texID;
+            renderObj.materials[i].specularHighlight = true;
+            renderObj.materials[i].specularHighlightTex = texID;
+        } else {
+            renderObj.materials[i].specularHighlight = false;
         }
         if (!materials[i].bump_texname.empty()) {
             std::string name = materialBaseDir + materials[i].bump_texname;
@@ -355,7 +375,10 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
                 if (loadTexture((name).c_str(), texID)) return 1;
                 textures[name] = texID;
             }
-            mats[i].bumpTex = texID;
+            renderObj.materials[i].bump = true;
+            renderObj.materials[i].bumpTex = texID;
+        } else {
+            renderObj.materials[i].bump = false;
         }
         if (!materials[i].displacement_texname.empty()) {
             std::string name = materialBaseDir + materials[i].displacement_texname;
@@ -365,7 +388,10 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
                 if (loadTexture((name).c_str(), texID)) return 1;
                 textures[name] = texID;
             }
-            mats[i].displacementTex = texID;
+            renderObj.materials[i].displacement = true;
+            renderObj.materials[i].displacementTex = texID;
+        } else {
+            renderObj.materials[i].displacement = false;
         }
         if (!materials[i].alpha_texname.empty()) {
             std::string name = materialBaseDir + materials[i].alpha_texname;
@@ -375,7 +401,10 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
                 if (loadTexture((name).c_str(), texID)) return 1;
                 textures[name] = texID;
             }
-            mats[i].alphaTex = texID;
+            renderObj.materials[i].alpha = true;
+            renderObj.materials[i].alphaTex = texID;
+        } else {
+            renderObj.materials[i].alpha = false;
         }
         if (!materials[i].reflection_texname.empty()) {
             std::string name = materialBaseDir + materials[i].reflection_texname;
@@ -385,8 +414,11 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
                 if (loadTexture((name).c_str(), texID)) return 1;
                 textures[name] = texID;
             }
-            mats[i].reflectionTex = texID;
-        }
+            renderObj.materials[i].reflection = true;
+            renderObj.materials[i].reflectionTex = texID;
+        } else {
+            renderObj.materials[i].reflection = false;
+        }*/
     }
     //////////
 
@@ -401,9 +433,10 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
         std::vector<Vertex> buffer(numVertices);
 
         for (size_t i = 0; i < shape.mesh.num_face_vertices.size(); ++i) {
-            size_t matID = shape.mesh.material_ids[i];
+            // TODO(Derek): Do materials per face
+            // size_t matID = shape.mesh.material_ids[i];
             // TODO(Derek): Use default material.
-            LOG_RETURN(ERR, (matID < 0 || matID >= materials.size()), 1, "Invalid material ID in shape: {} in file: {}", shape.name, modelPath);
+            // LOG_RETURN(ERR, (matID < 0 || matID >= materials.size()), 1, "Invalid material ID in shape: {} in file: {}", shape.name, modelPath);
 
             for (size_t k = 0; k < 3; ++k) {
                 size_t j = (3*i)+k;
@@ -442,16 +475,20 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
 
         // position attribute
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, pos)));
         // normal attribute
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
         // texture coord attribute
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, texCoord)));
+
+        glBindVertexArray(0);
+
         LOG(DEBUG, "    Loaded shape: {} with {} indices", shape.name, numVertices);
 
-        renderObj = {VAO, VBO, numVertices, 0};
+        size_t matID = shape.mesh.material_ids[0];
+        renderObj.models.push_back({VAO, VBO, numVertices, matID});
     }
 
     glBindVertexArray(0);
@@ -516,7 +553,9 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
     std::string ver = stringUntilSpace(list, i);
     if (ver == "v1.0") {
         // File v1.0
-        std::string name, posStr, rotStr, scaleStr;
+        LOG_RETURN(WARN, true, 1, "Object list file v1.0 not supported");
+
+        /*std::string name, posStr, rotStr, scaleStr;
 
         while (i < list.length()) {
             while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
@@ -568,10 +607,12 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 InstanceObject obj = {pos, angle, rot, scale, renObj};
                 allObjects.push_back(obj);
             }
-        }
+        }*/
     } else if (ver == "v1.1") {
         // File v1.1
-        std::map<std::string, RenderObject> renderObjects;
+        LOG_RETURN(WARN, true, 1, "Object list file v1.1 not supported");
+
+        /*std::map<std::string, RenderObject> renderObjects;
         std::string name, objFile, texFile, posStr, rotStr, scaleStr;
 
         while (i < list.length()) {
@@ -646,7 +687,7 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 InstanceObject obj = {pos, angle, rot, scale, renderObjects[name]};
                 allObjects.push_back(obj);
             }
-        }
+        }*/
     } else if (ver == "v1.2") {
         // File v1.2
         std::map<std::string, RenderObject> renderObjects;
@@ -674,7 +715,11 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 unsigned int texID;
                 if (loadTexture(texFile.c_str(), texID)) return 1;
 
-                RenderObject renderObj = {VAO, VBO, numVertices, texID};
+
+                RenderObject renderObj;
+                renderObj.models.push_back({VAO, VBO, numVertices, 0});
+                renderObj.materials.push_back({{-1, texID, -1, -1, -1, -1, -1, -1}});
+
                 auto result = renderObjects.emplace(name, renderObj);
                 LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate name at char: {}", i);
             } else if (list[i] == ':') {
@@ -744,8 +789,7 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
             }
         }
     } else {
-        LOG(WARN, "Object list file either invalid or version not supported");
-        return 1;
+        LOG_RETURN(WARN, true, 1, "Object list file either invalid or version not supported");
     }
 
     return 0;
