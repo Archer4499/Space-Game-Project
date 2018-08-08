@@ -191,10 +191,10 @@ int loadMesh(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsign
     LOG_IF(WARN, !err.empty(), "LoadObj error: {}", err);
     LOG_RETURN(ERR, !success, 1, "Loading object: {} failed.", modelPath);
 
-    // TODO(Derek): handle this case
-    LOG_RETURN(ERR, attrib.normals.size() == 0, 1, "Object: {} has no normals.", modelPath);
+    bool hasNormals = attrib.normals.size() > 0;
+    bool hasTexCoords = attrib.texcoords.size() > 0;
 
-    // Reserve enough space
+    // Reserve approximately enough space
     buffer.reserve(shapes.size() * shapes[0].mesh.indices.size());
 
     // Load vertices from indices
@@ -204,13 +204,29 @@ int loadMesh(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsign
             Vertex vert;
 
             vert.pos = vec3(&attrib.vertices[3 * idx.vertex_index]);
-            vert.normal = vec3(&attrib.normals[3 * idx.normal_index]);
 
-            if (attrib.texcoords.size() > 0) {
+            if (hasTexCoords) {
                 vert.texCoord = vec2(&attrib.texcoords[2 * idx.texcoord_index]);
             } else {
                 vert.texCoord = vec2(0.0f);
             }
+
+            if (hasNormals) {
+                vert.normal = vec3(&attrib.normals[3 * idx.normal_index]);
+            } else {
+                if (k%3 == 2) {
+                    size_t currBuffI = buffer.size();
+
+                    vec3 a = vert.pos - buffer[currBuffI-2].pos;
+                    vec3 b = buffer[currBuffI-1].pos - buffer[currBuffI-2].pos;
+                    vec3 norm = normalize(cross(a, b));
+
+                    buffer[currBuffI-2].normal = norm;
+                    buffer[currBuffI-1].normal = norm;
+                    vert.normal                = norm;
+                }
+            }
+
 
             buffer.push_back(vert);
 
