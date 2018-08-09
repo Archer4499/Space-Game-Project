@@ -37,6 +37,8 @@
 
 
 // Globals //
+unsigned int shaderProgram;
+std::vector<InstanceObject> allObjects;
 // camera
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
 float lastX = 0.0f;
@@ -109,11 +111,30 @@ void window_focus_callback(GLFWwindow *window, int focused) {
 void render() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    for (InstanceObject obj: allObjects) {
+        mat4 model(1.0f);
+        model = translate(model, obj.pos);
+        model = rotate(model, obj.angle, obj.rot);
+        model = scale(model, obj.scale);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+
+        obj.draw(shaderProgram);
+    }
 }
 
 int shutDown(int exitCode) {
-    glfwTerminate();
     LOG(INFO, "Running clean-up");
+
+    for (InstanceObject obj: allObjects) {
+        for (Model m : obj.renderObj.models) {
+            glDeleteVertexArrays(1, &m.VAO);
+            glDeleteBuffers(1, &m.VBO);
+            // glDeleteBuffers(1, &obj.EBO);
+        }
+    }
+    glfwTerminate();
+
     LOG(INFO, "Exit code: {}", exitCode);
     logClose();
     return exitCode;
@@ -155,9 +176,6 @@ int main(int argc, char const *argv[]) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
 
     GLFWwindow* window = NULL;
 
@@ -187,9 +205,10 @@ int main(int argc, char const *argv[]) {
     LOG_RETURN(FATAL, window == NULL, shutDown(-1), "Failed to create GLFW window");
 
     glfwMakeContextCurrent(window);
-    // Vsync
-    glfwSwapInterval(1);
 
+    glfwSwapInterval(1);  // Vsync
+
+    // Callbacks
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
@@ -205,12 +224,11 @@ int main(int argc, char const *argv[]) {
 
 
     LOG(DEBUG, "Loading Shaders");
-    unsigned int shaderProgram = glCreateProgram();
+    shaderProgram = glCreateProgram();
     int ret = loadShader(VERTEX_FILE, FRAGMENT_FILE, shaderProgram);
     LOG_RETURN(FATAL, ret, shutDown(-1), "Failed to load shaders");
 
     // Objects
-    std::vector<InstanceObject> allObjects;
     ret = loadAllObjects(OBJECTS_LIST_FILE, allObjects);
     LOG_RETURN(FATAL, ret, shutDown(-1), "Failed to load objects");
 
@@ -226,8 +244,6 @@ int main(int argc, char const *argv[]) {
 
             processInput(window);
 
-            render();
-
             glUseProgram(shaderProgram);
 
             // Camera transformations
@@ -240,16 +256,7 @@ int main(int argc, char const *argv[]) {
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
             ////
 
-            // TODO(Derek): move inside render function
-            for (InstanceObject obj: allObjects) {
-                mat4 model(1.0f);
-                model = translate(model, obj.pos);
-                model = rotate(model, obj.angle, obj.rot);
-                model = scale(model, obj.scale);
-                glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
-
-                obj.draw(shaderProgram);
-            }
+            render();
 
             glfwPollEvents();
             glfwSwapBuffers(window);
@@ -259,17 +266,6 @@ int main(int argc, char const *argv[]) {
             glfwSetTime(static_cast<double>(lastFrameTime));
         }
     }
-
-
-    // TODO(Derek): move into cleanup function
-    for (InstanceObject obj: allObjects) {
-        for (Model m : obj.renderObj.models) {
-            glDeleteVertexArrays(1, &m.VAO);
-            glDeleteBuffers(1, &m.VBO);
-            // glDeleteBuffers(1, &obj.EBO);
-        }
-    }
-
 
     return shutDown(0);
 }
