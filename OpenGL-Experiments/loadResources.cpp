@@ -2,7 +2,6 @@
 
 #include <glad/glad.h>
 
-#include <map>
 #include <unordered_map>
 
 #include "logging.h"
@@ -329,114 +328,7 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
                 renderObj.materials[i].texID[j] = -1;
             }
         }
-
-
-        /*if (!materials[i].ambient_texname.empty()) {
-            std::string name = materialBaseDir + materials[i].ambient_texname;
-            if (textures.count(name)) {
-                texID = textures[name];
-            } else {
-                if (loadTexture((name).c_str(), texID)) return 1;
-                textures[name] = texID;
-            }
-            renderObj.materials[i].ambient = true;
-            renderObj.materials[i].ambientTex = texID;
-        } else {
-            renderObj.materials[i].ambient = false;
-        }
-        if (!materials[i].diffuse_texname.empty()) {
-            std::string name = materialBaseDir + materials[i].diffuse_texname;
-            if (textures.count(name)) {
-                texID = textures[name];
-            } else {
-                if (loadTexture((name).c_str(), texID)) return 1;
-                textures[name] = texID;
-            }
-            renderObj.materials[i].diffuse = true;
-            renderObj.materials[i].diffuseTex = texID;
-        } else {
-            renderObj.materials[i].diffuse = false;
-        }
-        if (!materials[i].specular_texname.empty()) {
-            std::string name = materialBaseDir + materials[i].specular_texname;
-            if (textures.count(name)) {
-                texID = textures[name];
-            } else {
-                if (loadTexture((name).c_str(), texID)) return 1;
-                textures[name] = texID;
-            }
-            renderObj.materials[i].specular = true;
-            renderObj.materials[i].specularTex = texID;
-        } else {
-            renderObj.materials[i].specular = false;
-        }
-        if (!materials[i].specular_highlight_texname.empty()) {
-            std::string name = materialBaseDir + materials[i].specular_highlight_texname;
-            if (textures.count(name)) {
-                texID = textures[name];
-            } else {
-                if (loadTexture((name).c_str(), texID)) return 1;
-                textures[name] = texID;
-            }
-            renderObj.materials[i].specularHighlight = true;
-            renderObj.materials[i].specularHighlightTex = texID;
-        } else {
-            renderObj.materials[i].specularHighlight = false;
-        }
-        if (!materials[i].bump_texname.empty()) {
-            std::string name = materialBaseDir + materials[i].bump_texname;
-            if (textures.count(name)) {
-                texID = textures[name];
-            } else {
-                if (loadTexture((name).c_str(), texID)) return 1;
-                textures[name] = texID;
-            }
-            renderObj.materials[i].bump = true;
-            renderObj.materials[i].bumpTex = texID;
-        } else {
-            renderObj.materials[i].bump = false;
-        }
-        if (!materials[i].displacement_texname.empty()) {
-            std::string name = materialBaseDir + materials[i].displacement_texname;
-            if (textures.count(name)) {
-                texID = textures[name];
-            } else {
-                if (loadTexture((name).c_str(), texID)) return 1;
-                textures[name] = texID;
-            }
-            renderObj.materials[i].displacement = true;
-            renderObj.materials[i].displacementTex = texID;
-        } else {
-            renderObj.materials[i].displacement = false;
-        }
-        if (!materials[i].alpha_texname.empty()) {
-            std::string name = materialBaseDir + materials[i].alpha_texname;
-            if (textures.count(name)) {
-                texID = textures[name];
-            } else {
-                if (loadTexture((name).c_str(), texID)) return 1;
-                textures[name] = texID;
-            }
-            renderObj.materials[i].alpha = true;
-            renderObj.materials[i].alphaTex = texID;
-        } else {
-            renderObj.materials[i].alpha = false;
-        }
-        if (!materials[i].reflection_texname.empty()) {
-            std::string name = materialBaseDir + materials[i].reflection_texname;
-            if (textures.count(name)) {
-                texID = textures[name];
-            } else {
-                if (loadTexture((name).c_str(), texID)) return 1;
-                textures[name] = texID;
-            }
-            renderObj.materials[i].reflection = true;
-            renderObj.materials[i].reflectionTex = texID;
-        } else {
-            renderObj.materials[i].reflection = false;
-        }*/
     }
-    //////////
 
     bool hasNormals = attrib.normals.size() > 0;
     bool hasTexCoords = attrib.texcoords.size() > 0;
@@ -511,52 +403,8 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
     return 0;
 }
 
-int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO) {
-    // Return 0 if success
-    // Return 1 if failed to load model file
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-    float vertices[] = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
-    };
-    unsigned int indices[] = {
-        0, 1, 3,  // first Triangle
-        1, 2, 3   // second Triangle
-    };
 
-    glGenVertexArrays(1, VAO);
-    glGenBuffers(1, VBO);
-    glGenBuffers(1, EBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(*VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, *VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // texture coord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    return 0;
-}
-
-int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects) {
+int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &shaders, std::vector<InstanceObject> &allObjects) {
     // TODO(Derek): Handle spaces in input file paths
     // TODO(Derek): sanitize input
     LOG(DEBUG, "Loading all objects from: {}", listPath);
@@ -706,7 +554,8 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
         }*/
     } else if (ver == "v1.2") {
         // File v1.2
-        std::map<std::string, RenderObject> renderObjects;
+        LOG_RETURN(WARN, true, 1, "Object list file v1.2 not supported");
+        /*std::map<std::string, RenderObject> renderObjects;
         std::string name, objFile, texFile, materialBaseDir, posStr, rotStr, scaleStr;
 
         while (i < list.length()) {
@@ -801,6 +650,124 @@ int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects
                 LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
 
                 InstanceObject obj = {pos, angle, rot, scale, renderObjects[name]};
+                allObjects.push_back(obj);
+            }
+        }*/
+    } else if (ver == "v1.3") {
+        // File v1.3
+        std::unordered_map<std::string, RenderObject> renderObjects;
+        std::string name, shaderName, vertFile, fragFile, objFile, texFile, materialBaseDir, posStr, rotStr, scaleStr;
+
+        while (i < list.length()) {
+            while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
+            // TODO(Derek): sanitize name
+            char lineType = list[i++];
+            if (lineType == '=') {
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid shader name at char: {}", i);
+
+                vertFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, vertFile.empty(), 1, "Object list file contains invalid shader vertex file name at char: {}", i);
+
+                fragFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, fragFile.empty(), 1, "Object list file contains invalid shader fragment file name at char: {}", i);
+
+                LOG(DEBUG, "Loading Shader: {}", name);
+                unsigned int shaderProgram = glCreateProgram();
+                int ret = loadShader(vertFile.c_str(), fragFile.c_str(), shaderProgram);
+                LOG_RETURN(WARN, ret, 1, "Failed to load shader {} from: {}, {}", name, vertFile, fragFile);
+
+                auto result = shaders.emplace(name, shaderProgram);
+                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate shader name at char: {}", i);
+            } else if (lineType == '&') {
+                // Mesh and texture
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
+
+                objFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, objFile.empty(), 1, "Object list file contains invalid object file name at char: {}", i);
+
+                texFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, texFile.empty(), 1, "Object list file contains invalid texture file name at char: {}", i);
+
+                unsigned int VAO, VBO, numVertices;
+                if (loadMesh(objFile.c_str(), VAO, VBO, numVertices)) return 1;
+
+                unsigned int texID;
+                if (loadTexture(texFile.c_str(), texID)) return 1;
+
+
+                RenderObject renderObj;
+                renderObj.models.push_back({VAO, VBO, numVertices, 0});
+                renderObj.materials.push_back({{-1, texID, -1, -1, -1, -1, -1, -1}});
+
+                auto result = renderObjects.emplace(name, renderObj);
+                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate object name at char: {}", i);
+            } else if (lineType == ':') {
+                // Object (with .mtl info)
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
+
+                objFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, objFile.empty(), 1, "Object list file contains invalid object file name at char: {}", i);
+
+                materialBaseDir = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, materialBaseDir.empty(), 1, "Object list file contains invalid material folder name at char: {}", i);
+
+                RenderObject renderObj;
+                if (loadModel(objFile.c_str(), materialBaseDir.c_str(), renderObj)) return 1;
+
+                auto result = renderObjects.emplace(name, renderObj);
+                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate object name at char: {}", i);
+            } else if (lineType == '@') {
+                // InstanceObject
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
+                LOG_RETURN(WARN, !renderObjects.count(name), 1, "Object list file contains undefined object name on line at char: {}", i);
+
+                shaderName = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, shaderName.empty(), 1, "Object list file contains invalid shader name at char: {}", i);
+                LOG_RETURN(WARN, !shaders.count(shaderName), 1, "Object list file contains undefined shader name on line at char: {}", i);
+
+                posStr = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, posStr.empty(), 1, "Object list file contains invalid position at char: {}", i);
+
+                rotStr = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, rotStr.empty(), 1, "Object list file contains invalid rotation at char: {}", i);
+
+                scaleStr = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, scaleStr.empty(), 1, "Object list file contains invalid scale at char: {}", i);
+
+                float angle;
+                vec3 pos, rot, scale;
+
+                try {
+                    // Parsing "float,float,float f,f,f,f f,f,f"
+                    // ++ skips the ','
+                    size_t end1 = 0, end2 = 0, end3 = 0;
+                    float x = std::stof(posStr, &end1);
+                    float y = std::stof(posStr.substr(++end1), &end2);
+                    float z = std::stof(posStr.substr(end1 + (++end2)));
+                    pos = {x, y, z};
+
+                    angle = std::stof(rotStr, &end1);
+                    x = std::stof(rotStr.substr(++end1), &end2);
+                    y = std::stof(rotStr.substr(end1 + (++end2)), &end3);
+                    z = std::stof(rotStr.substr(end1 + end2 + (++end3)));
+                    rot = {x, y, z};
+
+                    x = std::stof(scaleStr, &end1);
+                    y = std::stof(scaleStr.substr(++end1), &end2);
+                    z = std::stof(scaleStr.substr(end1 + (++end2)));
+                    scale = {x, y, z};
+                } catch(...) {
+                    LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line with char: {}", i);
+                }
+
+                LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
+
+                // Already checked above if shader and name exist in maps
+                InstanceObject obj = {pos, angle, rot, scale, shaders[shaderName], renderObjects[name]};
                 allObjects.push_back(obj);
             }
         }

@@ -7,14 +7,17 @@
 #include <GLFW/glfw3.h>
 
 #include <vector>
+#include <map>
 
 // todo/note area //
+// NOTE: __declspec(deprecated("Message here")) int function() {} for deprecating functions
 // TODO(Derek): Log more info and errs
 // TODO(Derek): hot loading of resource files
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
 // TODO(Derek): Give math and logging their own repositories
 // TODO(Derek): use relative paths for Additional Include Directories
-// NOTE: __declspec(deprecated("Message here")) int function() {} for deprecating functions
+// TODO(Derek): Use materials in shaders
+// TODO(Derek): Use multiple lights
 ////////////////////
 
 
@@ -24,6 +27,8 @@
 #include "camera.h"
 #include "math/math.h"
 
+#define BACKGROUND_COLOUR 0.2f, 0.3f, 0.3f, 1.0f
+
 #define LOG_LEVEL DEBUG
 #define LOG_MODE "w"
 // #define LOG_MODE "a"
@@ -32,12 +37,9 @@
 
 #define OBJECTS_LIST_FILE "objects.list"
 
-#define VERTEX_FILE "Resources/Shaders/shader.vert"
-#define FRAGMENT_FILE "Resources/Shaders/shader.frag"
-
 
 // Globals //
-unsigned int shaderProgram;
+std::map<std::string, unsigned int> shaders;
 std::vector<InstanceObject> allObjects;
 // camera
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
@@ -108,18 +110,36 @@ void window_focus_callback(GLFWwindow *window, int focused) {
     }
 }
 
-void render() {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+void render(mat4 &projection, mat4 &view) {
+    glClearColor(BACKGROUND_COLOUR);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    for (auto const &shaderProgram : shaders) {
+        glUseProgram(shaderProgram.second);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.second, "projection"), 1, GL_FALSE, &projection[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram.second, "view"), 1, GL_FALSE, &view[0][0]);
+
+        if (shaderProgram.first == "general") {
+            // TODO(Derek): Give list of colours and locations
+            glUniform3f(glGetUniformLocation(shaderProgram.second, "lightColor"), 1.0f, 1.0f, 1.0f);
+            glUniform3f(glGetUniformLocation(shaderProgram.second, "lightPos"), 1.0f, 2.0f, 0.0f);
+        } else if (shaderProgram.first == "light") {
+            // Nothing to do here currently
+        } else {
+            LOG(SPAM, "Rendering unknown shader: {}", shaderProgram.first);
+        }
+    }
+
     for (InstanceObject obj: allObjects) {
+        glUseProgram(obj.shaderProgram);
+
         mat4 model(1.0f);
         model = translate(model, obj.pos);
         model = rotate(model, obj.angle, obj.rot);
         model = scale(model, obj.scale);
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(obj.shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 
-        obj.draw(shaderProgram);
+        obj.draw();
     }
 }
 
@@ -150,16 +170,15 @@ int main(int argc, char const *argv[]) {
     // Load config file
     Config conf;
 
-    if (int err = loadConfig(&conf, CONFIG_FILE)) {
-        if (err == 1) {
-            LOG(ERR, "Using and saving default config");
-            if (saveConfig(&conf, CONFIG_FILE)) {
-                return shutDown(-1);
-            }
-            LOG(INFO, "Config file saved to: {}", CONFIG_FILE);
-        } else if (err == 2) {
+    int err = loadConfig(&conf, CONFIG_FILE);
+    if (err == 1) {
+        LOG(ERR, "Using and saving default config");
+        if (saveConfig(&conf, CONFIG_FILE)) {
             return shutDown(-1);
         }
+        LOG(INFO, "Config file saved to: {}", CONFIG_FILE);
+    } else if (err == 2) {
+        return shutDown(-1);
     }
 
     int confScreenWidth = conf.getInt("width");
@@ -222,14 +241,8 @@ int main(int argc, char const *argv[]) {
 
     glEnable(GL_DEPTH_TEST);
 
-
-    LOG(DEBUG, "Loading Shaders");
-    shaderProgram = glCreateProgram();
-    int ret = loadShader(VERTEX_FILE, FRAGMENT_FILE, shaderProgram);
-    LOG_RETURN(FATAL, ret, shutDown(-1), "Failed to load shaders");
-
     // Objects
-    ret = loadAllObjects(OBJECTS_LIST_FILE, allObjects);
+    int ret = loadAllResources(OBJECTS_LIST_FILE, shaders, allObjects);
     LOG_RETURN(FATAL, ret, shutDown(-1), "Failed to load objects");
 
     LOG(DEBUG, "Main loop");
@@ -244,19 +257,14 @@ int main(int argc, char const *argv[]) {
 
             processInput(window);
 
-            glUseProgram(shaderProgram);
-
             // Camera transformations
             int width, height;
             glfwGetFramebufferSize(window, &width, &height);
             mat4 projection = perspective(radians(camera.Zoom), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
-
             mat4 view  = camera.GetViewMatrix();
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
             ////
 
-            render();
+            render(projection, view);
 
             glfwPollEvents();
             glfwSwapBuffers(window);

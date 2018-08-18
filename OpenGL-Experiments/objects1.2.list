@@ -1,0 +1,24 @@
+v1.2
+# Mesh and Textures
+# & Name    MeshFile                       TextureFile
+& container Resources/Models/container.obj Resources/Textures/container.jpg
+& hex       Resources/Models/hex.obj       Resources/Textures/hex.jpg
+& conhex    Resources/Models/hex.obj       Resources/Textures/container.jpg
+# & chalet    Resources/Models/chalet.obj    Resources/Textures/chalet.jpg
+
+# Object (with .mtl info)
+# : Name    ObjectFile                               MaterialBaseDir
+: nanosuit  Resources/Models/nanosuit/nanosuit.obj   Resources/Models/nanosuit/
+
+# Define InstanceObjects
+# @ ObjectName Position                     Rotation Scale
+@ nanosuit     0,-0.5,0                     0,0,0,0  0.05,0.05,0.05
+@ container    0,0,-2                       0,0,0,0  1,1,1
+@ conhex       0,-1,0                       0,0,0,0  1,1,1
+@ hex          0.8660253882408142,-1,1.5    0,0,0,0  1,1.1,1
+@ hex          -0.8660253882408142,-1,1.5   0,0,0,0  1,0.9,1
+@ hex          0.8660253882408142,-1,-1.5   0,0,0,0  1,1.1,1
+@ hex          -0.8660253882408142,-1,-1.5  0,0,0,0  1,0.9,1
+@ hex          1.7320507764816284,-1,0      0,0,0,0  1,1.05,1
+@ hex          -1.7320507764816284,-1,0     0,0,0,0  1,1,1
+# @ chalet       0,0,0                        0,0,0,0  1,1,1

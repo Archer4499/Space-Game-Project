@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include "Math\vector.h"
 
@@ -56,11 +57,12 @@ struct InstanceObject {
     float angle;
     vec3 rot;
     vec3 scale;
+    unsigned int shaderProgram;
     RenderObject renderObj;
 
-    void draw(unsigned int shaderProgram) {
+    void draw() {
         renderObj.draw(shaderProgram);
-    }
+    };
 };
 
 int loadShader(const char *vertexPath, const char *fragmentPath, unsigned int &shaderProgram);
@@ -73,4 +75,4 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
 
 // int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO);
 
-int loadAllObjects(const char *listPath, std::vector<InstanceObject> &allObjects);
+int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &shaders, std::vector<InstanceObject> &allObjects);
