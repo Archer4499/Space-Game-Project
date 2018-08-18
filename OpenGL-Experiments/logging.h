@@ -15,7 +15,8 @@ enum LogLevel {
     ERR,
     WARN,
     INFO,
-    DEBUG
+    DEBUG,
+    SPAM
 };
 
 #if LOG_TYPE == LOG_TYPE_NO
@@ -29,6 +30,7 @@ void logClose() {}
 
 #else // LOG_TYPE != LOG_TYPE_NO
 
+// TODO(Derek): add scope indenting
 
 #include <string>
 

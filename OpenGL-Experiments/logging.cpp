@@ -67,6 +67,9 @@ void logb(LogLevel errLevel, const char *file, unsigned int line, std::string me
         case DEBUG:
             errText = "  DEBUG";
             break;
+        case SPAM:
+            errText = "   SPAM";
+            break;
     }
 
     // Only file name not full path
