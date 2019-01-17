@@ -304,6 +304,7 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
         // renderObj.materials[i].specular      = vec3(materials[i].specular);
         // renderObj.materials[i].transmittance = vec3(materials[i].transmittance);
         // renderObj.materials[i].emission      = vec3(materials[i].emission);
+        // renderObj.materials[i].shininess     = materials[i].shininess;
 
         std::string texNames[8] = {materials[i].ambient_texname,
                                    materials[i].diffuse_texname,
@@ -663,6 +664,7 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
             // TODO(Derek): sanitize name
             char lineType = list[i++];
             if (lineType == '=') {
+                // Shader
                 name = stringUntilSpace(list, i);
                 LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid shader name at char: {}", i);
 

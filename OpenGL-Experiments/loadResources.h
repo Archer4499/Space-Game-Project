@@ -22,6 +22,7 @@ struct Material {
     // vec3 specular;
     // vec3 transmittance;
     // vec3 emission;
+    // float shininess;
 };
 
 struct Model {
@@ -40,8 +41,9 @@ struct RenderObject {
             // Check each possible texture in each material
             for (int i = 0; i < 8; ++i) {
                 if (materials[m.matID].texID[i] > -1) {
-                    glActiveTexture(GL_TEXTURE0 + i);
                     glUniform1i(glGetUniformLocation(shaderProgram, ("tex" + std::to_string(i)).c_str()), i);
+
+                    glActiveTexture(GL_TEXTURE0 + i);
                     glBindTexture(GL_TEXTURE_2D, materials[m.matID].texID[i]);
                 }
             }
