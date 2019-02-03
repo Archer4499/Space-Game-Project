@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F776BEBC-9029-4EC9-82C5-C320029C9392}</ProjectGuid>
-    <RootNamespace>OpenGLExperiments</RootNamespace>
+    <RootNamespace>SpaceGameProject</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
