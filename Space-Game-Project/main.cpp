@@ -18,6 +18,8 @@
 // TODO(Derek): use relative paths for Additional Include Directories
 // TODO(Derek): Use materials in shaders
 // TODO(Derek): Use multiple lights
+// TODO(Derek): Add VSync to config file
+// TODO(Derek): Sort out library path
 ////////////////////
 
 
@@ -201,7 +203,7 @@ int main(int argc, char const *argv[]) {
     // TODO(Derek): Set window icon
     // TODO(Derek): Allow to be changed during runtime ( http://www.glfw.org/docs/latest/window_guide.html )
     if (confFullscreen == 0) {
-        window = glfwCreateWindow(confScreenWidth, confScreenHeight, "OpenGL Experiments", NULL, NULL);
+        window = glfwCreateWindow(confScreenWidth, confScreenHeight, "Space Game Project", NULL, NULL);
         LOG(INFO, "Windowed mode, width: {}, height: {}", confScreenWidth, confScreenHeight);
     } else if (confFullscreen == 1) {
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -212,7 +214,7 @@ int main(int argc, char const *argv[]) {
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-        window = glfwCreateWindow(mode->width, mode->height, "OpenGL Experiments", monitor, NULL);
+        window = glfwCreateWindow(mode->width, mode->height, "Space Game Project", monitor, NULL);
         LOG(INFO, "Windowed fullscreen mode, width: {}, height: {}", mode->width, mode->height);
     } else if (confFullscreen == 2) {
         LOG(FATAL, "Fullscreen mode not yet implemented");
