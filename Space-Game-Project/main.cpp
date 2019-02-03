@@ -39,8 +39,14 @@
 
 #define OBJECTS_LIST_FILE "objects.list"
 
+enum GameState {
+    GAME_ACTIVE,
+    GAME_MENU,
+    // GAME_WIN
+};
 
 // Globals //
+GameState gameState = GAME_ACTIVE;
 std::map<std::string, unsigned int> shaders;
 std::vector<InstanceObject> allObjects;
 // camera
@@ -257,17 +263,21 @@ int main(int argc, char const *argv[]) {
             lastFrameTime = currentFrameTime;
             //
 
-            processInput(window);
+            if (gameState == GAME_ACTIVE) {
+                processInput(window);
 
-            // Camera transformations
-            int width, height;
-            glfwGetFramebufferSize(window, &width, &height);
-            mat4 projection = perspective(radians(camera.Zoom), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
-            mat4 view  = camera.GetViewMatrix();
-            ////
+                // Camera transformations
+                int width, height;
+                glfwGetFramebufferSize(window, &width, &height);
+                mat4 projection = perspective(radians(camera.Zoom), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
+                mat4 view  = camera.GetViewMatrix();
+                ////
 
-            render(projection, view);
+                render(projection, view);
+            } else if (gameState == GAME_MENU) {
+                processInput(window);
 
+            }
             glfwPollEvents();
             glfwSwapBuffers(window);
         } else {
