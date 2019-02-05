@@ -59,7 +59,7 @@ bool firstMouse = true;
 
 // timing
 float deltaTime = 0.0f; // Time between current frame and last frame
-float lastFrameTime = 0.0f;
+double lastFrameTime = 0.0;
 /////////////
 
 
@@ -260,8 +260,8 @@ int main(int argc, char const *argv[]) {
         // Only do things if window is focused
         if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
             // update deltaTime
-            float currentFrameTime = static_cast<float>(glfwGetTime());
-            deltaTime = abs(currentFrameTime - lastFrameTime); // Ensure time doesn't go backwards due to precision
+            double currentFrameTime = glfwGetTime();
+            deltaTime = static_cast<float>(max(currentFrameTime - lastFrameTime, 0.000000001)); // Ensure time doesn't go backwards due to precision
             lastFrameTime = currentFrameTime;
             //
 
@@ -285,7 +285,7 @@ int main(int argc, char const *argv[]) {
         } else {
             // Time pauses while unfocused
             glfwWaitEvents();
-            glfwSetTime(static_cast<double>(lastFrameTime));
+            glfwSetTime(lastFrameTime);
         }
     }
 
