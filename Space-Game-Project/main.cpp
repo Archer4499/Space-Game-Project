@@ -49,6 +49,8 @@ enum GameState {
 GameState gameState = GAME_ACTIVE;
 std::map<std::string, unsigned int> shaders;
 std::vector<InstanceObject> allObjects;
+GLFWwindow* window = NULL;
+
 // camera
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
 float lastX = 0.0f;
@@ -66,7 +68,7 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
     // TODO(Derek): move camera to new centre?
 }
 
-void processInput(GLFWwindow *window) {
+void processInput() {
     // Meta
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -170,88 +172,88 @@ int shutDown(int exitCode) {
 
 
 int main(int argc, char const *argv[]) {
-    // Start logging
-    if (logOpen(LOG_FILE, LOG_MODE, LOG_LEVEL)) {
-        return -1;
-    }
+    // Setup
+    {
+        // Start logging
+        if (logOpen(LOG_FILE, LOG_MODE, LOG_LEVEL)) return -1;
 
-    // Load config file
-    Config conf;
+        // Load config file
+        Config conf;
 
-    int err = loadConfig(&conf, CONFIG_FILE);
-    if (err == 1) {
-        LOG(ERR, "Using and saving default config");
-        if (saveConfig(&conf, CONFIG_FILE)) {
+        int err = loadConfig(&conf, CONFIG_FILE);
+        if (err == 1) {
+            LOG(ERR, "Using and saving default config");
+            if (saveConfig(&conf, CONFIG_FILE)) {
+                return shutDown(-1);
+            }
+            LOG(INFO, "Config file saved to: {}", CONFIG_FILE);
+        } else if (err == 2) {
             return shutDown(-1);
         }
-        LOG(INFO, "Config file saved to: {}", CONFIG_FILE);
-    } else if (err == 2) {
-        return shutDown(-1);
+
+        int confScreenWidth = conf.getInt("width");
+        int confScreenHeight = conf.getInt("height");
+        int confFullscreen = conf.getInt("fullscreen");
+        LOG(INFO, "Config loaded from: {}", CONFIG_FILE);
+        // END Load config
+
+
+        // Init GLFW
+        int success = glfwInit();
+        LOG_RETURN(FATAL, !success, shutDown(-1), "Failed to initialize GLFW.");
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+
+        // TODO(Derek): Set window icon
+        // TODO(Derek): Allow to be changed during runtime ( http://www.glfw.org/docs/latest/window_guide.html )
+        if (confFullscreen == 0) {
+            window = glfwCreateWindow(confScreenWidth, confScreenHeight, "Space Game Project", NULL, NULL);
+            LOG(INFO, "Windowed mode, width: {}, height: {}", confScreenWidth, confScreenHeight);
+        } else if (confFullscreen == 1) {
+            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+            glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+            glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+            glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+            glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+            window = glfwCreateWindow(mode->width, mode->height, "Space Game Project", monitor, NULL);
+            LOG(INFO, "Windowed fullscreen mode, width: {}, height: {}", mode->width, mode->height);
+        } else if (confFullscreen == 2) {
+            LOG(FATAL, "Fullscreen mode not yet implemented");
+            return shutDown(-1);
+        } else {
+            LOG(FATAL, "Fullscreen mode setting invalid");
+            return shutDown(-1);
+        }
+        LOG_RETURN(FATAL, window == NULL, shutDown(-1), "Failed to create GLFW window");
+
+        glfwMakeContextCurrent(window);
+
+        glfwSwapInterval(1);  // Vsync
+
+        // Callbacks
+        glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+        glfwSetCursorPosCallback(window, mouse_callback);
+        glfwSetScrollCallback(window, scroll_callback);
+        glfwSetWindowFocusCallback(window, window_focus_callback);
+
+        // Capture mouse
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+        success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+        LOG_RETURN(FATAL, !success, shutDown(-1), "Failed to initialise GLAD");
+
+        // glEnable(GL_DEPTH_TEST);
+
+        // Objects
+        int ret = loadAllResources(OBJECTS_LIST_FILE, shaders, allObjects);
+        LOG_RETURN(FATAL, ret, shutDown(-1), "Failed to load objects");
     }
-
-    int confScreenWidth = conf.getInt("width");
-    int confScreenHeight = conf.getInt("height");
-    int confFullscreen = conf.getInt("fullscreen");
-    LOG(INFO, "Config loaded from: {}", CONFIG_FILE);
-    // END Load config
-
-
-    // Init GLFW
-    int success = glfwInit();
-    LOG_RETURN(FATAL, !success, shutDown(-1), "Failed to initialize GLFW.");
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    GLFWwindow* window = NULL;
-
-    // TODO(Derek): Set window icon
-    // TODO(Derek): Allow to be changed during runtime ( http://www.glfw.org/docs/latest/window_guide.html )
-    if (confFullscreen == 0) {
-        window = glfwCreateWindow(confScreenWidth, confScreenHeight, "Space Game Project", NULL, NULL);
-        LOG(INFO, "Windowed mode, width: {}, height: {}", confScreenWidth, confScreenHeight);
-    } else if (confFullscreen == 1) {
-        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
-        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
-        window = glfwCreateWindow(mode->width, mode->height, "Space Game Project", monitor, NULL);
-        LOG(INFO, "Windowed fullscreen mode, width: {}, height: {}", mode->width, mode->height);
-    } else if (confFullscreen == 2) {
-        LOG(FATAL, "Fullscreen mode not yet implemented");
-        return shutDown(-1);
-    } else {
-        LOG(FATAL, "Fullscreen mode setting invalid");
-        return shutDown(-1);
-    }
-    LOG_RETURN(FATAL, window == NULL, shutDown(-1), "Failed to create GLFW window");
-
-    glfwMakeContextCurrent(window);
-
-    glfwSwapInterval(1);  // Vsync
-
-    // Callbacks
-    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    glfwSetWindowFocusCallback(window, window_focus_callback);
-
-    // Capture mouse
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    LOG_RETURN(FATAL, !success, shutDown(-1), "Failed to initialise GLAD");
-
-    glEnable(GL_DEPTH_TEST);
-
-    // Objects
-    int ret = loadAllResources(OBJECTS_LIST_FILE, shaders, allObjects);
-    LOG_RETURN(FATAL, ret, shutDown(-1), "Failed to load objects");
 
     LOG(DEBUG, "Main loop");
     while (!glfwWindowShouldClose(window)) {
@@ -264,7 +266,7 @@ int main(int argc, char const *argv[]) {
             //
 
             if (gameState == GAME_ACTIVE) {
-                processInput(window);
+                processInput();
 
                 // Camera transformations
                 int width, height;
@@ -275,7 +277,7 @@ int main(int argc, char const *argv[]) {
 
                 render(projection, view);
             } else if (gameState == GAME_MENU) {
-                processInput(window);
+                processInput();
 
             }
             glfwPollEvents();
