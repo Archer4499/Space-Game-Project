@@ -1,3 +1,6 @@
+#ifndef _DEBUG
+#define NDEBUG
+#endif
 #ifdef NDEBUG
 // Removes cmd window in non debug builds
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
