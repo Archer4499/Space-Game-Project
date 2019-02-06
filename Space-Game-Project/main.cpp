@@ -18,8 +18,10 @@
 // TODO(Derek): use relative paths for Additional Include Directories
 // TODO(Derek): Use materials in shaders
 // TODO(Derek): Use multiple lights
-// TODO(Derek): Add VSync to config file
 // TODO(Derek): Sort out library path
+// TODO(Derek): replace meshes with sprites
+// TODO(Derek): replace shaders
+// TODO(Derek): change objects list to use sprites
 ////////////////////
 
 
@@ -194,6 +196,7 @@ int main(int argc, char const *argv[]) {
         int confScreenWidth = conf.getInt("width");
         int confScreenHeight = conf.getInt("height");
         int confFullscreen = conf.getInt("fullscreen");
+        bool confVSync = conf.getBool("vsync");
         LOG(INFO, "Config loaded from: {}", CONFIG_FILE);
         // END Load config
 
@@ -234,7 +237,7 @@ int main(int argc, char const *argv[]) {
 
         glfwMakeContextCurrent(window);
 
-        glfwSwapInterval(1);  // Vsync
+        glfwSwapInterval(confVSync);  // Vsync
 
         // Callbacks
         glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);

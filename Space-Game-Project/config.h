@@ -22,6 +22,7 @@ struct Config {
         this->data["width"] =      "800";
         this->data["height"] =     "600";
         this->data["fullscreen"] = "0";
+        this->data["vsync"] =      "true";
     }
 
     std::string getString(std::string label);
