@@ -6,12 +6,11 @@ List of 3rd party libraries:
 - https://github.com/fmtlib/fmt
 - https://github.com/nothings/stb/blob/master/stb_image.h
 - https://github.com/syoyo/tinyobjloader
-- And the following not included libraries:
-  - http://www.glfw.org/download.html 32-bit Windows pre-compiled binaries.
-  - http://glad.dav1d.de with the following settings:
-    - language: C++
-    - gl: version 3.3
-    - profile: Core
-    - generate a loader selected.
+- http://www.glfw.org/download.html 32-bit Windows pre-compiled binaries.
+- http://glad.dav1d.de with the following settings:
+  - language: C++
+  - gl: version 3.3
+  - profile: Core
+  - generate a loader selected.
 
 Parts with reasonable progress so far include math and logging.
