@@ -6,7 +6,7 @@ v1.4
 
 # Object (Sprites with textures)
 # : Name    SpriteFile                       TextureFile
-:   box     Resources/Sprites/box.sp         Resources/Textures/container.jpg
+:   box     Resources/Sprites/circle.sp         Resources/Textures/container.jpg
 :   box2    Resources/Sprites/box2.sp        Resources/Textures/container.jpg
 # : container Resources/Models/container.obj Resources/Textures/container.jpg
 # : hex       Resources/Models/hex.obj       Resources/Textures/hex.jpg
