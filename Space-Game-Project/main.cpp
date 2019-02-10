@@ -19,19 +19,18 @@
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
 // TODO(Derek): Give math and logging their own repositories
 // TODO(Derek): use relative paths for Additional Include Directories
-// TODO(Derek): Use materials in shaders
-// TODO(Derek): Use multiple lights
-// TODO(Derek): Sort out library path
-// TODO(Derek): replace meshes with sprites
-// TODO(Derek): replace shaders
+// TODO(Derek): remove light shaders
 // TODO(Derek): change objects list to use sprites
+// Decisions //
+// TODO(Derek): decide which corner is 0,0 (change order of ortho()) (changes winding order)
+// TODO(Derek): decide whether resolution changes zoom or scaling
 ////////////////////
 
 
 #include "logging.h"
 #include "config.h"
 #include "loadResources.h"
-#include "camera.h"
+// #include "camera.h"
 #include "math/math.h"
 
 #define BACKGROUND_COLOUR 0.2f, 0.3f, 0.3f, 1.0f
@@ -56,11 +55,11 @@ std::map<std::string, unsigned int> shaders;
 std::vector<InstanceObject> allObjects;
 GLFWwindow* window = NULL;
 
-// camera
-Camera camera(vec3(0.0f, 0.0f, 3.0f));
-float lastX = 0.0f;
-float lastY = 0.0f;
-bool firstMouse = true;
+// // camera
+// Camera camera(vec3(0.0f, 0.0f, 3.0f));
+// float lastX = 0.0f;
+// float lastY = 0.0f;
+// bool firstMouse = true;
 
 // timing
 float deltaTime = 0.0f; // Time between current frame and last frame
@@ -80,54 +79,54 @@ void processInput() {
 
     // Controls
     // TODO(Derek): Allow key remapping: map(GLFW_KEY_W)
-    int input = NONE;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        input |= FORWARD;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        input |= BACKWARD;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        input |= LEFT;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        input |= RIGHT;
+    // int input = NONE;
+    // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    //     input |= FORWARD;
+    // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    //     input |= BACKWARD;
+    // if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    //     input |= LEFT;
+    // if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    //     input |= RIGHT;
 
-    camera.ProcessKeyboard(input, deltaTime);
+    // camera.ProcessKeyboard(input, deltaTime);
 }
 
 void mouse_callback(GLFWwindow *window, double aXPos, double aYPos) {
-    float xPos = static_cast<float>(aXPos);
-    float yPos = static_cast<float>(aYPos);
-    if (firstMouse) {
-        lastX = xPos;
-        lastY = yPos;
-        firstMouse = false;
-    }
+    // float xPos = static_cast<float>(aXPos);
+    // float yPos = static_cast<float>(aYPos);
+    // if (firstMouse) {
+    //     lastX = xPos;
+    //     lastY = yPos;
+    //     firstMouse = false;
+    // }
 
-    float xOffset = xPos - lastX;
-    float yOffset = lastY - yPos; // reversed since y-coordinates go from bottom to top
+    // float xOffset = xPos - lastX;
+    // float yOffset = lastY - yPos; // reversed since y-coordinates go from bottom to top
 
-    lastX = xPos;
-    lastY = yPos;
+    // lastX = xPos;
+    // lastY = yPos;
 
-    camera.ProcessMouseMovement(xOffset, yOffset);
+    // camera.ProcessMouseMovement(xOffset, yOffset);
 }
 
 void scroll_callback(GLFWwindow *window, double xOffset, double yOffset) {
-    camera.ProcessMouseScroll(static_cast<float>(yOffset));
+    // camera.ProcessMouseScroll(static_cast<float>(yOffset));
 }
 
 void window_focus_callback(GLFWwindow *window, int focused) {
     // TODO(Derek): stop camera jerking when refocused
     // TODO(Derek): when trying to resize window mouse moves to centre of window
     if (focused) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     } else {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 }
 
 void render(mat4 &projection, mat4 &view) {
     glClearColor(BACKGROUND_COLOUR);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     for (auto const &shaderProgram : shaders) {
         glUseProgram(shaderProgram.second);
@@ -136,8 +135,8 @@ void render(mat4 &projection, mat4 &view) {
 
         if (shaderProgram.first == "general") {
             // TODO(Derek): Give list of colours and locations
-            glUniform3f(glGetUniformLocation(shaderProgram.second, "lightColor"), 1.0f, 1.0f, 1.0f);
-            glUniform3f(glGetUniformLocation(shaderProgram.second, "lightPos"), 1.0f, 2.0f, 0.0f);
+            // glUniform3f(glGetUniformLocation(shaderProgram.second, "lightColor"), 1.0f, 1.0f, 1.0f);
+            // glUniform3f(glGetUniformLocation(shaderProgram.second, "lightPos"), 1.0f, 2.0f, 0.0f);
         } else if (shaderProgram.first == "light") {
             // Nothing to do here currently
         } else {
@@ -149,9 +148,9 @@ void render(mat4 &projection, mat4 &view) {
         glUseProgram(obj.shaderProgram);
 
         mat4 model(1.0f);
-        model = translate(model, obj.pos);
-        model = rotate(model, obj.angle, obj.rot);
-        model = scale(model, obj.scale);
+        model = translate(model, vec3(obj.pos.x, obj.pos.y, 0.0f));
+        model = rotate(model, obj.rot, vec3(0.0f, 0.0f, 1.0f));
+        model = scale(model, vec3(obj.scale.x, obj.scale.y, 1.0f));
         glUniformMatrix4fv(glGetUniformLocation(obj.shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 
         obj.draw();
@@ -244,16 +243,21 @@ int main(int argc, char const *argv[]) {
 
         // Callbacks
         glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-        glfwSetCursorPosCallback(window, mouse_callback);
+        // glfwSetCursorPosCallback(window, mouse_callback);
         glfwSetScrollCallback(window, scroll_callback);
         glfwSetWindowFocusCallback(window, window_focus_callback);
 
-        // Capture mouse
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        // // Capture mouse
+        // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+        // GLAD
         success = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
         LOG_RETURN(FATAL, !success, shutDown(-1), "Failed to initialise GLAD");
 
+        // OpenGL options
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         // glEnable(GL_DEPTH_TEST);
 
         // Objects
@@ -267,9 +271,10 @@ int main(int argc, char const *argv[]) {
         if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
             // update deltaTime
             double currentFrameTime = glfwGetTime();
-            deltaTime = static_cast<float>(max(currentFrameTime - lastFrameTime, 0.000000001)); // Ensure time doesn't go backwards due to precision
+            deltaTime = static_cast<float>(max(currentFrameTime - lastFrameTime, 0.00001)); // Ensure time doesn't go backwards due to precision
             lastFrameTime = currentFrameTime;
             //
+            glfwPollEvents();
 
             if (gameState == GAME_ACTIVE) {
                 processInput();
@@ -277,16 +282,17 @@ int main(int argc, char const *argv[]) {
                 // Camera transformations
                 int width, height;
                 glfwGetFramebufferSize(window, &width, &height);
-                mat4 projection = perspective(radians(camera.Zoom), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
-                mat4 view  = camera.GetViewMatrix();
+                // mat4 projection = perspective(radians(camera.Zoom), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
+                // mat4 view  = camera.GetViewMatrix();
+                mat4 projection = ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), -1.0f, 1.0f);
+                mat4 view  = mat4(1.0f);
                 ////
 
                 render(projection, view);
             } else if (gameState == GAME_MENU) {
                 processInput();
-
+                // Render menu
             }
-            glfwPollEvents();
             glfwSwapBuffers(window);
         } else {
             // Time pauses while unfocused

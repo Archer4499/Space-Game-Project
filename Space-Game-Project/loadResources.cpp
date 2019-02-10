@@ -11,9 +11,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
-
 
 std::string readFile(const char *filePath) {
     fmt::memory_buffer out;
@@ -144,7 +141,7 @@ int loadTexture(const char *texturePath, unsigned int &texID) {
 
     glBindTexture(GL_TEXTURE_2D, texID);
     glTexImage2D(GL_TEXTURE_2D, 0, format, texWidth, texHeight, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    // glGenerateMipmap(GL_TEXTURE_2D);
 
     // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -162,107 +159,64 @@ int loadTexture(const char *texturePath, unsigned int &texID) {
     return 0;
 }
 
-int loadMesh(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsigned int &numVertices) {
+int loadSprite(const char *spritePath, unsigned int &VAO, unsigned int &VBO, unsigned int &numVertices) {
     // Return 0 if success
     // Return 1 if failed to load model file
-    // NOTE(optimisation): use map or set for a unique collection of vertices(with texCoords/normals) and re-index that
-    //      ^ Doesn't really help much for the effort required
-    // NOTE: possibly use different VBOs for different shapes
 
     struct Vertex {
-        vec3 pos;
-        vec3 normal;
+        vec2 pos;
         vec2 texCoord;
     };
 
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    std::string err;
-
-    std::vector<Vertex> buffer;
-
-    VBO = 0; // TODO(Derek): Is this needed?
+    std::vector<Vertex> vertices;
     numVertices = 0;
 
-    bool success = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, modelPath);
-
-    LOG_IF(WARN, !err.empty(), "LoadObj error: {}", err);
-    LOG_RETURN(ERR, !success, 1, "Loading object: {} failed.", modelPath);
-
-    bool hasNormals = attrib.normals.size() > 0;
-    bool hasTexCoords = attrib.texcoords.size() > 0;
-
-    // Reserve approximately enough space
-    buffer.reserve(shapes.size() * shapes[0].mesh.indices.size());
-
-    // Load vertices from indices
-    for (size_t i = 0; i < shapes.size(); ++i) {
-        for (size_t k = 0; k < shapes[i].mesh.indices.size(); ++k) {
-            tinyobj::index_t idx = shapes[i].mesh.indices[k];
-            Vertex vert;
-
-            vert.pos = vec3(&attrib.vertices[3 * idx.vertex_index]);
-
-            if (hasTexCoords) {
-                vert.texCoord = vec2(&attrib.texcoords[2 * idx.texcoord_index]);
-            } else {
-                vert.texCoord = vec2(0.0f);
-            }
-
-            if (hasNormals) {
-                vert.normal = vec3(&attrib.normals[3 * idx.normal_index]);
-            } else {
-                if (k%3 == 2) {
-                    size_t currBuffI = buffer.size();
-
-                    vec3 a = vert.pos - buffer[currBuffI-2].pos;
-                    vec3 b = buffer[currBuffI-1].pos - buffer[currBuffI-2].pos;
-                    vec3 norm = normalize(cross(a, b));
-
-                    buffer[currBuffI-2].normal = norm;
-                    buffer[currBuffI-1].normal = norm;
-                    vert.normal                = norm;
-                }
-            }
+    std::string spriteFile = readFile(spritePath);
+    LOG_RETURN(ERR, spriteFile.empty(), 1, "Sprite file: {} empty, no objects loaded.", spritePath);
 
 
-            buffer.push_back(vert);
+    size_t i = 0;
+    Vertex vertex;
 
-            ++numVertices;
-        }
+    while (i < spriteFile.length()) {
+        while (skipComments(spriteFile, i)) if (i >= spriteFile.length()) break; // Skip any consecutive comment lines
+
+        float x = std::stof(stringUntilSpace(spriteFile, i));
+        LOG_RETURN(ERR, i >= spriteFile.length(), 1, "Sprite file: {} invalid at char: {}", spritePath, i);
+        float y = std::stof(stringUntilSpace(spriteFile, i));
+        LOG_RETURN(ERR, i >= spriteFile.length(), 1, "Sprite file: {} invalid at char: {}", spritePath, i);
+        float tx = std::stof(stringUntilSpace(spriteFile, i));
+        LOG_RETURN(ERR, i >= spriteFile.length(), 1, "Sprite file: {} invalid at char: {}", spritePath, i);
+        float ty = std::stof(stringUntilSpace(spriteFile, i));
+
+        vertex = {{x, y}, {tx, ty}};
+        vertices.push_back(vertex);
+        numVertices++;
     }
 
-    LOG_RETURN(ERR, buffer.empty(), 1, "No valid object info in file: {}", modelPath);
+    LOG_RETURN(ERR, vertices.empty(), 1, "No valid sprite info in file: {}", spritePath);
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
-    glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(Vertex), &buffer[0].pos[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0].pos[0], GL_STATIC_DRAW);
 
-    // position attribute
+    glBindVertexArray(VAO);
+    // position and texture coords attribute
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0));
-    // normal attribute
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
-    // texture coord attribute
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, texCoord)));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0));
 
     glBindVertexArray(0);
 
 
-    LOG(DEBUG, "Loaded model: {}, Vertices = {}, TexCoords = {}, Indices = {}", modelPath, attrib.vertices.size()/3, attrib.texcoords.size()/2, numVertices);
-    // LOG(INFO, "Transformed into: {} vertices", numVertices);
+    LOG(DEBUG, "Loaded model: {}, Vertices = {}", spritePath, numVertices);
 
     return 0;
 }
 
-int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &renderObj) {
+/*int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &renderObj) {
     // Return 0 if success
     // Return 1 if failed to load model file
     // NOTE(optimisation): use map or set for a unique collection of vertices(with texCoords/normals) and re-index that
@@ -402,7 +356,7 @@ int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &
 
     glBindVertexArray(0);
     return 0;
-}
+}*/
 
 
 int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &shaders, std::vector<InstanceObject> &allObjects) {
@@ -419,7 +373,6 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
     if (ver == "v1.0") {
         // File v1.0
         LOG_RETURN(WARN, true, 1, "Object list file v1.0 not supported");
-
         /*std::string name, posStr, rotStr, scaleStr;
 
         while (i < list.length()) {
@@ -476,7 +429,6 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
     } else if (ver == "v1.1") {
         // File v1.1
         LOG_RETURN(WARN, true, 1, "Object list file v1.1 not supported");
-
         /*std::map<std::string, RenderObject> renderObjects;
         std::string name, objFile, texFile, posStr, rotStr, scaleStr;
 
@@ -656,7 +608,8 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
         }*/
     } else if (ver == "v1.3") {
         // File v1.3
-        std::unordered_map<std::string, RenderObject> renderObjects;
+        LOG_RETURN(WARN, true, 1, "Object list file v1.2 not supported");
+        /*std::unordered_map<std::string, RenderObject> renderObjects;
         std::string name, shaderName, vertFile, fragFile, objFile, texFile, materialBaseDir, posStr, rotStr, scaleStr;
 
         while (i < list.length()) {
@@ -770,6 +723,107 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
 
                 // Already checked above if shader and name exist in maps
                 InstanceObject obj = {pos, angle, rot, scale, shaders[shaderName], renderObjects[name]};
+                allObjects.push_back(obj);
+            }
+        }*/
+    } else if (ver == "v1.4") {
+        // File v1.4
+        std::unordered_map<std::string, RenderObject> renderObjects;
+        std::string name, shaderName, vertFile, fragFile, spriteFile, texFile, posStr, rotStr, scaleStr;
+
+        while (i < list.length()) {
+            while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
+            // TODO(Derek): sanitize name
+            char lineType = list[i++];
+            if (lineType == '=') {
+                // Shader
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid shader name at char: {}", i);
+
+                vertFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, vertFile.empty(), 1, "Object list file contains invalid shader vertex file name at char: {}", i);
+
+                fragFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, fragFile.empty(), 1, "Object list file contains invalid shader fragment file name at char: {}", i);
+
+                LOG(DEBUG, "Loading Shader: {}", name);
+                unsigned int shaderProgram = glCreateProgram();
+                int ret = loadShader(vertFile.c_str(), fragFile.c_str(), shaderProgram);
+                LOG_RETURN(WARN, ret, 1, "Failed to load shader {} from: {}, {}", name, vertFile, fragFile);
+
+                auto result = shaders.emplace(name, shaderProgram);
+                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate shader name at char: {}", i);
+            } else if (lineType == ':') {
+                // RenderObject (Sprite and texture)
+                // TODO(Derek): allow colour and/or texture
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
+
+                spriteFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, spriteFile.empty(), 1, "Object list file contains invalid sprite file name at char: {}", i);
+
+                texFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, texFile.empty(), 1, "Object list file contains invalid texture file name at char: {}", i);
+
+                unsigned int VAO, VBO, numVertices;
+                if (loadSprite(spriteFile.c_str(), VAO, VBO, numVertices)) return 1;
+
+                unsigned int texID;
+                if (loadTexture(texFile.c_str(), texID)) return 1;
+
+
+                RenderObject renderObj;
+                renderObj.models.push_back({VAO, VBO, numVertices, texID});
+
+                auto result = renderObjects.emplace(name, renderObj);
+                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate object name at char: {}", i);
+            } else if (lineType == '@') {
+                // InstanceObject
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
+                LOG_RETURN(WARN, !renderObjects.count(name), 1, "Object list file contains undefined object name on line at char: {}", i);
+
+                shaderName = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, shaderName.empty(), 1, "Object list file contains invalid shader name at char: {}", i);
+                LOG_RETURN(WARN, !shaders.count(shaderName), 1, "Object list file contains undefined shader name on line at char: {}", i);
+
+                posStr = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, posStr.empty(), 1, "Object list file contains invalid position at char: {}", i);
+
+                rotStr = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, rotStr.empty(), 1, "Object list file contains invalid rotation at char: {}", i);
+
+                scaleStr = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, scaleStr.empty(), 1, "Object list file contains invalid scale at char: {}", i);
+
+                float rot;
+                vec2 pos, scale;
+
+                try {
+                    // Parsing "float,float f f,f"
+                    // ++ skips the ','
+                    size_t end = 0;
+                    float x = std::stof(posStr, &end);
+                    float y = std::stof(posStr.substr(++end));
+                    pos = {x, y};
+
+                    rot = std::stof(rotStr, &end);
+                    // x = std::stof(rotStr.substr(++end1), &end2);
+                    // y = std::stof(rotStr.substr(end1 + (++end2)), &end3);
+                    // z = std::stof(rotStr.substr(end1 + end2 + (++end3)));
+                    // rot = {x, y, z};
+
+                    x = std::stof(scaleStr, &end);
+                    y = std::stof(scaleStr.substr(++end));
+                    scale = {x, y};
+                } catch(...) {
+                    LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line at char: {}", i);
+                }
+
+                LOG(DEBUG, "Loading: {} at {}:{}:{}", name, pos, rot, scale);
+
+                // Already checked above if shader and name exist in maps
+                InstanceObject obj = {pos, rot, scale, shaders[shaderName], renderObjects[name]};
                 allObjects.push_back(obj);
             }
         }
