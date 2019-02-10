@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Derek\Downloads\Apps\Projects\C++\Libraries\Includes;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Derek\Downloads\Apps\Projects\C++\Libraries\Libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Libraries\Includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Libraries\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\Derek\Downloads\Apps\Projects\C++\Libraries\Includes;$(IncludePath)</IncludePath>
