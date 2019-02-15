@@ -161,7 +161,7 @@ int loadTexture(const char *texturePath, unsigned int &texID) {
 
 int loadSprite(const char *spritePath, unsigned int &VAO, unsigned int &VBO, unsigned int &numVertices) {
     // Return 0 if success
-    // Return 1 if failed to load model file
+    // Return 1 if failed to load sprite file
 
     struct Vertex {
         vec2 pos;
