@@ -16,7 +16,7 @@
 // Notes //
 // NOTE: __declspec(deprecated("Message here")) int function() {} for deprecating functions
 // NOTE: (0,0) is at top left corner
-// TODOs //
+// To-dos //
 // TODO(Derek): Log more info and errs
 // TODO(Derek): hot loading of resource files
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
@@ -24,6 +24,7 @@
 // TODO(Derek): use relative paths for Additional Include Directories
 // TODO(Derek): remove light shaders
 // TODO(Derek): change objects list to use sprites
+// TODO(Derek): remove tiny_obj_loader.h
 // Decisions //
 // TODO(Derek): decide whether resolution changes zoom or scaling (http://www.david-amador.com/2013/04/opengl-2d-independent-resolution-rendering/)
 ///////////////
@@ -32,7 +33,7 @@
 #include "logging.h"
 #include "config.h"
 #include "loadResources.h"
-// #include "camera.h"
+#include "camera.h"
 #include "math/math.h"
 
 #define BACKGROUND_COLOUR 0.2f, 0.3f, 0.3f, 1.0f
@@ -58,7 +59,7 @@ std::vector<InstanceObject> allObjects;
 GLFWwindow* window = NULL;
 
 // // camera
-// Camera camera(vec3(0.0f, 0.0f, 3.0f));
+Camera camera(vec2(0.0f));
 // float lastX = 0.0f;
 // float lastY = 0.0f;
 // bool firstMouse = true;
@@ -81,17 +82,17 @@ void processInput() {
 
     // Controls
     // TODO(Derek): Allow key remapping: map(GLFW_KEY_W)
-    // int input = NONE;
-    // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    //     input |= FORWARD;
-    // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    //     input |= BACKWARD;
-    // if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    //     input |= LEFT;
-    // if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    //     input |= RIGHT;
+    int input = NONE;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        input |= UP;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        input |= DOWN;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        input |= LEFT;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        input |= RIGHT;
 
-    // camera.ProcessKeyboard(input, deltaTime);
+    camera.ProcessKeyboard(input, deltaTime);
 }
 
 void mouse_callback(GLFWwindow *window, double aXPos, double aYPos) {
@@ -113,7 +114,7 @@ void mouse_callback(GLFWwindow *window, double aXPos, double aYPos) {
 }
 
 void scroll_callback(GLFWwindow *window, double xOffset, double yOffset) {
-    // camera.ProcessMouseScroll(static_cast<float>(yOffset));
+    camera.ProcessMouseScroll(static_cast<float>(yOffset));
 }
 
 void window_focus_callback(GLFWwindow *window, int focused) {
@@ -273,7 +274,7 @@ int main(int argc, char const *argv[]) {
         if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
             // update deltaTime
             double currentFrameTime = glfwGetTime();
-            deltaTime = static_cast<float>(max(currentFrameTime - lastFrameTime, 0.00001)); // Ensure time doesn't go backwards due to precision
+            deltaTime = static_cast<float>(max(currentFrameTime - lastFrameTime, 0.0000001)); // Ensure time doesn't go backwards due to precision
             lastFrameTime = currentFrameTime;
             //
             glfwPollEvents();
@@ -284,10 +285,8 @@ int main(int argc, char const *argv[]) {
                 // Camera transformations
                 int width, height;
                 glfwGetFramebufferSize(window, &width, &height);
-                // mat4 projection = perspective(radians(camera.Zoom), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
-                // mat4 view  = camera.GetViewMatrix();
                 mat4 projection = ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, -1.0f, 1.0f);
-                mat4 view  = mat4(1.0f);
+                mat4 view  = camera.GetViewMatrix();
                 ////
 
                 render(projection, view);
