@@ -58,6 +58,8 @@ std::map<std::string, unsigned int> shaders;
 std::vector<InstanceObject> allObjects;
 GLFWwindow* window = NULL;
 
+int lastKeyState[GLFW_KEY_LAST];
+
 // // camera
 Camera camera(vec2(0.0f));
 // float lastX = 0.0f;
@@ -75,24 +77,49 @@ void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
     // TODO(Derek): move camera to new centre?
 }
 
+bool keyPressed(int key) {
+    if (glfwGetKey(window, key) != lastKeyState[key] && lastKeyState[key] == GLFW_RELEASE)
+        return true;
+    else
+        return false;
+}
+bool keyReleased(int key) {
+    if (glfwGetKey(window, key) != lastKeyState[key] && lastKeyState[key] == GLFW_PRESS)
+        return true;
+    else
+        return false;
+}
+
 void processInput() {
-    // Meta
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    if (gameState == GAME_MENU) {
+        if (keyReleased(GLFW_KEY_Q))
+            glfwSetWindowShouldClose(window, true);
 
-    // Controls
-    // TODO(Derek): Allow key remapping: map(GLFW_KEY_W)
-    int input = NONE;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        input |= UP;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        input |= DOWN;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        input |= LEFT;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        input |= RIGHT;
+        if (keyReleased(GLFW_KEY_ESCAPE))
+            gameState = GAME_ACTIVE;
+    } else if (gameState == GAME_ACTIVE) {
+        if (keyReleased(GLFW_KEY_ESCAPE))
+            gameState = GAME_MENU;
 
-    camera.ProcessKeyboard(input, deltaTime);
+        // Controls
+        // TODO(Derek): Allow key remapping: map(GLFW_KEY_W)
+        int input = NONE;
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+            input |= UP;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+            input |= DOWN;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+            input |= LEFT;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+            input |= RIGHT;
+
+        camera.ProcessKeyboard(input, deltaTime);
+    }
+
+    for (int i = 0 ; i < GLFW_KEY_LAST ; ++i) {
+        // TODO(Derek): possibly change to just updating the list of keys we use
+        lastKeyState[i] = glfwGetKey(window, i);
+    }
 }
 
 void mouse_callback(GLFWwindow *window, double aXPos, double aYPos) {
@@ -118,7 +145,6 @@ void scroll_callback(GLFWwindow *window, double xOffset, double yOffset) {
 }
 
 void window_focus_callback(GLFWwindow *window, int focused) {
-    // TODO(Derek): stop camera jerking when refocused
     // TODO(Derek): when trying to resize window mouse moves to centre of window
     if (focused) {
         // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -278,10 +304,9 @@ int main(int argc, char const *argv[]) {
             lastFrameTime = currentFrameTime;
             //
             glfwPollEvents();
+            processInput();
 
             if (gameState == GAME_ACTIVE) {
-                processInput();
-
                 // Camera transformations
                 int width, height;
                 glfwGetFramebufferSize(window, &width, &height);
@@ -291,7 +316,6 @@ int main(int argc, char const *argv[]) {
 
                 render(projection, view);
             } else if (gameState == GAME_MENU) {
-                processInput();
                 // Render menu
             }
             glfwSwapBuffers(window);
