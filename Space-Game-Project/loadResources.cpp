@@ -204,9 +204,13 @@ int loadSprite(const char *spritePath, unsigned int &VAO, unsigned int &VBO, uns
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0].pos[0], GL_STATIC_DRAW);
 
     glBindVertexArray(VAO);
-    // position and texture coords attribute
+    // position attribute
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(0));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, pos)));
+    // texture coords attribute
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, texCoord)));
+
 
     glBindVertexArray(0);
 
