@@ -14,6 +14,7 @@
 
 // todo/note area //
 // NOTE: __declspec(deprecated("Message here")) int function() {} for deprecating functions
+// NOTE: (0,0) is at top left corner
 // TODO(Derek): Log more info and errs
 // TODO(Derek): hot loading of resource files
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
@@ -22,7 +23,6 @@
 // TODO(Derek): remove light shaders
 // TODO(Derek): change objects list to use sprites
 // Decisions //
-// TODO(Derek): decide which corner is 0,0 (change order of ortho()) (changes winding order)
 // TODO(Derek): decide whether resolution changes zoom or scaling
 ////////////////////
 
@@ -255,7 +255,7 @@ int main(int argc, char const *argv[]) {
         LOG_RETURN(FATAL, !success, shutDown(-1), "Failed to initialise GLAD");
 
         // OpenGL options
-        glEnable(GL_CULL_FACE);
+        // glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         // glEnable(GL_DEPTH_TEST);
@@ -284,7 +284,7 @@ int main(int argc, char const *argv[]) {
                 glfwGetFramebufferSize(window, &width, &height);
                 // mat4 projection = perspective(radians(camera.Zoom), static_cast<float>(width) / static_cast<float>(height), 0.1f, 100.0f);
                 // mat4 view  = camera.GetViewMatrix();
-                mat4 projection = ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), -1.0f, 1.0f);
+                mat4 projection = ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, -1.0f, 1.0f);
                 mat4 view  = mat4(1.0f);
                 ////
 
