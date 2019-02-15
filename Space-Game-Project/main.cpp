@@ -1,4 +1,5 @@
 #ifndef _DEBUG
+// Enable NDEBUG for Visual Studio
 #define NDEBUG
 #endif
 #ifdef NDEBUG
@@ -12,9 +13,10 @@
 #include <vector>
 #include <map>
 
-// todo/note area //
+// Notes //
 // NOTE: __declspec(deprecated("Message here")) int function() {} for deprecating functions
 // NOTE: (0,0) is at top left corner
+// TODOs //
 // TODO(Derek): Log more info and errs
 // TODO(Derek): hot loading of resource files
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
@@ -23,8 +25,8 @@
 // TODO(Derek): remove light shaders
 // TODO(Derek): change objects list to use sprites
 // Decisions //
-// TODO(Derek): decide whether resolution changes zoom or scaling
-////////////////////
+// TODO(Derek): decide whether resolution changes zoom or scaling (http://www.david-amador.com/2013/04/opengl-2d-independent-resolution-rendering/)
+///////////////
 
 
 #include "logging.h"
