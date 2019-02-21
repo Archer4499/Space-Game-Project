@@ -52,10 +52,4 @@ int loadTexture(const char *texturePath, unsigned int &texID);
 
 int loadSprite(const char *spritePath, unsigned int &VAO, unsigned int &VBO, unsigned int &numVertices);
 
-// int loadMesh(const char *modelPath, unsigned int &VAO, unsigned int &VBO, unsigned int &numVertices);
-
-// int loadModel(const char *modelPath, const char *materialBaseDir, RenderObject &renderObj);
-
-// int loadModelOld(unsigned int *VBO, unsigned int *VAO, unsigned int *EBO);
-
 int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &shaders, std::vector<InstanceObject> &allObjects);
