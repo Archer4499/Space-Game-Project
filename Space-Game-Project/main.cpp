@@ -154,7 +154,14 @@ void window_focus_callback(GLFWwindow *window, int focused) {
     }
 }
 
-void render(mat4 &projection, mat4 &view) {
+void renderGame() {
+    // Camera transformations
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    mat4 projection = ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, -1.0f, 1.0f);
+    mat4 view  = camera.GetViewMatrix();
+    ////
+
     glClearColor(BACKGROUND_COLOUR);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -190,8 +197,8 @@ void render(mat4 &projection, mat4 &view) {
 }
 
 void renderMenu() {
-    glClearColor(BACKGROUND_COLOUR);
-    glClear(GL_COLOR_BUFFER_BIT);
+    // glClearColor(BACKGROUND_COLOUR);
+    // glClear(GL_COLOR_BUFFER_BIT);
 }
 
 int shutDown(int exitCode) {
@@ -315,16 +322,9 @@ int main(int argc, char const *argv[]) {
             processInput();
 
             if (gameState == GAME_ACTIVE) {
-                // Camera transformations
-                int width, height;
-                glfwGetFramebufferSize(window, &width, &height);
-                mat4 projection = ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, -1.0f, 1.0f);
-                mat4 view  = camera.GetViewMatrix();
-                ////
-
-                render(projection, view);
+                renderGame();
             } else if (gameState == GAME_MENU) {
-                // Render menu
+                renderGame();
                 renderMenu();
             }
             glfwSwapBuffers(window);
