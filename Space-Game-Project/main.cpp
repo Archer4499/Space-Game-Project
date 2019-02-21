@@ -315,9 +315,10 @@ int main(int argc, char const *argv[]) {
         if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
             // update deltaTime
             double currentFrameTime = glfwGetTime();
-            deltaTime = static_cast<float>(max(currentFrameTime - lastFrameTime, 0.0000001)); // Ensure time doesn't go backwards due to precision
+            deltaTime = static_cast<float>(currentFrameTime - lastFrameTime);
             lastFrameTime = currentFrameTime;
             //
+
             glfwPollEvents();
             processInput();
 
