@@ -178,9 +178,11 @@ void render(mat4 &projection, mat4 &view) {
 
         mat4 model(1.0f);
         model = translate(model, vec3(obj.pos.x, obj.pos.y, 0.0f));
-        model = rotate(model, obj.rot, vec3(0.0f, 0.0f, 1.0f));
+        model = rotate(model, radians(obj.rot), vec3(0.0f, 0.0f, 1.0f));
         model = scale(model, vec3(obj.scale.x, obj.scale.y, 1.0f));
         glUniformMatrix4fv(glGetUniformLocation(obj.shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+
+        glUniform3fv(glGetUniformLocation(obj.shaderProgram, "spriteColor"), 1, &obj.color[0]);
 
         obj.draw();
     }
