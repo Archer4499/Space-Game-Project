@@ -230,366 +230,11 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
     size_t i = 0;
 
     std::string ver = stringUntilSpace(list, i);
-    if (ver == "v1.0") {
-        // File v1.0
-        LOG_RETURN(WARN, true, 1, "Object list file v1.0 not supported");
-        /*std::string name, posStr, rotStr, scaleStr;
 
-        while (i < list.length()) {
-            while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
-            name = stringUntilSpace(list, i);
-            if (name != "") {
-                posStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, posStr.empty(), 1, "Object list file invalid at char: {}", i);
-
-                rotStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, rotStr.empty(), 1, "Object list file invalid at char: {}", i);
-
-                scaleStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, scaleStr.empty(), 1, "Object list file invalid at char: {}", i);
-
-                float angle;
-                vec3 pos, rot, scale;
-
-                try {
-                    // Parsing "float,float,float"
-                    // ++ skips the ','
-                    size_t end1 = 0, end2 = 0, end3 = 0;
-                    float x = std::stof(posStr, &end1);
-                    float y = std::stof(posStr.substr(++end1), &end2);
-                    float z = std::stof(posStr.substr(end1 + (++end2)));
-                    pos = {x, y, z};
-
-                    angle = std::stof(rotStr, &end1);
-                    x = std::stof(rotStr.substr(++end1), &end2);
-                    y = std::stof(rotStr.substr(end1 + (++end2)), &end3);
-                    z = std::stof(rotStr.substr(end1 + end2 + (++end3)));
-                    rot = {x, y, z};
-
-                    x = std::stof(scaleStr, &end1);
-                    y = std::stof(scaleStr.substr(++end1), &end2);
-                    z = std::stof(scaleStr.substr(end1 + (++end2)));
-                    scale = {x, y, z};
-                } catch(...) {
-                    LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line with char: {}", i);
-                }
-
-                LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
-
-                unsigned int VAO, VBO, numVertices;
-                if (loadMesh(name.c_str(), VAO, VBO, numVertices)) return 1;
-
-                unsigned int texID = 0;
-
-                RenderObject renObj = {VAO, VBO, numVertices, texID};
-                InstanceObject obj = {pos, angle, rot, scale, renObj};
-                allObjects.push_back(obj);
-            }
-        }*/
-    } else if (ver == "v1.1") {
-        // File v1.1
-        LOG_RETURN(WARN, true, 1, "Object list file v1.1 not supported");
-        /*std::map<std::string, RenderObject> renderObjects;
-        std::string name, objFile, texFile, posStr, rotStr, scaleStr;
-
-        while (i < list.length()) {
-            while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
-            // TODO(Derek): sanitize name
-            if (list[i] == ':') {
-                // RenderObject
-                ++i;
-
-                name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
-
-                objFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, objFile.empty(), 1, "Object list file contains invalid object file name at char: {}", i);
-
-                texFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, texFile.empty(), 1, "Object list file contains invalid texture file name at char: {}", i);
-
-                unsigned int VAO, VBO, numVertices;
-                if (loadMesh(objFile.c_str(), VAO, VBO, numVertices)) return 1;
-
-                unsigned int texID;
-                if (loadTexture(texFile.c_str(), texID)) return 1;
-
-                RenderObject renderObj = {VAO, VBO, numVertices, texID};
-                auto result = renderObjects.emplace(name, renderObj);
-                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate name at char: {}", i);
-            } else if (list[i] == '@') {
-                // InstanceObject
-                ++i;
-                name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
-                LOG_RETURN(WARN, !renderObjects.count(name), 1, "Object list file contains undefined name on line at char: {}", i);
-
-                posStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, posStr.empty(), 1, "Object list file contains invalid position at char: {}", i);
-
-                rotStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, rotStr.empty(), 1, "Object list file contains invalid rotation at char: {}", i);
-
-                scaleStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, scaleStr.empty(), 1, "Object list file contains invalid scale at char: {}", i);
-
-                float angle;
-                vec3 pos, rot, scale;
-
-                try {
-                    // Parsing "float,float,float"
-                    // ++ skips the ','
-                    size_t end1 = 0, end2 = 0, end3 = 0;
-                    float x = std::stof(posStr, &end1);
-                    float y = std::stof(posStr.substr(++end1), &end2);
-                    float z = std::stof(posStr.substr(end1 + (++end2)));
-                    pos = {x, y, z};
-
-                    angle = std::stof(rotStr, &end1);
-                    x = std::stof(rotStr.substr(++end1), &end2);
-                    y = std::stof(rotStr.substr(end1 + (++end2)), &end3);
-                    z = std::stof(rotStr.substr(end1 + end2 + (++end3)));
-                    rot = {x, y, z};
-
-                    x = std::stof(scaleStr, &end1);
-                    y = std::stof(scaleStr.substr(++end1), &end2);
-                    z = std::stof(scaleStr.substr(end1 + (++end2)));
-                    scale = {x, y, z};
-                } catch(...) {
-                    LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line with char: {}", i);
-                }
-
-                LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
-
-                InstanceObject obj = {pos, angle, rot, scale, renderObjects[name]};
-                allObjects.push_back(obj);
-            }
-        }*/
-    } else if (ver == "v1.2") {
-        // File v1.2
-        LOG_RETURN(WARN, true, 1, "Object list file v1.2 not supported");
-        /*std::map<std::string, RenderObject> renderObjects;
-        std::string name, objFile, texFile, materialBaseDir, posStr, rotStr, scaleStr;
-
-        while (i < list.length()) {
-            while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
-            // TODO(Derek): sanitize name
-            if (list[i] == '&') {
-                // Mesh and texture
-                ++i;
-
-                name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
-
-                objFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, objFile.empty(), 1, "Object list file contains invalid object file name at char: {}", i);
-
-                texFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, texFile.empty(), 1, "Object list file contains invalid texture file name at char: {}", i);
-
-                unsigned int VAO, VBO, numVertices;
-                if (loadMesh(objFile.c_str(), VAO, VBO, numVertices)) return 1;
-
-                unsigned int texID;
-                if (loadTexture(texFile.c_str(), texID)) return 1;
-
-
-                RenderObject renderObj;
-                renderObj.models.push_back({VAO, VBO, numVertices, 0});
-                renderObj.materials.push_back({{-1, texID, -1, -1, -1, -1, -1, -1}});
-
-                auto result = renderObjects.emplace(name, renderObj);
-                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate name at char: {}", i);
-            } else if (list[i] == ':') {
-                // Object (with .mtl info)
-                ++i;
-
-                name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
-
-                objFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, objFile.empty(), 1, "Object list file contains invalid object file name at char: {}", i);
-
-                materialBaseDir = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, materialBaseDir.empty(), 1, "Object list file contains invalid material folder name at char: {}", i);
-
-                RenderObject renderObj;
-                if (loadModel(objFile.c_str(), materialBaseDir.c_str(), renderObj)) return 1;
-
-                auto result = renderObjects.emplace(name, renderObj);
-                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate name at char: {}", i);
-            } else if (list[i] == '@') {
-                // InstanceObject
-                ++i;
-                name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid name at char: {}", i);
-                LOG_RETURN(WARN, !renderObjects.count(name), 1, "Object list file contains undefined name on line at char: {}", i);
-
-                posStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, posStr.empty(), 1, "Object list file contains invalid position at char: {}", i);
-
-                rotStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, rotStr.empty(), 1, "Object list file contains invalid rotation at char: {}", i);
-
-                scaleStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, scaleStr.empty(), 1, "Object list file contains invalid scale at char: {}", i);
-
-                float angle;
-                vec3 pos, rot, scale;
-
-                try {
-                    // Parsing "float,float,float"
-                    // ++ skips the ','
-                    size_t end1 = 0, end2 = 0, end3 = 0;
-                    float x = std::stof(posStr, &end1);
-                    float y = std::stof(posStr.substr(++end1), &end2);
-                    float z = std::stof(posStr.substr(end1 + (++end2)));
-                    pos = {x, y, z};
-
-                    angle = std::stof(rotStr, &end1);
-                    x = std::stof(rotStr.substr(++end1), &end2);
-                    y = std::stof(rotStr.substr(end1 + (++end2)), &end3);
-                    z = std::stof(rotStr.substr(end1 + end2 + (++end3)));
-                    rot = {x, y, z};
-
-                    x = std::stof(scaleStr, &end1);
-                    y = std::stof(scaleStr.substr(++end1), &end2);
-                    z = std::stof(scaleStr.substr(end1 + (++end2)));
-                    scale = {x, y, z};
-                } catch(...) {
-                    LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line with char: {}", i);
-                }
-
-                LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
-
-                InstanceObject obj = {pos, angle, rot, scale, renderObjects[name]};
-                allObjects.push_back(obj);
-            }
-        }*/
-    } else if (ver == "v1.3") {
-        // File v1.3
-        LOG_RETURN(WARN, true, 1, "Object list file v1.2 not supported");
-        /*std::unordered_map<std::string, RenderObject> renderObjects;
-        std::string name, shaderName, vertFile, fragFile, objFile, texFile, materialBaseDir, posStr, rotStr, scaleStr;
-
-        while (i < list.length()) {
-            while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
-            // TODO(Derek): sanitize name
-            char lineType = list[i++];
-            if (lineType == '=') {
-                // Shader
-                name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid shader name at char: {}", i);
-
-                vertFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, vertFile.empty(), 1, "Object list file contains invalid shader vertex file name at char: {}", i);
-
-                fragFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, fragFile.empty(), 1, "Object list file contains invalid shader fragment file name at char: {}", i);
-
-                LOG(DEBUG, "Loading Shader: {}", name);
-                unsigned int shaderProgram = glCreateProgram();
-                int ret = loadShader(vertFile.c_str(), fragFile.c_str(), shaderProgram);
-                LOG_RETURN(WARN, ret, 1, "Failed to load shader {} from: {}, {}", name, vertFile, fragFile);
-
-                auto result = shaders.emplace(name, shaderProgram);
-                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate shader name at char: {}", i);
-            } else if (lineType == '&') {
-                // Mesh and texture
-                name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
-
-                objFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, objFile.empty(), 1, "Object list file contains invalid object file name at char: {}", i);
-
-                texFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, texFile.empty(), 1, "Object list file contains invalid texture file name at char: {}", i);
-
-                unsigned int VAO, VBO, numVertices;
-                if (loadMesh(objFile.c_str(), VAO, VBO, numVertices)) return 1;
-
-                unsigned int texID;
-                if (loadTexture(texFile.c_str(), texID)) return 1;
-
-
-                RenderObject renderObj;
-                renderObj.models.push_back({VAO, VBO, numVertices, 0});
-                renderObj.materials.push_back({{-1, texID, -1, -1, -1, -1, -1, -1}});
-
-                auto result = renderObjects.emplace(name, renderObj);
-                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate object name at char: {}", i);
-            } else if (lineType == ':') {
-                // Object (with .mtl info)
-                name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
-
-                objFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, objFile.empty(), 1, "Object list file contains invalid object file name at char: {}", i);
-
-                materialBaseDir = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, materialBaseDir.empty(), 1, "Object list file contains invalid material folder name at char: {}", i);
-
-                RenderObject renderObj;
-                if (loadModel(objFile.c_str(), materialBaseDir.c_str(), renderObj)) return 1;
-
-                auto result = renderObjects.emplace(name, renderObj);
-                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate object name at char: {}", i);
-            } else if (lineType == '@') {
-                // InstanceObject
-                name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
-                LOG_RETURN(WARN, !renderObjects.count(name), 1, "Object list file contains undefined object name on line at char: {}", i);
-
-                shaderName = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, shaderName.empty(), 1, "Object list file contains invalid shader name at char: {}", i);
-                LOG_RETURN(WARN, !shaders.count(shaderName), 1, "Object list file contains undefined shader name on line at char: {}", i);
-
-                posStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, posStr.empty(), 1, "Object list file contains invalid position at char: {}", i);
-
-                rotStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, rotStr.empty(), 1, "Object list file contains invalid rotation at char: {}", i);
-
-                scaleStr = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, scaleStr.empty(), 1, "Object list file contains invalid scale at char: {}", i);
-
-                float angle;
-                vec3 pos, rot, scale;
-
-                try {
-                    // Parsing "float,float,float f,f,f,f f,f,f"
-                    // ++ skips the ','
-                    size_t end1 = 0, end2 = 0, end3 = 0;
-                    float x = std::stof(posStr, &end1);
-                    float y = std::stof(posStr.substr(++end1), &end2);
-                    float z = std::stof(posStr.substr(end1 + (++end2)));
-                    pos = {x, y, z};
-
-                    angle = std::stof(rotStr, &end1);
-                    x = std::stof(rotStr.substr(++end1), &end2);
-                    y = std::stof(rotStr.substr(end1 + (++end2)), &end3);
-                    z = std::stof(rotStr.substr(end1 + end2 + (++end3)));
-                    rot = {x, y, z};
-
-                    x = std::stof(scaleStr, &end1);
-                    y = std::stof(scaleStr.substr(++end1), &end2);
-                    z = std::stof(scaleStr.substr(end1 + (++end2)));
-                    scale = {x, y, z};
-                } catch(...) {
-                    LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line with char: {}", i);
-                }
-
-                LOG(DEBUG, "Loading: {} at {}:{},{}:{}", name, pos, angle, rot, scale);
-
-                // Already checked above if shader and name exist in maps
-                InstanceObject obj = {pos, angle, rot, scale, shaders[shaderName], renderObjects[name]};
-                allObjects.push_back(obj);
-            }
-        }*/
-    } else if (ver == "v1.4") {
-        // File v1.4
+    if (ver == "v1.5") {
+        // File v1.5
         std::unordered_map<std::string, RenderObject> renderObjects;
-        std::string name, shaderName, vertFile, fragFile, spriteFile, texFile, posStr, rotStr, scaleStr;
+        std::string name, shaderName, vertFile, fragFile, spriteFile, texFile, posStr, rotStr, scaleStr, colorStr;
 
         while (i < list.length()) {
             while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
@@ -615,7 +260,7 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
                 LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate shader name at char: {}", i);
             } else if (lineType == ':') {
                 // RenderObject (Sprite and texture)
-                // TODO(Derek): allow colour and/or texture
+                // TODO(Derek): allow no texture and just use colour from InstanceObject
                 name = stringUntilSpace(list, i);
                 LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
 
@@ -656,37 +301,50 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
                 scaleStr = stringUntilSpace(list, i);
                 LOG_RETURN(WARN, scaleStr.empty(), 1, "Object list file contains invalid scale at char: {}", i);
 
+                colorStr = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, colorStr.empty(), 1, "Object list file contains invalid colour at char: {}", i);
+
                 float rot;
                 vec2 pos, scale;
+                vec3 color;
+                float x, y, z;
+                size_t end1, end2;
 
                 try {
-                    // Parsing "float,float f f,f"
+                    // Parsing "f,f  f  f,f  f,f,f"
                     // ++ skips the ','
-                    size_t end = 0;
-                    float x = std::stof(posStr, &end);
-                    float y = std::stof(posStr.substr(++end));
+                    // Pos
+                    x = std::stof(posStr, &end1);
+                    y = std::stof(posStr.substr(++end1));
                     pos = {x, y};
 
-                    rot = std::stof(rotStr, &end);
-                    // x = std::stof(rotStr.substr(++end1), &end2);
-                    // y = std::stof(rotStr.substr(end1 + (++end2)), &end3);
-                    // z = std::stof(rotStr.substr(end1 + end2 + (++end3)));
-                    // rot = {x, y, z};
+                    // Rotation
+                    rot = std::stof(rotStr);
 
-                    x = std::stof(scaleStr, &end);
-                    y = std::stof(scaleStr.substr(++end));
+                    // Scale
+                    x = std::stof(scaleStr, &end1);
+                    y = std::stof(scaleStr.substr(++end1));
                     scale = {x, y};
+
+                    // Colour
+                    x = std::stof(colorStr, &end1);
+                    y = std::stof(colorStr.substr(++end1), &end2);
+                    z = std::stof(colorStr.substr(end1 + (++end2)));
+                    color = {x, y, z};
+
                 } catch(...) {
                     LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line at char: {}", i);
                 }
 
-                LOG(DEBUG, "Loading: {} at {}:{}:{}", name, pos, rot, scale);
+                LOG(DEBUG, "Loading: {} at {}:{}:{} with colour {}", name, pos, rot, scale, color);
 
                 // Already checked above if shader and name exist in maps
-                InstanceObject obj = {pos, rot, scale, shaders[shaderName], renderObjects[name]};
+                InstanceObject obj = {pos, rot, scale, color, shaders[shaderName], renderObjects[name]};
                 allObjects.push_back(obj);
             }
         }
+    } else if (ver[0] == 'v') {
+        LOG_RETURN(WARN, true, 1, "Object list file {} not supported", ver);
     } else {
         LOG_RETURN(WARN, true, 1, "Object list file either invalid or version not supported");
     }
