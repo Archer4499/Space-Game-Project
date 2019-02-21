@@ -18,13 +18,11 @@
 // NOTE: (0,0) is at top left corner
 // To-dos //
 // TODO(Derek): Make Icon
-// TODO(Derek): Log more info and errs
 // TODO(Derek): hot loading of resource files
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
 // TODO(Derek): Give math and logging their own repositories
-// TODO(Derek): use relative paths for Additional Include Directories
 // TODO(Derek): remove light shaders
-// TODO(Derek): change objects list to use sprites
+// TODO(Derek): Method of having sprite shapes with different textures
 // TODO(Derek): remove tiny_obj_loader.h
 // Decisions //
 // TODO(Derek): decide whether resolution changes zoom or scaling (http://www.david-amador.com/2013/04/opengl-2d-independent-resolution-rendering/)
@@ -192,7 +190,6 @@ void renderGame() {
 
         glUniform3fv(glGetUniformLocation(obj.shaderProgram, "spriteColor"), 1, &obj.color[0]);
 
-        // Check whether the texture in each material exists
         if (obj.renderObj.texID > 0) {
             glUniform1i(glGetUniformLocation(obj.shaderProgram, "tex"), 0);
 
