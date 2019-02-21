@@ -37,7 +37,7 @@ struct InstanceObject {
     vec2 pos;
     float rot;
     vec2 scale;
-    // vec3 colour;
+    vec3 color;
     unsigned int shaderProgram;
     RenderObject renderObj;
 
