@@ -112,8 +112,8 @@ int loadShader(const char *vertexPath, const char *fragmentPath, unsigned int &s
 int loadTexture(const char *texturePath, unsigned int &texID) {
     int texWidth, texHeight, nrComponents;
 
-    // tell stb_image.h to flip loaded texture's on the y-axis.
-    stbi_set_flip_vertically_on_load(true);
+    // // tell stb_image.h to flip loaded texture's on the y-axis.
+    // stbi_set_flip_vertically_on_load(true);
 
     unsigned char *data = stbi_load(texturePath, &texWidth, &texHeight, &nrComponents, 0);
     if (!data) {
