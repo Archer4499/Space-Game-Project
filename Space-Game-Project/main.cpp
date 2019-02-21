@@ -192,7 +192,16 @@ void renderGame() {
 
         glUniform3fv(glGetUniformLocation(obj.shaderProgram, "spriteColor"), 1, &obj.color[0]);
 
-        obj.draw();
+        // Check whether the texture in each material exists
+        if (obj.renderObj.texID > 0) {
+            glUniform1i(glGetUniformLocation(obj.shaderProgram, "tex"), 0);
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, obj.renderObj.texID);
+        }
+
+        glBindVertexArray(obj.renderObj.VAO);
+        glDrawArrays(GL_TRIANGLES, 0, obj.renderObj.numVertices);
     }
 }
 
@@ -205,11 +214,9 @@ int shutDown(int exitCode) {
     LOG(INFO, "Running clean-up");
 
     for (InstanceObject obj: allObjects) {
-        for (Model m : obj.renderObj.models) {
-            glDeleteVertexArrays(1, &m.VAO);
-            glDeleteBuffers(1, &m.VBO);
-            // glDeleteBuffers(1, &obj.EBO);
-        }
+        glDeleteVertexArrays(1, &obj.renderObj.VAO);
+        glDeleteBuffers(1, &obj.renderObj.VBO);
+        // glDeleteBuffers(1, &obj.renderObj.EBO);
     }
     glfwTerminate();
 

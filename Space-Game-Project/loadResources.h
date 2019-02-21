@@ -7,30 +7,10 @@
 
 #include "Math\vector.h"
 
-struct Model {
+struct RenderObject {
     unsigned int VAO, VBO;
     unsigned int numVertices;
     unsigned int texID;
-};
-
-struct RenderObject {
-    std::vector<Model> models;
-
-    void draw(unsigned int shaderProgram) {
-        glUseProgram(shaderProgram);
-        for (Model m : models) {
-            // Check whether the texture in each material exists
-            if (m.texID > 0) {
-                glUniform1i(glGetUniformLocation(shaderProgram, "tex"), 0);
-
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, m.texID);
-            }
-
-            glBindVertexArray(m.VAO);
-            glDrawArrays(GL_TRIANGLES, 0, m.numVertices);
-        }
-    }
 };
 
 struct InstanceObject {
@@ -40,10 +20,6 @@ struct InstanceObject {
     vec3 color;
     unsigned int shaderProgram;
     RenderObject renderObj;
-
-    void draw() {
-        renderObj.draw(shaderProgram);
-    }
 };
 
 int loadShader(const char *vertexPath, const char *fragmentPath, unsigned int &shaderProgram);

@@ -277,8 +277,7 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
                 if (loadTexture(texFile.c_str(), texID)) return 1;
 
 
-                RenderObject renderObj;
-                renderObj.models.push_back({VAO, VBO, numVertices, texID});
+                RenderObject renderObj = {VAO, VBO, numVertices, texID};
 
                 auto result = renderObjects.emplace(name, renderObj);
                 LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate object name at char: {}", i);
