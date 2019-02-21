@@ -17,6 +17,7 @@
 // NOTE: __declspec(deprecated("Message here")) int function() {} for deprecating functions
 // NOTE: (0,0) is at top left corner
 // To-dos //
+// TODO(Derek): Make Icon
 // TODO(Derek): Log more info and errs
 // TODO(Derek): hot loading of resource files
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
@@ -188,6 +189,11 @@ void render(mat4 &projection, mat4 &view) {
     }
 }
 
+void renderMenu() {
+    glClearColor(BACKGROUND_COLOUR);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
 int shutDown(int exitCode) {
     LOG(INFO, "Running clean-up");
 
@@ -319,6 +325,7 @@ int main(int argc, char const *argv[]) {
                 render(projection, view);
             } else if (gameState == GAME_MENU) {
                 // Render menu
+                renderMenu();
             }
             glfwSwapBuffers(window);
         } else {
