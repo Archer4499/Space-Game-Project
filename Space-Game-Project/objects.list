@@ -5,7 +5,7 @@ v1.5
 
 # Object (Sprites with textures)
 # : Name        SpriteFile                       TextureFile
-:   circle      Resources/Sprites/circle.sp      Resources/Textures/container.jpg
+:   circle      Resources/Sprites/circle.sp      Resources/Textures/awesomeface.png
 :   box         Resources/Sprites/box2.sp        Resources/Textures/container.jpg
 
 # Define InstanceObjects
