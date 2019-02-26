@@ -1,16 +1,27 @@
-v1.5
+v1.6
 # Shaders
 # = Name   VertFile                            FragFile
-= general  Resources/Shaders/shader.vert       Resources/Shaders/shader.frag
+= shape    Resources/Shaders/shape.vert        Resources/Shaders/shape.frag
+= sprite   Resources/Shaders/sprite.vert       Resources/Shaders/sprite.frag
 
-# Object (Sprites with textures)
-# : Name        SpriteFile                       TextureFile
-:   circle      Resources/Sprites/circle.sp      Resources/Textures/awesomeface.png
-:   box         Resources/Sprites/box2.sp        Resources/Textures/container.jpg
 
-# Define InstanceObjects
-# @ ObjectName  Shader   Position  Angle  Scale     Colour
-@   circle      general  200,200   0      100,100   1.0,1.0,1.0
-@   box         general  400,400   0      100,100   0.5,1.0,1.0
-@   box         general  200,400   90     100,100   1.0,0.5,1.0
-@   box         general  400,200   45     100,100   1.0,1.0,0.5
+# Sprites
+# : Name        SpriteFile
+:   circle20    Resources/Sprites/circle20.sp
+:   square      Resources/Sprites/square.sp
+
+
+# Textures
+# & Name        TextureFile
+&   container   Resources/Textures/container.jpg
+&   face        Resources/Textures/awesomeface.png
+
+
+# InstanceObjects
+# @ SpriteName  TextureName(or NULL)  Shader   Position  Angle  Scale     Colour
+@   circle20    face                  sprite   200,200   0      100,100   1.0,1.0,1.0
+@   square      container             sprite   400,400   0      100,100   0.5,1.0,1.0
+@   square      container             sprite   200,400   90     100,100   1.0,0.5,1.0
+@   square      container             sprite   400,200   45     100,100   1.0,1.0,0.5
+
+@   square      NULL                  shape    600,300   0      100,200   0.5,0.0,0.5

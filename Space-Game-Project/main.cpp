@@ -190,15 +190,15 @@ void renderGame() {
 
         glUniform3fv(glGetUniformLocation(obj.shaderProgram, "spriteColor"), 1, &obj.color[0]);
 
-        if (obj.renderObj.texID > 0) {
+        if (obj.texID > 0) {
             glUniform1i(glGetUniformLocation(obj.shaderProgram, "tex"), 0);
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, obj.renderObj.texID);
+            glBindTexture(GL_TEXTURE_2D, obj.texID);
         }
 
-        glBindVertexArray(obj.renderObj.VAO);
-        glDrawArrays(GL_TRIANGLES, 0, obj.renderObj.numVertices);
+        glBindVertexArray(obj.sprite.VAO);
+        glDrawArrays(GL_TRIANGLES, 0, obj.sprite.numVertices);
     }
 }
 
@@ -210,10 +210,11 @@ void renderMenu() {
 int shutDown(int exitCode) {
     LOG(INFO, "Running clean-up");
 
+    // TODO(Derek): get list of sprites not list of instanceObjects
     for (InstanceObject obj: allObjects) {
-        glDeleteVertexArrays(1, &obj.renderObj.VAO);
-        glDeleteBuffers(1, &obj.renderObj.VBO);
-        // glDeleteBuffers(1, &obj.renderObj.EBO);
+        glDeleteVertexArrays(1, &obj.sprite.VAO);
+        glDeleteBuffers(1, &obj.sprite.VBO);
+        // glDeleteBuffers(1, &obj.sprite.EBO);
     }
     glfwTerminate();
 

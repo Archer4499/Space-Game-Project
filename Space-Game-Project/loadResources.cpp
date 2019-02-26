@@ -231,10 +231,11 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
 
     std::string ver = stringUntilSpace(list, i);
 
-    if (ver == "v1.5") {
-        // File v1.5
-        std::unordered_map<std::string, RenderObject> renderObjects;
-        std::string name, shaderName, vertFile, fragFile, spriteFile, texFile, posStr, rotStr, scaleStr, colorStr;
+    if (ver == "v1.6") {
+        // File v1.6
+        std::unordered_map<std::string, unsigned int> textures;
+        std::unordered_map<std::string, Sprite> sprites;
+        std::string name, spriteName, textureName, shaderName, vertFile, fragFile, spriteFile, texFile, posStr, rotStr, scaleStr, colorStr;
 
         while (i < list.length()) {
             while (skipComments(list, i)) if (i >= list.length()) break; // Skip any consecutive comment lines
@@ -259,33 +260,48 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
                 auto result = shaders.emplace(name, shaderProgram);
                 LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate shader name at char: {}", i);
             } else if (lineType == ':') {
-                // RenderObject (Sprite and texture)
-                // TODO(Derek): allow no texture and just use colour from InstanceObject
+                // Sprites
                 name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid sprite name at char: {}", i);
 
                 spriteFile = stringUntilSpace(list, i);
                 LOG_RETURN(WARN, spriteFile.empty(), 1, "Object list file contains invalid sprite file name at char: {}", i);
 
-                texFile = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, texFile.empty(), 1, "Object list file contains invalid texture file name at char: {}", i);
-
                 unsigned int VAO, VBO, numVertices;
                 if (loadSprite(spriteFile.c_str(), VAO, VBO, numVertices)) return 1;
+
+                Sprite sprite = {VAO, VBO, numVertices};
+
+                auto result = sprites.emplace(name, sprite);
+                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate sprite name at char: {}", i);
+            } else if (lineType == '&') {
+                // Textures
+                name = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid texture name at char: {}", i);
+
+                texFile = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, texFile.empty(), 1, "Object list file contains invalid texture file name at char: {}", i);
 
                 unsigned int texID;
                 if (loadTexture(texFile.c_str(), texID)) return 1;
 
-
-                RenderObject renderObj = {VAO, VBO, numVertices, texID};
-
-                auto result = renderObjects.emplace(name, renderObj);
-                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate object name at char: {}", i);
+                auto result = textures.emplace(name, texID);
+                LOG_RETURN(WARN, !result.second, 1, "Object list file contains duplicate texture name at char: {}", i);
             } else if (lineType == '@') {
                 // InstanceObject
-                name = stringUntilSpace(list, i);
-                LOG_RETURN(WARN, name.empty(), 1, "Object list file contains invalid object name at char: {}", i);
-                LOG_RETURN(WARN, !renderObjects.count(name), 1, "Object list file contains undefined object name on line at char: {}", i);
+                spriteName = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, spriteName.empty(), 1, "Object list file contains invalid sprite name at char: {}", i);
+                LOG_RETURN(WARN, !sprites.count(spriteName), 1, "Object list file contains undefined sprite name on line at char: {}", i);
+
+                textureName = stringUntilSpace(list, i);
+                LOG_RETURN(WARN, textureName.empty(), 1, "Object list file contains invalid texture name at char: {}", i);
+                unsigned int texID;
+                if (textureName == "NULL") {
+                    texID = 0;
+                } else {
+                    LOG_RETURN(WARN, !textures.count(textureName), 1, "Object list file contains undefined texture name on line at char: {}", i);
+                    texID = textures[textureName];
+                }
 
                 shaderName = stringUntilSpace(list, i);
                 LOG_RETURN(WARN, shaderName.empty(), 1, "Object list file contains invalid shader name at char: {}", i);
@@ -335,10 +351,10 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
                     LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line at char: {}", i);
                 }
 
-                LOG(DEBUG, "Loading: {} at {}:{}:{} with colour {}", name, pos, rot, scale, color);
+                LOG(DEBUG, "Loading: {},{},{} at {}:{}:{} with colour {}", spriteName, textureName, shaderName, pos, rot, scale, color);
 
                 // Already checked above if shader and name exist in maps
-                InstanceObject obj = {pos, rot, scale, color, shaders[shaderName], renderObjects[name]};
+                InstanceObject obj = {pos, rot, scale, color, shaders[shaderName], texID, sprites[spriteName]};
                 allObjects.push_back(obj);
             }
         }

@@ -1,0 +1,16 @@
+v1.5
+# Shaders
+# = Name   VertFile                            FragFile
+= general  Resources/Shaders/shader.vert       Resources/Shaders/shader.frag
+
+# Object (Sprites with textures)
+# : Name        SpriteFile                       TextureFile
+:   circle      Resources/Sprites/circle.sp      Resources/Textures/awesomeface.png
+:   box         Resources/Sprites/box2.sp        Resources/Textures/container.jpg
+
+# Define InstanceObjects
+# @ ObjectName  Shader   Position  Angle  Scale     Colour
+@   circle      general  200,200   0      100,100   1.0,1.0,1.0
+@   box         general  400,400   0      100,100   0.5,1.0,1.0
+@   box         general  200,400   90     100,100   1.0,0.5,1.0
+@   box         general  400,200   45     100,100   1.0,1.0,0.5

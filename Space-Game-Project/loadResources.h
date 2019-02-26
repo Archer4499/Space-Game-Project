@@ -7,10 +7,9 @@
 
 #include "Math\vector.h"
 
-struct RenderObject {
+struct Sprite {
     unsigned int VAO, VBO;
     unsigned int numVertices;
-    unsigned int texID;
 };
 
 struct InstanceObject {
@@ -19,7 +18,8 @@ struct InstanceObject {
     vec2 scale;
     vec3 color;
     unsigned int shaderProgram;
-    RenderObject renderObj;
+    unsigned int texID;
+    Sprite sprite;
 };
 
 int loadShader(const char *vertexPath, const char *fragmentPath, unsigned int &shaderProgram);
