@@ -1,8 +1,8 @@
 #version 330 core
 out vec4 color;
 
-uniform vec3 spriteColor;
+uniform vec4 spriteColor;
 
 void main() {
-    color = vec4(spriteColor, 1.0);
+    color = spriteColor;
 }

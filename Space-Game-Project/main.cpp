@@ -196,7 +196,7 @@ void renderGame() {
         model = scale(model, vec3(obj.scale.x, obj.scale.y, 1.0f));
         glUniformMatrix4fv(glGetUniformLocation(obj.shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 
-        glUniform3fv(glGetUniformLocation(obj.shaderProgram, "spriteColor"), 1, &obj.color[0]);
+        glUniform4fv(glGetUniformLocation(obj.shaderProgram, "spriteColor"), 1, &obj.color[0]);
 
         if (obj.texID > 0) {
             glUniform1i(glGetUniformLocation(obj.shaderProgram, "tex"), 0);

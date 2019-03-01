@@ -321,12 +321,13 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
 
                 float rot;
                 vec2 pos, scale;
-                vec3 color;
-                float x, y, z;
+                vec4 color;
+                float x, y, z, w;
                 size_t end1, end2;
 
+                // TODO(Derek): Better number parsing
                 try {
-                    // Parsing "f,f  f  f,f  f,f,f"
+                    // Parsing "f,f  f  f,f  f,f,f(,f)?"
                     // ++ skips the ','
                     // Pos
                     x = std::stof(posStr, &end1);
@@ -343,9 +344,17 @@ int loadAllResources(const char *listPath, std::map<std::string, unsigned int> &
 
                     // Colour
                     x = std::stof(colorStr, &end1);
-                    y = std::stof(colorStr.substr(++end1), &end2);
-                    z = std::stof(colorStr.substr(end1 + (++end2)));
-                    color = {x, y, z};
+                    ++end1;
+                    y = std::stof(colorStr.substr(end1), &end2);
+                    end1 += end2 + 1;
+                    z = std::stof(colorStr.substr(end1), &end2);
+                    end1 += end2 + 1;
+                    if (end1 < colorStr.length()) {
+                        w = std::stof(colorStr.substr(end1));
+                    } else {
+                        w = 1.0f;
+                    }
+                    color = {x, y, z, w};
 
                 } catch(...) {
                     LOG_RETURN(WARN, true, 1, "Object list file contains invalid float on line at char: {}", i);

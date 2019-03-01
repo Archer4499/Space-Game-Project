@@ -16,7 +16,7 @@ struct InstanceObject {
     vec2 pos;
     float rot;
     vec2 scale;
-    vec3 color;
+    vec4 color;
     unsigned int shaderProgram;
     unsigned int texID;
     Sprite sprite;
