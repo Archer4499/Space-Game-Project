@@ -24,4 +24,6 @@ v1.6
 @   square      container             sprite   200,400   90     100,100   1.0,0.5,1.0,0.7
 @   square      container             sprite   400,200   45     100,100   1.0,1.0,0.5,0.3
 
+@   square      container             sprite   300,300   0      200,200   1.0,1.0,1.0,0.2
+
 @   square      NULL                  shape    600,300   0      100,200   0.5,0.0,0.5,0.8
