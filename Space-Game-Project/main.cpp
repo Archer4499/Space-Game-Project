@@ -24,6 +24,7 @@
 // TODO(Derek): remove light shaders
 // TODO(Derek): Method of having sprite shapes with different textures
 // TODO(Derek): remove tiny_obj_loader.h
+// TODO(Derek): Add moveToward for vectors lerping
 // Decisions //
 // TODO(Derek): decide whether resolution changes zoom or scaling (http://www.david-amador.com/2013/04/opengl-2d-independent-resolution-rendering/)
 ///////////////
@@ -101,12 +102,18 @@ void processInput() {
         if (keyReleased(GLFW_KEY_ESCAPE))
             gameState = GAME_MENU;
 
-        if (keyReleased(GLFW_KEY_LEFT_BRACKET))
+        if (keyReleased(GLFW_KEY_LEFT_BRACKET)) {
             timeFactor /= 2;
-        if (keyReleased(GLFW_KEY_RIGHT_BRACKET))
+            LOG(DEBUG, "Slowing to time factor: {}", timeFactor);
+        }
+        if (keyReleased(GLFW_KEY_RIGHT_BRACKET)) {
             timeFactor *= 2;
-        if (keyReleased(GLFW_KEY_BACKSLASH))
+            LOG(DEBUG, "Speeding up to time factor: {}", timeFactor);
+        }
+        if (keyReleased(GLFW_KEY_BACKSLASH)) {
             timeFactor = 1.0f;
+            LOG(DEBUG, "Resetting time factor to: {}", timeFactor);
+        }
 
         // Controls
         // TODO(Derek): Allow key remapping: map(GLFW_KEY_W)
