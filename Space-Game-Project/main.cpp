@@ -68,6 +68,7 @@ Camera camera(vec2(0.0f));
 // timing
 float deltaTime = 0.0f; // Time between current frame and last frame
 double lastFrameTime = 0.0;
+float timeFactor = 1.0f;
 /////////////
 
 
@@ -99,6 +100,13 @@ void processInput() {
     } else if (gameState == GAME_ACTIVE) {
         if (keyReleased(GLFW_KEY_ESCAPE))
             gameState = GAME_MENU;
+
+        if (keyReleased(GLFW_KEY_LEFT_BRACKET))
+            timeFactor /= 2;
+        if (keyReleased(GLFW_KEY_RIGHT_BRACKET))
+            timeFactor *= 2;
+        if (keyReleased(GLFW_KEY_BACKSLASH))
+            timeFactor = 1.0f;
 
         // Controls
         // TODO(Derek): Allow key remapping: map(GLFW_KEY_W)
@@ -321,6 +329,7 @@ int main(int argc, char const *argv[]) {
             // update deltaTime
             double currentFrameTime = glfwGetTime();
             deltaTime = static_cast<float>(currentFrameTime - lastFrameTime);
+            deltaTime *= timeFactor;
             lastFrameTime = currentFrameTime;
             //
 
