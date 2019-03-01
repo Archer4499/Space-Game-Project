@@ -17,7 +17,7 @@ v1.6
 &   face        Resources/Textures/awesomeface.png
 
 
-# InstanceObjects
+# InstanceObjects (Currently objects are rendered in the order listed here)
 # @ SpriteName  TextureName(or NULL)  Shader   Position  Angle  Scale     Colour
 @   circle20    face                  sprite   200,200   0      100,100   1.0,1.0,1.0,1.0
 @   square      container             sprite   400,400   0      100,100   0.5,1.0,1.0
