@@ -18,15 +18,12 @@
 // NOTE: (0,0) is at top left corner
 // NOTE: Easiest way to add sprites is to use https://threejs.org/editor/ and then 'export OBJ" then run convertToSprite.py
 // To-dos //
-// TODO(Derek): Make Icon
 // TODO(Derek): hot loading of resource files
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
 // TODO(Derek): Give math and logging their own repositories
-// TODO(Derek): remove light shaders
-// TODO(Derek): Method of having sprite shapes with different textures
 // TODO(Derek): remove tiny_obj_loader.h
-// TODO(Derek): Add moveToward for vectors lerping
 // Decisions //
+// TODO(Derek): Game Icon
 // TODO(Derek): decide whether resolution changes zoom or scaling (http://www.david-amador.com/2013/04/opengl-2d-independent-resolution-rendering/)
 // TODO(Derek): possibly lock aspect ratio using glfwSetWindowAspectRatio(window, 16, 9);
 ///////////////
@@ -81,13 +78,12 @@ unsigned int menuSelected = 0;
 
 void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
     int size[4];
-    // int oldWidth, oldHeight;
     glGetIntegerv(GL_VIEWPORT, size);
-    // glfwGetFramebufferSize(window, &oldWidth, &oldHeight);
+
     glViewport(0, 0, width, height);
+
     camera.Pos.x += (width - size[2]) / 2.0f;
     camera.Pos.y += (height - size[3]) / 2.0f;
-    // TODO(Derek): move camera to new centre?
 }
 
 bool keyPressed(int key) {
