@@ -9,6 +9,7 @@ v1.6
 # : Name        SpriteFile
 :   circle20    Resources/Sprites/circle20.sp
 :   square      Resources/Sprites/square.sp
+:   triangle60  Resources/Sprites/triangle60.sp
 
 
 # Textures
@@ -27,3 +28,5 @@ v1.6
 @   square      container             sprite   300,300   0      200,200   1.0,1.0,1.0,0.2
 
 @   square      NULL                  shape    600,300   0      100,200   0.5,0.0,0.5,0.8
+
+@   triangle60  container             sprite   500,400   0      100,100   1.0,1.0,1.0
