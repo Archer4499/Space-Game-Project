@@ -16,6 +16,7 @@
 // Notes //
 // NOTE: __declspec(deprecated("Message here")) int function() {} for deprecating functions
 // NOTE: (0,0) is at top left corner
+// NOTE: Easiest way to add sprites is to use https://threejs.org/editor/ and then 'export OBJ" then run convertToSprite.py
 // To-dos //
 // TODO(Derek): Make Icon
 // TODO(Derek): hot loading of resource files
