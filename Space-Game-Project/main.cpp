@@ -158,17 +158,13 @@ void mouse_callback(GLFWwindow *window, double aXPos, double aYPos) {
 void scroll_callback(GLFWwindow *window, double xOffset, double yOffset) {
     int width, height;
     double xMPos, yMPos;
-    float xPos, yPos;
+    vec2 mPos;
 
     glfwGetFramebufferSize(window, &width, &height);
     glfwGetCursorPos(window, &xMPos, &yMPos);
+    mPos = vec2(static_cast<float>(xMPos), static_cast<float>(yMPos));
 
-    // xPos = static_cast<float>(xMPos) - (width/2);
-    // yPos = static_cast<float>(yMPos) - (height/2);
-    xPos = static_cast<float>(xMPos);
-    yPos = static_cast<float>(yMPos);
-
-    camera.ProcessMouseScroll(static_cast<float>(yOffset), xPos, yPos, deltaTime);
+    camera.ProcessMouseScroll(static_cast<float>(yOffset), mPos, deltaTime);
     LOG(DEBUG, "Zoom level now: {}", camera.Zoom);
 }
 

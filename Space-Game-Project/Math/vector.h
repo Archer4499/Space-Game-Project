@@ -135,3 +135,6 @@ float dot(const vec2& a, const vec2& b);
 float dot(const vec3& a, const vec3& b);
 float dot(const vec4& a, const vec4& b);
 vec3 cross(const vec3& a, const vec3& b);
+vec2 moveToward(const vec2& a, const vec2& b, float c);
+vec3 moveToward(const vec3& a, const vec3& b, float c);
+vec4 moveToward(const vec4& a, const vec4& b, float c);

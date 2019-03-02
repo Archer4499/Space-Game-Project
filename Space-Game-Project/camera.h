@@ -73,7 +73,7 @@ public:
         clampCamera();
     }
 
-    void ProcessMouseScroll(float yOffset, float xPos, float yPos, float deltaTime) {
+    void ProcessMouseScroll(float yOffset, vec2 mPos, float deltaTime) {
         float dZoom = yOffset * 1.2f * deltaTime;
 
         Zoom += dZoom;
@@ -84,8 +84,7 @@ public:
         } else if (Zoom > MAXZOOM) {
             Zoom = MAXZOOM;
         } else {
-            Pos.x = lerp(Pos.x, Pos.x-xPos, dZoom);
-            Pos.y = lerp(Pos.y, Pos.y-yPos, dZoom);
+            Pos = moveToward(Pos, Pos-mPos, dZoom);
             clampCamera();
         }
     }

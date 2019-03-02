@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include "vector.h"
+#include "func.h"
 
 
 vec2::vec2() {
@@ -224,4 +225,26 @@ vec3 cross(const vec3& a, const vec3& b) {
         a.y * b.z - b.y * a.z,
         a.z * b.x - b.z * a.x,
         a.x * b.y - b.x * a.y);
+}
+
+vec2 moveToward(const vec2& a, const vec2& b, float c) {
+    vec2 res;
+    res.x = lerp(a.x, b.x, c);
+    res.y = lerp(a.y, b.y, c);
+    return res;
+}
+vec3 moveToward(const vec3& a, const vec3& b, float c) {
+    vec3 res;
+    res.x = lerp(a.x, b.x, c);
+    res.y = lerp(a.y, b.y, c);
+    res.z = lerp(a.z, b.z, c);
+    return res;
+}
+vec4 moveToward(const vec4& a, const vec4& b, float c) {
+    vec4 res;
+    res.x = lerp(a.x, b.x, c);
+    res.y = lerp(a.y, b.y, c);
+    res.z = lerp(a.z, b.z, c);
+    res.w = lerp(a.w, b.w, c);
+    return res;
 }
