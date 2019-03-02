@@ -28,6 +28,7 @@
 // TODO(Derek): Add moveToward for vectors lerping
 // Decisions //
 // TODO(Derek): decide whether resolution changes zoom or scaling (http://www.david-amador.com/2013/04/opengl-2d-independent-resolution-rendering/)
+// TODO(Derek): possibly lock aspect ratio using glfwSetWindowAspectRatio(window, 16, 9);
 ///////////////
 
 
@@ -75,7 +76,13 @@ float timeFactor = 1.0f;
 
 
 void framebufferSizeCallback(GLFWwindow *window, int width, int height) {
+    int size[4];
+    // int oldWidth, oldHeight;
+    glGetIntegerv(GL_VIEWPORT, size);
+    // glfwGetFramebufferSize(window, &oldWidth, &oldHeight);
     glViewport(0, 0, width, height);
+    camera.Pos.x += (width - size[2]) / 2.0f;
+    camera.Pos.y += (height - size[3]) / 2.0f;
     // TODO(Derek): move camera to new centre?
 }
 
