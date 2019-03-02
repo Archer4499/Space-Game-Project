@@ -72,6 +72,10 @@ Camera camera(vec2(0.0f));
 float deltaTime = 0.0f; // Time between current frame and last frame
 double lastFrameTime = 0.0;
 float timeFactor = 1.0f;
+
+// Menu
+unsigned int menuSelected = 0;
+#define NUM_MENU_OPTIONS 1
 /////////////
 
 
@@ -106,9 +110,21 @@ void processInput() {
 
         if (keyReleased(GLFW_KEY_ESCAPE))
             gameState = GAME_ACTIVE;
+
+        if (keyReleased(GLFW_KEY_UP) || keyReleased(GLFW_KEY_W)) {
+            if (menuSelected > 0) {
+                --menuSelected;
+            } else {
+                menuSelected = NUM_MENU_OPTIONS - 1;
+            }
+        }
+        if (keyReleased(GLFW_KEY_DOWN) || keyReleased(GLFW_KEY_S))
+            menuSelected = (menuSelected + 1) % NUM_MENU_OPTIONS;
     } else if (gameState == GAME_ACTIVE) {
-        if (keyReleased(GLFW_KEY_ESCAPE))
+        if (keyReleased(GLFW_KEY_ESCAPE)) {
+            menuSelected = 0;
             gameState = GAME_MENU;
+        }
 
         if (keyReleased(GLFW_KEY_LEFT_BRACKET)) {
             timeFactor /= 2;
