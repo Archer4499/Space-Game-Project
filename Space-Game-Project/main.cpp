@@ -16,7 +16,8 @@
 // Notes //
 // NOTE: __declspec(deprecated("Message here")) int function() {} for deprecating functions
 // NOTE: (0,0) is at top left corner
-// NOTE: Easiest way to add sprites is to use https://threejs.org/editor/ and then 'export OBJ" then run convertToSprite.py
+// NOTE: Easiest way to add sprites is to use https://threejs.org/editor/
+//       then 'export OBJ" then run convertToSprite.py
 // To-dos //
 // TODO(Derek): hot loading of resource files
 // TODO(Derek): Replace operator>> overloads with format_arg then remove define
@@ -26,6 +27,7 @@
 // TODO(Derek): Game Icon
 // TODO(Derek): decide whether resolution changes zoom or scaling (http://www.david-amador.com/2013/04/opengl-2d-independent-resolution-rendering/)
 // TODO(Derek): possibly lock aspect ratio using glfwSetWindowAspectRatio(window, 16, 9);
+// TODO(Derek): should unfocusing the window make everything pause (currently does this) or just lower the frame rate to 10
 ///////////////
 
 
